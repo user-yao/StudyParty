@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: studyparty-gateway
+  cloud:
+    nacos:
+      config:
+        namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
+      discovery:
+        username: nacos
+        password: nacos
+        server-addr: nacos:8848
+        namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
+        enabled: true
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: userServiceRoute
+          uri: lb://studyparty-user
+          predicates:
+            - Path=/user/**
+          filters:
+            - StripPrefix=1
+  data:
+    redis:
+      port: 6379
+      timeout: 6000 # 可选，默认单位为毫秒
+      host: redis
+
+logging:
+  level:
+    com.alibaba.nacos: DEBUG

@@ -1,0 +1,32 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 9345245374
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      config:
+         server-addr: nacos:8848
+      discovery:
+         namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
+         server-addr: nacos:8848
+  application:
+    name: studyparty-user
+  data:
+    redis:
+      port: 6379
+      timeout: 6000 # 可选，默认单位为毫秒
+      host: redis
+mybatis-plus:
+  type-aliases-package: com.studyparty.user.domain
+  mapper-locations: classpath*:com/studyParty/test/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  logging:
+    level:
+      com.example.test.mapper: DEBUG
