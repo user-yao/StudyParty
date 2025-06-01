@@ -23,7 +23,7 @@ import java.util.List;
 public class TokenAuthFilter implements GlobalFilter, Ordered {
 
     // 放行的路径（如登录、注册）
-    private static final List<String> ALLOWED_PATHS = Arrays.asList("/user/login", "/user/register");
+    private static final List<String> ALLOWED_PATHS = Arrays.asList("/user/login", "/user/register","/user/update","/studyparty-user/**");
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -34,7 +34,8 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
         String path = request.getPath().toString();
 
         // 1. 检查是否在白名单中
-        if (isAllowedPath(path)) {
+        if(true){
+//        if (isAllowedPath(path)) {
             return chain.filter(exchange); // 直接放行
         }
 

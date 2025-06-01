@@ -27,10 +27,10 @@ public class UserController {
     @Autowired
     private UserServer userServer;
     @GetMapping("/login")
-    public Result<?> login(String username, String password){
+    public Result<?> login(String name, String password){
         try {
             QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("username",username);
+            queryWrapper.eq("name",name);
             User userByName = userMapper.selectOne(queryWrapper);
             if(userByName == null){
                 return Result.error("用户名不存在");
@@ -38,7 +38,7 @@ public class UserController {
             if(!PasswordEncoder.matches(password,userByName.getPassword())){
                 return Result.error("用户名或密码错误");
             }
-            String jwt = userServer.login(username, password);
+            String jwt = userServer.login(name, password);
             UserToken userToken = new UserToken(userByName,jwt);
             Logger.getGlobal().log(Level.WARNING,jwt);
             if (StringUtils.hasLength(jwt)){
@@ -54,14 +54,14 @@ public class UserController {
     public Result<?> register(@RequestBody User user){
         try {
             QueryWrapper<User> queryWrapper = new QueryWrapper<>();//封装查询条件
-            queryWrapper.eq("username",user.getUsername());
+            queryWrapper.eq("name",user.getName());
             User userByName = userMapper.selectOne(queryWrapper);
             if(userByName != null){
                 return Result.error("用户名已存在");
             }
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
-            User user1 = new User(user.getUsername(),encodedPassword);
+            User user1 = new User(user.getName(),encodedPassword);
             userServer.save(user1);
             return  Result.success("注册成功");
         } catch (Exception e) {
@@ -69,7 +69,7 @@ public class UserController {
             return Result.error();
         }
     }
-    @PostMapping("/update")
+    @GetMapping("/update")
     public Result<?> update(){
         return Result.success("测试成功");
     }

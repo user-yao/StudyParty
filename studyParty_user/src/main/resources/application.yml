@@ -1,6 +1,8 @@
 server:
   port: 8081
 spring:
+  application:
+    name: studyparty-user
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
@@ -11,22 +13,32 @@ spring:
       username: nacos
       password: nacos
       config:
-         server-addr: nacos:8848
+         server-addr: localhost:8848
       discovery:
          namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
-         server-addr: nacos:8848
-  application:
-    name: studyparty-user
+         server-addr: localhost:8848
   data:
     redis:
       port: 6379
       timeout: 6000 # 可选，默认单位为毫秒
-      host: redis
+      host: localhost
 mybatis-plus:
   type-aliases-package: com.studyparty.user.domain
   mapper-locations: classpath*:com/studyParty/test/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
-  logging:
-    level:
-      com.example.test.mapper: DEBUG
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # 关键！网关依赖此路径拉取文档
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.studyParty.user.controller  # 扫描本模块的Controller包
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+
+knife4j:
+  enable: true  # 启用Knife4j增强UI
+  setting:
+    language: zh_cn
