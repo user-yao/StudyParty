@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+/// 登录
+/// 注册
 @RestController
 public class UserController {
     @Autowired
@@ -61,16 +62,16 @@ public class UserController {
             }
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
-            User user1 = new User(user.getName(),encodedPassword);
-            userServer.save(user1);
+            user.setStarCoin(100);
+            user.setGroupCoin(0);
+            user.setStarPrestige(0);
+            userServer.save(user);
             return  Result.success("注册成功");
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return Result.error();
         }
     }
-    @GetMapping("/update")
-    public Result<?> update(){
-        return Result.success("测试成功");
-    }
+
+
 }

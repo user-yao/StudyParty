@@ -9,12 +9,14 @@
         <outputRelativeToContentRoot value="true" />
         <module name="studyParty_user" />
         <module name="studyParty_gateway" />
+        <module name="studyParty_group" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="studyParty_gateway" options="-parameters" />
+      <module name="studyParty_group" options="-parameters" />
       <module name="studyParty_user" options="-parameters" />
     </option>
   </component>

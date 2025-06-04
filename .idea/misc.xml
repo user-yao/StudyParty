@@ -7,6 +7,7 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/studyParty_gateway/pom.xml" />
         <option value="$PROJECT_DIR$/studyParty_user/pom.xml" />
+        <option value="$PROJECT_DIR$/studyParty_group/pom.xml" />
       </list>
     </option>
   </component>

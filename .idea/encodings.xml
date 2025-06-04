@@ -3,7 +3,8 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/studyParty_gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/studyParty_.gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/studyParty_group/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_user/src/main/java" charset="UTF-8" />
   </component>
 </project>
