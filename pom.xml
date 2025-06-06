@@ -25,6 +25,7 @@
         <module>studyParty_enterprise</module>
         <module>studyParty_websocket</module>
         <module>studyParty_AI</module>
+        <module>studyParty_admin</module>
     </modules>
 
     <licenses>

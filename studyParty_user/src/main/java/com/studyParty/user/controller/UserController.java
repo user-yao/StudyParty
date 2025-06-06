@@ -9,6 +9,7 @@ import com.studyParty.user.domain.entity.UserToken;
 import com.studyParty.user.mapper.UserMapper;
 import com.studyParty.user.services.UserServer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,9 @@ public class UserController {
     private UserMapper userMapper;
     @Autowired
     private UserServer userServer;
+    @Value("${head}")
+    private String head;
+
     @GetMapping("/login")
     public Result<?> login(String name, String password){
         try {
@@ -60,11 +64,19 @@ public class UserController {
             if(userByName != null){
                 return Result.error("用户名已存在");
             }
+            if (user.getStatus() == 3){
+                
+            }
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
             user.setStarCoin(100);
             user.setGroupCoin(0);
             user.setStarPrestige(0);
+            if (user.getSex().equals("男")){
+                user.setHead(head+"boys.png");
+            }else{
+                user.setHead(head+"girls.png");
+            }
             userServer.save(user);
             return  Result.success("注册成功");
         } catch (Exception e) {
@@ -72,6 +84,4 @@ public class UserController {
             return Result.error();
         }
     }
-
-
 }

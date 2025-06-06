@@ -1,4 +1,4 @@
-package com.studyparty.studyparty_group;
+package com.studyparty.group;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

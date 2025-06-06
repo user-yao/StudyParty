@@ -111,6 +111,7 @@
         </dependencies>
     </dependencyManagement>
     <build>
+        <finalName>studyParty_gateway</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

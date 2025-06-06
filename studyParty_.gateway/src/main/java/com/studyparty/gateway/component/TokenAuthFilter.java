@@ -27,7 +27,8 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
             "/user/login",
             "/user/register",
             "/doc.html",
-            "/studyparty-user/v3/api-docs"
+            "/studyParty-user/v3/api-docs",
+            "/studyParty-group/v3/api-docs"
 
     );
 

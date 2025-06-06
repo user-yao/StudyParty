@@ -2,7 +2,7 @@ server:
   port: 8080
 spring:
   application:
-    name: studyparty-gateway
+    name: studyParty-gateway
   cloud:
     nacos:
       config:
@@ -24,11 +24,17 @@ spring:
           predicates:
            - Path=/v3/api-docs/**  # 关键路径匹配
         - id: userServiceRoute
-          uri: lb://studyparty-user
+          uri: lb://studyParty-user
           predicates:
-            - Path=/user/**, /studyparty-user/**
+            - Path=/user/**, /studyParty-user/**
           filters:
             - StripPrefix=1
+        -  id: groupServiceRoute
+           uri: lb://studyParty-group
+           predicates:
+            - Path=/group/**, /studyParty-group/**
+           filters:
+            -  StripPrefix=1
 
         - id: knife4j-ui
           uri: no://op
