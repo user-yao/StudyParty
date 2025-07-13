@@ -1,5 +1,9 @@
 server:
   port: 8081
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 spring:
   application:
     name: studyParty-user
@@ -42,4 +46,5 @@ knife4j:
   enable: true  # 启用Knife4j增强UI
   setting:
     language: zh_cn
-head: D://studyParty/head/
+head: static/head/
+saveHead: D:/studyParty/head/

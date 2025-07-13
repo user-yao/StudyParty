@@ -15,7 +15,7 @@ import java.security.NoSuchAlgorithmException;
  *      JWT.create()
  *         .withIssuer("yzt")
  *         .withClaim("Id",user.getId())
- *         .withClaim("username",user.getUsername())
+ *         .withClaim("phone",user.getPhone())
  *         .withClaim("passwordHash", hashPassword(user.getPassword()))
  *         .withSubject(user.getName())
  *         .withExpiresAt(new Date(System.currentTimeMillis()+60*60*1000))//1h
@@ -50,7 +50,7 @@ public class JwtUtil {
             if(!decodedJWT.getIssuer().equals("yzt")){
                 return Mono.just(null); // 假设这是一个返回Mono<Boolean>的方法
             }
-            return redisUtil.getValue(decodedJWT.getClaim("username").asString())// key == username value = passwordHash
+            return redisUtil.getValue(decodedJWT.getClaim("phone").asString())// key == phone value = passwordHash
                     .map(userPassword -> {
                         if (!userPassword.equals(decodedJWT.getClaim("passwordHash").asString())){
                             return null;

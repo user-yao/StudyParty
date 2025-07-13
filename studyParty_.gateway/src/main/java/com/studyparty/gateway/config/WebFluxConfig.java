@@ -22,10 +22,23 @@ public class WebFluxConfig implements WebFluxConfigurer {
         this.resourceLoader = resourceLoader;
     }
 
+
     @Override
     public void addResourceHandlers(org.springframework.web.reactive.config.ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("file:D:/studyParty/")
                 .resourceChain(true);
+        /** 配置knife4j 显示文档 */
+        registry.addResourceHandler("doc.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+        /**
+         * 配置swagger-ui显示文档
+         */
+        registry.addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+        /** 公共部分内容 */
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
+
 }

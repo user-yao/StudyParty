@@ -2,7 +2,7 @@ package com.studyParty.user.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.studyParty.user.Utils.MyFileUtil;
 import com.studyParty.user.Utils.PasswordEncoder;
 import com.studyParty.user.Utils.RedisUtil;
 import com.studyParty.user.common.Result;
@@ -34,6 +34,8 @@ import java.util.logging.Logger;
 @RestController
 public class UserController {
     @Autowired
+    private MyFileUtil fileUtil;
+    @Autowired
     private RedisUtil redisUtil;
     @Autowired
     private UserMapper userMapper;
@@ -41,7 +43,8 @@ public class UserController {
     private UserServer userServer;
     @Value("${head}")
     private String head;
-
+    @Value("${saveHead}")
+    private String saveHead;
     @GetMapping("/login")
     public Result<?> login(String phone, String password){
         try {
@@ -80,7 +83,7 @@ public class UserController {
             if(userByPhone != null){
                 return Result.error("用户名已存在");
             }
-            user.setHead(head+ (user.getSex().equals("男") ? "boys.png" : "girls.png"));
+            user.setHead(head + (user.getSex().equals("男") ? "boys.png" : "girls.png"));
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
             userServer.save(user);
@@ -115,22 +118,27 @@ public class UserController {
         }
         String uuid =  id + "_" + UUID.randomUUID().toString().replace("-","");
         String phName = uuid + newName;
-        String pre = head + id;
+        String pre = saveHead + id;
         String path = pre + "/" + phName;
         File file = new File(pre);
-        if(!file.exists() && !file.isDirectory()){
-            try {
+        try {
+            if(!file.exists() && !file.isDirectory()){
                 Files.createDirectories(Path.of(path));
                 photo.transferTo(new File(path));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            }else {
+                fileUtil.deleteDirectoryRecursively(pre);
+                Files.createDirectories(Path.of(path));
+                photo.transferTo(new File(path));
             }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
         }
         userMapper.update(null,new LambdaUpdateWrapper<User>()
                 .eq(User::getId,id)
-                .set(User::getHead,"/images/head/" + id +"/" +phName)
+                .set(User::getHead, head + id +"/" +phName)
                 );
-        return Result.success();
+        return Result.success(head + id +"/" +phName);
     }
 
     @PostMapping("/updateUser")

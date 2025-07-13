@@ -22,13 +22,13 @@ public class TokenUtil {
     public String createToken(User user){
         Algorithm algorithm = Algorithm.HMAC256(sign);
         String passwordHash = hashPassword(user.getPassword());
-        if (redisUtil.getFromRedis(user.getName())==null){
-            redisUtil.saveToRedis(user.getName(),passwordHash);
+        if (redisUtil.getFromRedis(user.getPhone())==null){
+            redisUtil.saveToRedis(user.getPhone(),passwordHash);
         }
         return JWT.create()
                 .withIssuer("yzt")
                 .withClaim("Id",user.getId())
-                .withClaim("username",user.getName())
+                .withClaim("phone",user.getPhone())
                 .withClaim("passwordHash", passwordHash)
                 .withExpiresAt(new Date(System.currentTimeMillis()+60*60*1000))//1h
                 .sign(algorithm);

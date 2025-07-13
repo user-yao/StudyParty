@@ -52,6 +52,7 @@ public class User {
         this.starCoin  = 100;
         this.groupCoin = 0;
         this.starPrestige = 0;
+        this.clockIn = 1;
         this.lastLogin = Date.valueOf(LocalDate.now());
     }
     /// 修改个人信息专用

@@ -46,4 +46,5 @@ knife4j:
   enable: true  # 启用Knife4j增强UI
   setting:
     language: zh_cn
-head: D://studyParty/images/head/
+head: static/head/
+saveHead: D:/studyParty/head/

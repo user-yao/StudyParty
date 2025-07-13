@@ -17,9 +17,9 @@ public class UserServerImpl extends ServiceImpl<UserMapper, User> implements Use
     @Autowired
     private TokenUtil tokenUtil;
     @Override
-    public String login(String username, String password) {
+    public String login(String phone, String password) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username",username);
+        queryWrapper.eq("phone",phone);
         User userByName = userMapper.selectOne(queryWrapper);
         if(userByName == null){
             return null;
