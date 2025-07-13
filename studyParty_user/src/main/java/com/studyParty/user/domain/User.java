@@ -5,13 +5,16 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Getter
 @Setter
-@TableName("user")
+@TableName("users")
 public class User {
     @TableId(type = IdType.AUTO)
     private int id;
@@ -29,12 +32,13 @@ public class User {
     private String school;
     private int clockIn;
     private String email;
+    private Date lastLogin;
 
     public User(String name, String password) {
         this.name = name;
         this.password = password;
     }
-
+    /// 注册专用
     public User(String name, String password, String sex, String major, String grade, int status, String phone, String school, String email) {
         this.name = name;
         this.password = password;
@@ -45,7 +49,24 @@ public class User {
         this.phone = phone;
         this.school = school;
         this.email = email;
+        this.starCoin  = 100;
+        this.groupCoin = 0;
+        this.starPrestige = 0;
+        this.lastLogin = Date.valueOf(LocalDate.now());
     }
+    /// 修改个人信息专用
+    public User(int id, String name, String sex, String major, String grade, String phone, String school, String email) {
+        this.id = id;
+        this.name = name;
+        this.sex = sex;
+        this.major = major;
+        this.grade = grade;
+        this.phone = phone;
+        this.school = school;
+        this.email = email;
+    }
+
+
 
     public User(String name, String password, String head, String sex, String major, String grade, int status, String phone, String school, int clockIn, String email) {
         this.name = name;
