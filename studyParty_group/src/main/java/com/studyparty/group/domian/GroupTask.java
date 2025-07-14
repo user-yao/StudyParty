@@ -10,10 +10,11 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("group_tags")
-public class GroupTags {
+@TableName("group_task")
+public class GroupTask {
     @TableId(type = IdType.AUTO)
     private int id;
     private int groupId;
-    private int tagId;
+    private String groupTask;
+    private String groupTaskLastTime;
 }

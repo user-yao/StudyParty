@@ -5,15 +5,14 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("group_tags")
-public class GroupTags {
+@TableName("tags")
+@Data
+public class Tags {
     @TableId(type = IdType.AUTO)
     private int id;
-    private int groupId;
-    private int tagId;
+    private String tagName;
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.studyParty.user.Utils.TokenUtil;
 import com.studyParty.user.domain.User;
+import com.studyParty.user.domain.entity.UserToken;
 import com.studyParty.user.mapper.UserMapper;
 import com.studyParty.user.services.UserServer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +18,14 @@ public class UserServerImpl extends ServiceImpl<UserMapper, User> implements Use
     @Autowired
     private TokenUtil tokenUtil;
     @Override
-    public String login(String phone, String password) {
+    public UserToken login(String phone, String password) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("phone",phone);
         User userByName = userMapper.selectOne(queryWrapper);
         if(userByName == null){
             return null;
         }
-        return tokenUtil.createToken(userByName);
+        String jwt = tokenUtil.createToken(userByName);
+        return new UserToken(userByName,jwt);
     }
 }

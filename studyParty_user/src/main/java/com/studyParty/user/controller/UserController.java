@@ -22,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -48,24 +50,18 @@ public class UserController {
     @GetMapping("/login")
     public Result<?> login(String phone, String password){
         try {
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("phone",phone);
-            User userByPhone = userMapper.selectOne(queryWrapper);
-            if(userByPhone == null){
-                return Result.error("用户名不存在");
-            }
-            if(!PasswordEncoder.matches(password,userByPhone.getPassword())){
-                return Result.error("用户名或密码错误");
-            }
-            String jwt = userServer.login(phone, password);
-            UserToken userToken = new UserToken(userByPhone,jwt);
-            Logger.getGlobal().log(Level.WARNING,jwt);
-            if (StringUtils.hasLength(jwt)){
-                if (!Objects.equals(userByPhone.getLastLogin(), Date.valueOf(LocalDate.now()))){
-                    userMapper.update(null,new LambdaUpdateWrapper<User>()
-                            .eq(User::getId,userByPhone.getId())
-                            .set(User::getLastLogin, Date.valueOf(LocalDate.now())));
+            UserToken userToken = userServer.login(phone, password);
+            if (StringUtils.hasLength(userToken.getToken())){
+                LocalDate lastLoginDate = userToken.getUser().getLastLogin().toLocalDate();
+                if (ChronoUnit.DAYS.between(LocalDate.now(), lastLoginDate) == 1){
+                    userToken.getUser().setClockIn(userToken.getUser().getClockIn()+1);
+                }else {
+                    userToken.getUser().setClockIn(1);
                 }
+                userMapper.update(null,new LambdaUpdateWrapper<User>()
+                        .eq(User::getId,userToken.getUser().getId())
+                        .set(User::getLastLogin, Date.valueOf(LocalDate.now()))
+                        .set(User::getClockIn,userToken.getUser().getClockIn()));
                 return Result.success(userToken);
             }
         } catch (Exception e) {
@@ -86,6 +82,7 @@ public class UserController {
             user.setHead(head + (user.getSex().equals("男") ? "boys.png" : "girls.png"));
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
+            user.setCreateDate(Date.valueOf(LocalDate.now()));
             userServer.save(user);
             return  Result.success("注册成功");
         } catch (Exception e) {
