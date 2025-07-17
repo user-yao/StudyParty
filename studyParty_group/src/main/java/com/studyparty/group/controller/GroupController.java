@@ -29,8 +29,11 @@ public class GroupController {
         if (canJoin){
             queryWrapper.apply("people_num<max_people_unm");
         }
-        // 可以根据需要设置查询条件
         return Result.success(groupMapper.selectPage(page, queryWrapper));
+    }
+    @PostMapping("/getMyGroup")
+    public Result<?> getMyGroup(int currentPage, int userId) {
+
     }
 
 }
