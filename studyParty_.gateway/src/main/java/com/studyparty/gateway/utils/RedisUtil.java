@@ -16,6 +16,6 @@ public class RedisUtil {
     }
 
     public Mono<String> getValue(String key) {
-        return reactiveRedisOperations.opsForValue().get(key);
+         return reactiveRedisOperations.opsForValue().get(key);
     }
 }

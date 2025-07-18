@@ -10,7 +10,7 @@ import lombok.*;
 @Getter
 @Setter
 @Data
-@TableName("group")
+@TableName("`group`")
 public class Group {
     @TableId(type = IdType.AUTO)
     private int id;

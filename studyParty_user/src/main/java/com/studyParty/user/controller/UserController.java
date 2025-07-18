@@ -58,6 +58,7 @@ public class UserController {
                 }else {
                     userToken.getUser().setClockIn(1);
                 }
+                redisUtil.saveToRedis(userToken.getToken(),userToken.getUser().getPassword());
                 userMapper.update(null,new LambdaUpdateWrapper<User>()
                         .eq(User::getId,userToken.getUser().getId())
                         .set(User::getLastLogin, Date.valueOf(LocalDate.now()))

@@ -24,7 +24,7 @@ spring:
       host: localhost
 mybatis-plus:
   type-aliases-package: com.studyParty.group.domain
-  mapper-locations: classpath*:com/studyParty/test/**/*.xml
+  mapper-locations: classpath:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
 springdoc:

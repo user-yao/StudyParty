@@ -1,15 +1,19 @@
 package com.studyparty.gateway.utils;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractMap;
+import java.util.Map;
 
 /**
  *      JWT.create()
@@ -44,41 +48,45 @@ public class JwtUtil {
         }
     }
 
-    public Mono<String> tokenVerify(String token){// 验证token
-        try {
-            DecodedJWT decodedJWT = JWT.decode(token);
-            if(!decodedJWT.getIssuer().equals("yzt")){
-                return Mono.just(null); // 假设这是一个返回Mono<Boolean>的方法
-            }
-            return redisUtil.getValue(decodedJWT.getClaim("phone").asString())// key == phone value = passwordHash
-                    .map(userPassword -> {
-                        if (!userPassword.equals(decodedJWT.getClaim("passwordHash").asString())){
-                            return null;
+    public Mono<String> tokenVerify(String token) {
+        return Mono.defer(() -> {
+                    try {
+                        DecodedJWT decodedJWT = JWT.decode(token);
+                        Algorithm algorithm = Algorithm.HMAC256(sign);
+                        if (!"yzt".equals(decodedJWT.getIssuer())) {
+                            return Mono.error(new JWTVerificationException("无效发行商"));
                         }
-                        // 检查密码哈希值
-                        return decodedJWT.getClaim("Id").toString();
-                    })
-                    .defaultIfEmpty(null); // 如果没有找到对应的用户密码，默认返回false
-        }catch (JWTVerificationException e) {
-            // Token验证失败
-            System.err.println("Token verification failed: " + e.getMessage());
-            log.info("token验证失败: " + e.getMessage());
-            return Mono.just(null);
-        } catch (NullPointerException e) {
-            // 空指针异常
-            System.err.println("Null pointer exception: " + e.getMessage());
-            log.info("空指针异常: " + e.getMessage());
-            return Mono.just(null);
-        } catch (IllegalArgumentException e) {
-            // 非法参数异常
-            System.err.println("Illegal argument exception: " + e.getMessage());
-            log.info("非法参数异常: " + e.getMessage());
-            return Mono.just(null);
-        } catch (Exception e) {
-            // 其他未知异常
-            System.err.println("Unknown exception: " + e.getMessage());
-            log.info("未知异常: " + e.getMessage());
-            return Mono.just(null);
-        }
+                        if (decodedJWT.getSignature().equals(algorithm.toString())){
+                            return Mono.error(new JWTVerificationException("无效签名"));
+                        }
+                        decodedJWT.getSignature();
+                        String phone = decodedJWT.getClaim("phone").asString();
+                        String passwordHash = decodedJWT.getClaim("passwordHash").asString();
+                        if (phone == null || passwordHash == null) {
+                            return Mono.error(new Throwable("令牌错误"));
+                        }
+                        return redisUtil.getValue(phone)
+                                .switchIfEmpty(Mono.error(new RuntimeException("服务器错误，请重新登录")))
+                                .publishOn(Schedulers.boundedElastic())
+                                .mapNotNull(storedHash -> {
+                                    if (!storedHash.equals(passwordHash)) {
+                                        return Mono.<String>error(new Throwable("密码错误")).block();
+                                    }
+                                    return decodedJWT.getSubject(); // 或返回用户信息
+                                })
+                                .onErrorResume(ex -> {
+                                    return Mono.error(new RuntimeException("服务器错误，请重新登录", ex));
+                                });
+                    } catch (JWTVerificationException ex) {
+                        return Mono.error(new Throwable("权限错误"));
+                    } catch (Exception ex) {
+                        return Mono.error(new RuntimeException("权限校验失败", ex));
+                    }
+                })
+                .onErrorResume(JWTVerificationException.class,ex -> Mono.error(new JWTVerificationException(ex.getMessage(),ex)))
+                .onErrorResume(Throwable.class,ex -> Mono.error(new Throwable(ex.getMessage(),ex)))
+                .onErrorResume(RuntimeException.class,ex -> Mono.error(new RuntimeException(ex.getMessage(),ex)))
+                .onErrorResume(Exception.class, ex -> Mono.error(new Exception(ex.getMessage(), ex)));
     }
+
 }
