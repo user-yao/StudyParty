@@ -59,7 +59,7 @@ public class GroupController {
         return Result.success(list);
     }
     @PostMapping("/createGroup")
-    public Result<?> createGroup(Group group, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> createGroup(@RequestBody Group group, @RequestHeader("X-User-Id") String userId) {
         if (group.getGroupName().trim().isEmpty()){
             return Result.error("请输入正确的群组名称");
         }
@@ -92,6 +92,11 @@ public class GroupController {
             throw new RuntimeException(e);
         }
         return Result.success(head + userId + "/groupHeadPhoto");
+    }
+    @PostMapping("/updateGroup")
+    public Result<?> updateGroup(String slogan, String rule, String groupName, @RequestHeader("X-User-Id") String userId) {
+
+        return Result.success(groupServer.updateById(group));
     }
 
 }

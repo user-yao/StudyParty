@@ -3,6 +3,7 @@ package com.studyparty.group.domian;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.studyparty.group.common.Level;
 import lombok.*;
 
 import java.sql.Date;
@@ -36,9 +37,9 @@ public class Group {
         this.groupName = groupName;
         this.groupLevel = 1;
         this.experience = 0;
-        this.needExperience = 10;
+        this.needExperience = Level.LEVEL_1.getNeedExperience();;
         this.peopleNum = 1;
-        this.maxPeopleNum = 5;
+        this.maxPeopleNum = Level.LEVEL_1.getMaxPeopleNum();
         this.slogan = slogan;
         this.rule = rule;
         this.createTime = Date.valueOf(LocalDate.now());
