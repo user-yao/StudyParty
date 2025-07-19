@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -17,20 +20,28 @@ public class Group {
     private int leader;
     private String groupName;
     private int groupLevel;
-    private int suffer;
+    private int experience;
+    private int needExperience;
     private int peopleNum;
     private int maxPeopleNum;
     private String slogan;
     private String rule;
+    private String head;
+    private Date createTime;
+    private int canJoin;
 
-    public Group(int leader, String groupName, int groupLevel, int suffer, int peopleNum, int maxPeopleNum, String slogan, String rule) {
+
+    public Group(int leader, String groupName,String slogan, String rule,Date createTime, int canJoin) {
         this.leader = leader;
         this.groupName = groupName;
-        this.groupLevel = groupLevel;
-        this.suffer = suffer;
-        this.peopleNum = peopleNum;
-        this.maxPeopleNum = maxPeopleNum;
+        this.groupLevel = 1;
+        this.experience = 0;
+        this.needExperience = 10;
+        this.peopleNum = 1;
+        this.maxPeopleNum = 5;
         this.slogan = slogan;
         this.rule = rule;
+        this.createTime = Date.valueOf(LocalDate.now());
+        this.canJoin = canJoin;
     }
 }

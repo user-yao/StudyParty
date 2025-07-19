@@ -106,38 +106,7 @@ public class UserController {
         );
         return Result.success("密码修改成功");
     }
-    @PostMapping("/updateHead")
-    public Result<?> updateHead(@RequestParam("photo")MultipartFile photo,@RequestParam("id") int id){
-        String photoName = photo.getOriginalFilename();
-        String newName = null;
-        if (photoName != null && photoName.contains(".")) {
-            String[] parts = photoName.split("\\.");
-            newName = "." + parts[parts.length - 1]; // 获取最后一个部分作为扩展名
-        }
-        String uuid =  id + "_" + UUID.randomUUID().toString().replace("-","");
-        String phName = uuid + newName;
-        String pre = saveHead + id;
-        String path = pre + "/" + phName;
-        File file = new File(pre);
-        try {
-            if(!file.exists() && !file.isDirectory()){
-                Files.createDirectories(Path.of(path));
-                photo.transferTo(new File(path));
-            }else {
-                fileUtil.deleteDirectoryRecursively(pre);
-                Files.createDirectories(Path.of(path));
-                photo.transferTo(new File(path));
-            }
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        userMapper.update(null,new LambdaUpdateWrapper<User>()
-                .eq(User::getId,id)
-                .set(User::getHead, head + id +"/" +phName)
-                );
-        return Result.success(head + id +"/" +phName);
-    }
+
 
     @PostMapping("/updateUser")
     public Result<?> updateUser(@RequestBody User user){
@@ -162,4 +131,53 @@ public class UserController {
         );
         return Result.success();
     }
+    @PostMapping("/updateHead")
+    public Result<?> updateHead(@RequestParam("photo")MultipartFile photo,@RequestHeader("X-User-Id") String userId){
+        String path = saveHead + userId;
+        File file = new File(path);
+        try {
+            if (file.exists() || file.isDirectory()) {
+                Files.createDirectories(Path.of(path));
+                userMapper.update(null,new LambdaUpdateWrapper<User>()
+                        .eq(User::getId,userId)
+                        .set(User::getHead, head + userId + "/userHeadPhoto" ));
+            }
+            photo.transferTo(new File(path + "/userHeadPhoto"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return Result.success(head + userId + "/userHeadPhoto");
+    }
+   /* @PostMapping("/updateHead")
+    public Result<?> updateHead(@RequestParam("photo")MultipartFile photo,@RequestParam("id") int id,@RequestParam("oldPhoto") String oldPhoto){
+        String photoName = photo.getOriginalFilename();
+        String newName = null;
+        if (photoName != null && photoName.contains(".")) {
+            String[] parts = photoName.split("\\.");
+            newName = "." + parts[parts.length - 1]; // 获取最后一个部分作为扩展名
+        }
+        String uuid =  id + "_" + UUID.randomUUID().toString().replace("-","");
+        String phName = uuid + newName;
+        String pre = saveHead + id;
+        String path = pre + "/" + phName;
+        File file = new File(pre);
+        try {
+            if(!file.exists() && !file.isDirectory()){
+                Files.createDirectories(Path.of(path));
+                photo.transferTo(new File(path));
+            }else {
+                new File(oldPhoto).delete();
+                Files.createDirectories(Path.of(path));
+                photo.transferTo(new File(path));
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        userMapper.update(null,new LambdaUpdateWrapper<User>()
+                .eq(User::getId,id)
+                .set(User::getHead, head + id +"/" +phName)
+        );
+        return Result.success(head + id +"/" +phName);
+    }*/
 }

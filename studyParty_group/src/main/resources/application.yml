@@ -42,3 +42,5 @@ knife4j:
   enable: true  # ??Knife4j??UI
   setting:
     language: zh_cn
+head: static/head/
+saveHead: D:/studyParty/head/
