@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.studyparty.group.domian.Tags;
 import com.studyparty.group.mapper.TagsMapper;
 import com.studyparty.group.services.TagsServer;
-import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.stereotype.Service;
 
-@Server
+@Service
+
 public class TagsServerImpl extends ServiceImpl<TagsMapper, Tags> implements TagsServer {
 }

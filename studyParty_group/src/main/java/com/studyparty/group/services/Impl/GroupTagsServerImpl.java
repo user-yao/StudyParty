@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.studyparty.group.domian.GroupTags;
 import com.studyparty.group.mapper.GroupTagsMapper;
 import com.studyparty.group.services.GroupTagsServer;
-import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.stereotype.Service;
 
-@Server
+@Service
+
 public class GroupTagsServerImpl extends ServiceImpl<GroupTagsMapper, GroupTags> implements GroupTagsServer {
 }

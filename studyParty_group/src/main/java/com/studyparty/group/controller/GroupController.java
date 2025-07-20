@@ -3,11 +3,16 @@ package com.studyparty.group.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.studyparty.group.common.Result;
 import com.studyparty.group.domian.Group;
+import com.studyparty.group.domian.GroupUser;
 import com.studyparty.group.mapper.GroupMapper;
+import com.studyparty.group.mapper.GroupUserMapper;
+import com.studyparty.group.services.GroupJoinServer;
 import com.studyparty.group.services.GroupServer;
+import com.studyparty.group.services.GroupUserServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -21,7 +26,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController
+@RestController("/group")
 public class GroupController {
     @Autowired
     private GroupMapper groupMapper;
@@ -31,6 +36,10 @@ public class GroupController {
     private String head;
     @Value("${saveHead}")
     private String saveHead;
+    @Autowired
+    private GroupUserMapper groupUserMapper;
+    @Autowired
+    private GroupUserServer groupUserServer;
 
     @PostMapping("/searchGroup")
     public Result<?> searchGroup(String searchContext, int currentPage,boolean canJoin) {
@@ -73,7 +82,9 @@ public class GroupController {
             return Result.error("身份错误，请重新登录");
         }
         group.setHead(head + "group.png");
-        return Result.success(groupServer.save(group));
+        groupServer.save(group);
+        groupUserServer.save(new GroupUser(Integer.parseInt(userId), group.getId()));
+        return Result.success();
     }
     @PostMapping("/updateHead")
     public Result<?> updateHead(@RequestParam("photo") MultipartFile photo, @RequestHeader("X-User-Id") String userId){
@@ -95,8 +106,28 @@ public class GroupController {
     }
     @PostMapping("/updateGroup")
     public Result<?> updateGroup(String slogan, String rule, String groupName, @RequestHeader("X-User-Id") String userId) {
-
-        return Result.success(groupServer.updateById(group));
+        LambdaUpdateWrapper<Group> updateWrapper = new LambdaUpdateWrapper<>();
+        if (!groupName.trim().isEmpty()) {
+            updateWrapper.set(Group::getGroupName, groupName);
+        }
+        if (!slogan.trim().isEmpty()) {
+            updateWrapper.set(Group::getSlogan, slogan);
+        }
+        if (!rule.trim().isEmpty()) {
+            updateWrapper.set(Group::getRule, rule);
+        }
+        updateWrapper.eq(Group::getLeader, Integer.parseInt(userId));
+        return Result.success(groupMapper.update(null, updateWrapper));
     }
-
+    @PostMapping("/deleteGroup")
+    public Result<?> deleteGroup(int groupId, @RequestHeader("X-User-Id") String userId) {
+        LambdaQueryWrapper<Group> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Group::getId, groupId);
+        queryWrapper.eq(Group::getLeader, Integer.parseInt(userId));
+        if (groupMapper.delete(queryWrapper) == 0) {
+            groupUserMapper.delete(new UpdateWrapper<GroupUser>().eq("groupId", groupId));
+            return Result.error("未找到对应的群组，可能已被删除");
+        }
+        return Result.success();
+    }
 }

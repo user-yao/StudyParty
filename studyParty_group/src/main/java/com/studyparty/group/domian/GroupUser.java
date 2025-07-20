@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -19,4 +20,10 @@ public class GroupUser {
     private int groupId;
     private int userId;
     private Date addTime;
+
+    public GroupUser(int groupId, int userId) {
+        this.groupId = groupId;
+        this.userId = userId;
+        this.addTime = Date.valueOf(LocalDate.now());
+    }
 }
