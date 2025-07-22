@@ -11,7 +11,18 @@
         <option value="$PROJECT_DIR$/studyParty_AI/pom.xml" />
         <option value="$PROJECT_DIR$/studyParty_.gateway/pom.xml" />
         <option value="$PROJECT_DIR$/studyParty_admin/pom.xml" />
+        <option value="$PROJECT_DIR$/studyParty_Entity/pom.xml" />
+        <option value="$PROJECT_DIR$/startParty_entity/pom.xml" />
+        <option value="$PROJECT_DIR$/studyParty_entity/pom.xml" />
+        <option value="$PROJECT_DIR$/studyParty_dubboApi/pom.xml" />
+        <option value="$PROJECT_DIR$/studyparty_entityApi/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/studyParty_Entity/pom.xml" />
+        <option value="$PROJECT_DIR$/studyParty_entity/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="temurin-17" project-jdk-type="JavaSDK" />

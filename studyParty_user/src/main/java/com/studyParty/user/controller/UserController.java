@@ -6,7 +6,7 @@ import com.studyParty.user.Utils.MyFileUtil;
 import com.studyParty.user.Utils.PasswordEncoder;
 import com.studyParty.user.Utils.RedisUtil;
 import com.studyParty.user.common.Result;
-import com.studyParty.user.domain.User;
+import com.studyParty.entity.user.*;
 import com.studyParty.user.domain.entity.UserToken;
 import com.studyParty.user.mapper.UserMapper;
 import com.studyParty.user.services.UserServer;
@@ -23,9 +23,6 @@ import java.nio.file.Path;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /// 登录

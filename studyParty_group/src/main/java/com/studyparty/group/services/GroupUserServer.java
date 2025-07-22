@@ -1,7 +1,7 @@
 package com.studyparty.group.services;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.studyparty.group.domian.GroupUser;
+import com.studyParty.entity.group.GroupUser;
 
 public interface GroupUserServer extends IService<GroupUser> {
 }

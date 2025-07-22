@@ -1,7 +1,8 @@
 package com.studyparty.group.controller;
 
+import com.studyParty.entity.group.Group;
+import com.studyParty.entity.user.User;
 import com.studyparty.group.common.Result;
-import com.studyparty.group.domian.Group;
 import com.studyparty.group.services.GroupServer;
 import com.studyparty.group.services.GroupUserServer;
 import org.springframework.beans.factory.annotation.Autowired;

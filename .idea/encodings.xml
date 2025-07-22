@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_.gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_AI/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_admin/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_community/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/studyParty_dubboApi/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_enterprise/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/studyParty_entity/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/studyParty_entityApi/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/studyParty_entityApi/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_group/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_user/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/studyParty_websocket/src/main/java" charset="UTF-8" />

@@ -1,7 +1,7 @@
 package com.studyparty.group.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.studyparty.group.domian.GroupTask;
+import com.studyParty.entity.group.GroupTask;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

@@ -2,7 +2,7 @@ package com.studyparty.group.services;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.studyparty.group.domian.Group;
+import com.studyParty.entity.group.Group;
 
 import java.util.List;
 

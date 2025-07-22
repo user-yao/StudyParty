@@ -1,7 +1,7 @@
 package com.studyparty.group.controller;
 
+import com.studyParty.entity.group.GroupJoin;
 import com.studyparty.group.common.Result;
-import com.studyparty.group.domian.GroupJoin;
 import com.studyparty.group.mapper.GroupJoinMapper;
 import com.studyparty.group.mapper.GroupMapper;
 import com.studyparty.group.services.GroupJoinServer;

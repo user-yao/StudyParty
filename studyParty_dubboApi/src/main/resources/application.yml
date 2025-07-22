@@ -1,0 +1,75 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: studyParty-dubboApi
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 9345245374
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      config:
+        server-addr: localhost:8848
+      discovery:
+        namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
+        server-addr: localhost:8848
+  data:
+    redis:
+      port: 6379
+      timeout: 6000 # ??????????
+      host: localhost
+  kafka:
+    bootstrap-servers: localhost:9092 # Kafka服务器地址
+    consumer:
+      group-id: studyParty # 消费组ID
+      auto-offset-reset: earliest # 当没有初始偏移量时该做何处理（earliest, latest）
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+mybatis-plus:
+  type-aliases-package: com.studyParty.dubboApi.domain
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # ??????????????
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.studyParty.dubboApi.controller  # ??????Controller?
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+# application.yml示例
+
+dubbo:
+  application:
+    name: studyParty-dubboApi # 应用名称
+  registry:
+    address: nacos://localhost:8848 # 注册中心地址
+  protocol:
+    name: dubbo
+    port: 20880 # 服务暴露端口
+  scan:
+    base-packages: com.studyParty.dubboApi.service # 扫描服务接口所在包
+# 服务提供方
+dubbo.provider:
+  timeout: 2000 # 服务提供方超时时间
+# 服务消费方
+dubbo.consumer:
+  timeout: 2000 # 服务消费方超时时间
+
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+head: static/head/
+saveHead: D:/studyParty/head/
