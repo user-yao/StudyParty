@@ -1,6 +1,12 @@
 server:
   port: 8080
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 单个文件最大大小
+      max-request-size: 10MB   # 整个请求最大大小
+  codec:
+    max-in-memory-size: 10MB
   application:
     name: studyParty-gateway
   cloud:
@@ -14,6 +20,12 @@ spring:
         namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
         enabled: true
     gateway:
+      httpclient:
+        max-initial-line-length: 8192
+        max-header-size: 8192
+        max-chunk-size: 16384
+        ssl:
+          use-insecure-trust-manager: true
       discovery:
         locator:
           enabled: true

@@ -5,7 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.studyParty.user.domain.User;
+import com.studyParty.entity.user.User;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,9 +25,11 @@ public class TokenUtil {
         if (redisUtil.getFromRedis(user.getPhone())==null){
             redisUtil.saveToRedis(user.getPhone(),passwordHash);
         }
+        System.out.println("Id"+user.getId());
         return JWT.create()
                 .withIssuer("yzt")
-                .withClaim("Id",user.getId())
+                .withSubject(String.valueOf(user.getId()))
+                .withClaim("id",user.getId())
                 .withClaim("phone",user.getPhone())
                 .withClaim("passwordHash", passwordHash)
                 .withExpiresAt(new Date(System.currentTimeMillis()+60*60*1000))//1h

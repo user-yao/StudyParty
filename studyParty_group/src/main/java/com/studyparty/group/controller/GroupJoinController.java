@@ -1,5 +1,6 @@
 package com.studyparty.group.controller;
 
+import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupJoin;
 import com.studyparty.group.common.Result;
 import com.studyparty.group.mapper.GroupJoinMapper;
@@ -24,6 +25,19 @@ public class GroupJoinController {
         }
         if(groupJoin.getUserId() != Integer.parseInt(userId)){
             return Result.error("用户身份错误");
+        }
+        Group group = groupMapper.selectById(groupJoin.getGroupId());
+        if(group == null){
+            return Result.error("群组不存在");
+        }
+        if (group.getPeopleNum() >= group.getMaxPeopleNum()){
+            return Result.error("群组已满");
+        }
+        if (groupJoinServer.isJoined(groupJoin.getGroupId(),groupJoin.getUserId())){
+            return Result.error("已经申请加入");
+        }
+        if(group.getCanJoin() == 0){
+            return Result.error("群组不允许加入");
         }
         groupJoinMapper.insert(groupJoin);
         return Result.success();

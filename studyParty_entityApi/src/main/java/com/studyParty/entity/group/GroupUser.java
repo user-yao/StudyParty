@@ -19,11 +19,13 @@ public class GroupUser {
     private int id;
     private int groupId;
     private int userId;
+    private int contribution;
     private Date addTime;
-
+    /// 新加群员专用
     public GroupUser(int groupId, int userId) {
         this.groupId = groupId;
         this.userId = userId;
+        this.contribution = 0;
         this.addTime = Date.valueOf(LocalDate.now());
     }
 }

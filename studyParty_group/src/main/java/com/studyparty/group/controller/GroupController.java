@@ -129,4 +129,71 @@ public class GroupController {
         }
         return Result.success();
     }
+    @PostMapping("/transferGroup")
+    public Result<?> transferGroup(int groupId, int newLeader, @RequestHeader("X-User-Id") String userId) {
+        if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
+            return Result.error("权限错误");
+        }
+        UpdateWrapper<Group> queryWrapper = new UpdateWrapper<>();
+        queryWrapper.eq("id", groupId);
+        queryWrapper.set("leader", newLeader);
+        if (groupMapper.update(null, queryWrapper) == 0) {
+            return Result.error("未找到对应的群组，可能已被删除");
+        }
+        return Result.success();
+    }
+    @PostMapping("/changeDeputy")
+    public Result<?> changeDeputy(int groupId, int deputy, @RequestHeader("X-User-Id") String userId) {
+        if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
+            return Result.error("权限错误");
+        }
+        QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("groupId", groupId);
+        queryWrapper.eq("userId", deputy);
+        if (groupUserMapper.selectOne(queryWrapper) == null){
+            return Result.error("未找到对应的群组成员");
+        }
+        UpdateWrapper<Group> queryWrapper1 = new UpdateWrapper<>();
+        queryWrapper1.eq("id", groupId);
+        queryWrapper1.set("deputy", deputy);
+        if (groupMapper.update(null, queryWrapper1) == 0) {
+            return Result.error("未找到对应的群组，可能已被删除");
+        }
+        return Result.success();
+    }
+    @PostMapping("/changeCanJoin")
+    public Result<?> changeCanJoin(int groupId, int canJoin, @RequestHeader("X-User-Id") String userId) {
+        if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
+            return Result.error("权限错误");
+        }
+        UpdateWrapper<Group> queryWrapper = new UpdateWrapper<>();
+        queryWrapper.eq("id", groupId);
+        queryWrapper.set("canJoin", canJoin);
+        if (groupMapper.update(null, queryWrapper) == 0) {
+            return Result.error("未找到对应的群组，可能已被删除");
+        }
+        return Result.success();
+    }
+    @PostMapping("/contributionGroup")
+    public Result<?> contributionGroup(int groupId, @RequestHeader("X-User-Id") String userId) {
+        QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("groupId", groupId);
+        queryWrapper.eq("userId", userId);
+        if (groupUserMapper.selectOne(queryWrapper) == null){
+            return Result.error("未找到对应的群组成员");
+        }
+        UpdateWrapper<GroupUser> queryWrapper1 = new UpdateWrapper<>();
+        queryWrapper1.eq("groupId", groupId);
+        queryWrapper1.eq("userId", userId);
+        queryWrapper1.set("contribution", groupUserMapper.selectById(userId).getContribution() + 20);
+        if (groupUserMapper.update(null, queryWrapper1) == 0) {
+            return Result.error("未找到对应的群组，可能已被删除");
+        }
+        UpdateWrapper<Group> queryWrapper2 = new UpdateWrapper<>();
+        queryWrapper2.eq("id", groupId);
+        queryWrapper2.set("experience", groupMapper.selectById(groupId).getExperience() + 20);
+        return Result.success();
+    }
+
+
 }

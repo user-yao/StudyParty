@@ -55,4 +55,14 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
         groupJoin.setIsPass(2);
         return groupJoinMapper.update(groupJoin, new QueryWrapper<GroupJoin>().eq("id", groupJoinId)) == 1;
     }
+
+    @Override
+    public boolean isJoined(int groupId, int userId) {
+        QueryWrapper<GroupJoin> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("group_id", groupId).eq("user_id", userId);
+        if (groupJoinMapper.selectOne(queryWrapper) != null) {
+            return true;
+        }
+        return false;
+    }
 }

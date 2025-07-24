@@ -1,6 +1,7 @@
 package com.studyparty.gateway.component;
 
 import com.alibaba.cloud.commons.lang.StringUtils;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.studyparty.gateway.common.Result;
 import com.studyparty.gateway.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,6 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -22,8 +22,6 @@ import reactor.core.scheduler.Schedulers;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.http.ResponseEntity.internalServerError;
-import static org.springframework.http.ResponseEntity.notFound;
 
 // 过滤器
 @Component
@@ -52,27 +50,38 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
         }
 
         // 2. 从请求头获取 Token
-        String token = request.getHeaders().getFirst("token");
+        String token = request.getHeaders().getFirst("Authorization");
         if (StringUtils.isEmpty(token)) {
             return unauthorized(exchange.getResponse(), "无权限");
         }
 
         // 3. 异步校验 Token（非阻塞）
         return validateTokenAsync(token)
-                .flatMap(isValid -> {
-                    if (!isValid.isEmpty()) {
+                .flatMap(userId -> {
+                    if (userId != null && !userId.isEmpty()) {
                         exchange.mutate()
-                                .request(builder -> builder.header("X-User-Id", isValid))
+                                .request(builder -> builder.header("X-User-Id", userId))
                                 .build();
                         return chain.filter(exchange); // 校验通过，继续执行
                     } else {
-                        return unauthorized(exchange.getResponse(), "token为空");
+                        return unauthorized(exchange.getResponse(), "无效 Token");
                     }
                 })
-                .onErrorResume(ex -> {
-                    // 其他未知错误
-                    return writeError(exchange, ex.getMessage(), HttpStatus.UNAUTHORIZED);
-                });
+                .onErrorResume(JWTVerificationException.class, ex -> {
+                    return writeError(exchange, "权限错误", HttpStatus.UNAUTHORIZED);
+                })
+                .onErrorResume(IllegalArgumentException.class, ex -> {
+                    return writeError(exchange, "参数错误: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+                })
+                .onErrorResume(RuntimeException.class, ex -> {
+                    return writeError(exchange, "服务器错误: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                })
+                .onErrorResume(Exception.class, ex -> {
+                    return writeError(exchange, "权限校验失败: " + ex.getMessage(), HttpStatus.FORBIDDEN);
+                })
+                .then();
+
+
     }
     
     // 异步校验 Token（示例）
@@ -86,11 +95,10 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
         Result<?> error = new Result<>(status.value(), message);
-
         return jsonEncoder.encode(Mono.just(error), response.bufferFactory(), ResolvableType.forClass(Result.class), MediaType.APPLICATION_JSON, null)
-                .flatMap(buffer -> response.writeWith(Mono.just(buffer))).then();
+                .flatMap(buffer -> response.writeWith(Mono.just(buffer)))
+                .then();
     }
     // 返回 401 未授权响应
     private Mono<Void> unauthorized(ServerHttpResponse response, String message) {

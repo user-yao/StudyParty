@@ -1,7 +1,7 @@
 package com.studyParty.user.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.studyParty.user.domain.UserTags;
+import com.studyParty.entity.user.UserTags;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

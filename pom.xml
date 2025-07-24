@@ -57,6 +57,11 @@
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
             <version>4.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.studyParty</groupId>
+            <artifactId>studyParty_dubboApi</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <!--    nacos节点服务    -->
         <dependency>
             <groupId>com.alibaba.nacos</groupId>

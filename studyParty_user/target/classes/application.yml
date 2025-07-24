@@ -5,6 +5,12 @@ server:
       max-file-size: 10MB
       max-request-size: 10MB
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 单个文件最大大小
+      max-request-size: 10MB   # 整个请求最大大小
+  codec:
+    max-in-memory-size: 10MB
   application:
     name: studyParty-user
   datasource:
@@ -13,6 +19,13 @@ spring:
     username: root
     password: 9345245374
   cloud:
+    gateway:
+      httpclient:
+        max-initial-line-length: 8192
+        max-header-size: 8192
+        max-chunk-size: 16384
+        ssl:
+          use-insecure-trust-manager: true
     nacos:
       username: nacos
       password: nacos
@@ -26,6 +39,16 @@ spring:
       port: 6379
       timeout: 6000 # 可选，默认单位为毫秒
       host: localhost
+  kafka:
+    bootstrap-servers: localhost:9092 # Kafka服务器地址
+    consumer:
+      group-id: studyParty # 消费组ID
+      auto-offset-reset: earliest # 当没有初始偏移量时该做何处理（earliest, latest）
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 mybatis-plus:
   type-aliases-package: com.studyParty.user.domain
   mapper-locations: classpath*:com/studyParty/test/**/*.xml
@@ -41,7 +64,22 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     config-url: /v3/api-docs/swagger-config
-
+dubbo:
+  application:
+    name: studyParty-dubboApi # 应用名称
+  registry:
+    address: nacos://localhost:8848?username=nacos&password=nacos # 注册中心地址
+  protocol:
+    name: dubbo
+    port: 20880 # 服务暴露端口
+  scan:
+    base-packages: com.studyParty.dubboApi.service # 扫描服务接口所在包
+# 服务提供方
+dubbo.provider:
+  timeout: 2000 # 服务提供方超时时间
+# 服务消费方
+dubbo.consumer:
+  timeout: 2000 # 服务消费方超时时间
 knife4j:
   enable: true  # 启用Knife4j增强UI
   setting:

@@ -4,16 +4,16 @@ import lombok.Getter;
 
 @Getter
 public enum Level {
-    LEVEL_1(10,5),
-    LEVEL_2(25,10),
-    LEVEL_3(100,15),
-    LEVEL_4(200,20),
-    LEVEL_5(400,25),
-    LEVEL_6(800,30),
-    LEVEL_7(1600,35),
-    LEVEL_8(3200,40),
-    LEVEL_9(6400,45),
-    LEVEL_10(12800,50);
+    LEVEL_1(100,3),
+    LEVEL_2(250,4),
+    LEVEL_3(600,5),
+    LEVEL_4(1200,6),
+    LEVEL_5(2500,7),
+    LEVEL_6(5000,8),
+    LEVEL_7(10000,9),
+    LEVEL_8(20000,10),
+    LEVEL_9(40000,10),
+    LEVEL_10(80000,10);
 
     Level(int needExperience, int maxPeopleNum) {
         this.needExperience = needExperience;

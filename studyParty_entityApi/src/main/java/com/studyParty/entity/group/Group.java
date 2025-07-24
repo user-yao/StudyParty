@@ -18,6 +18,8 @@ public class Group {
     @TableId(type = IdType.AUTO)
     private int id;
     private int leader;
+    private int deputy;
+    private Date deputyTime;
     private String groupName;
     private int groupLevel;
     private int experience;
@@ -30,9 +32,11 @@ public class Group {
     private Date createTime;
     private int canJoin;
 
-
+    /// 创建小组专用
     public Group(int leader, String groupName,String slogan, String rule,Date createTime, int canJoin) {
         this.leader = leader;
+        this.deputy = leader;
+        this.deputyTime = Date.valueOf(LocalDate.now());
         this.groupName = groupName;
         this.groupLevel = 1;
         this.experience = 0;

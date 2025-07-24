@@ -10,4 +10,5 @@ public interface GroupJoinServer extends IService<GroupJoin> {
     List<List<GroupJoin>> findMyGroups(int userId);
     boolean agreeJoin(int id, int userId, GroupJoin groupJoin);
     boolean disagreeJoin(int id, int userId, GroupJoin groupJoin);
+    boolean isJoined(int groupId, int userId);
 }

@@ -1,6 +1,7 @@
 package com.studyparty.gateway.utils;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -51,42 +52,42 @@ public class JwtUtil {
     public Mono<String> tokenVerify(String token) {
         return Mono.defer(() -> {
                     try {
-                        DecodedJWT decodedJWT = JWT.decode(token);
+                        // 创建验证器
                         Algorithm algorithm = Algorithm.HMAC256(sign);
+                        JWTVerifier verifier = JWT.require(algorithm)
+                                .withIssuer("yzt")
+                                .build();
+                        DecodedJWT decodedJWT = verifier.verify(token);
                         if (!"yzt".equals(decodedJWT.getIssuer())) {
                             return Mono.error(new JWTVerificationException("无效发行商"));
                         }
-                        if (decodedJWT.getSignature().equals(algorithm.toString())){
-                            return Mono.error(new JWTVerificationException("无效签名"));
-                        }
-                        decodedJWT.getSignature();
                         String phone = decodedJWT.getClaim("phone").asString();
                         String passwordHash = decodedJWT.getClaim("passwordHash").asString();
                         if (phone == null || passwordHash == null) {
-                            return Mono.error(new Throwable("令牌错误"));
+                            return Mono.error(new IllegalArgumentException("令牌错误"));
                         }
                         return redisUtil.getValue(phone)
-                                .switchIfEmpty(Mono.error(new RuntimeException("服务器错误，请重新登录")))
+                                .switchIfEmpty(Mono.error(new JWTVerificationException("用户不存在")))
                                 .publishOn(Schedulers.boundedElastic())
-                                .mapNotNull(storedHash -> {
+                                .flatMap(storedHash -> {
                                     if (!storedHash.equals(passwordHash)) {
-                                        return Mono.<String>error(new Throwable("密码错误")).block();
+                                        return Mono.error(new IllegalArgumentException("密码错误"));
                                     }
-                                    return decodedJWT.getSubject(); // 或返回用户信息
+                                    return Mono.just(decodedJWT.getSubject()); // 或返回用户信息
                                 })
                                 .onErrorResume(ex -> {
-                                    return Mono.error(new RuntimeException("服务器错误，请重新登录", ex));
+                                    return Mono.error(new JWTVerificationException("服务器错误，请重新登录：" + ex.getClass().getSimpleName() + " - " + ex.getMessage(), ex));
                                 });
                     } catch (JWTVerificationException ex) {
-                        return Mono.error(new Throwable("权限错误"));
+                        return Mono.error(new JWTVerificationException("权限错误",ex));
+                    } catch (IllegalArgumentException ex){
+                        return Mono.error(new IllegalArgumentException("权限参数错误",ex));
+                    } catch (RuntimeException  ex) {
+                        return Mono.error(new RuntimeException("服务器异常，请稍后再试" , ex));
                     } catch (Exception ex) {
-                        return Mono.error(new RuntimeException("权限校验失败", ex));
+                        return Mono.error(new JWTVerificationException("权限校验失败", ex));
                     }
-                })
-                .onErrorResume(JWTVerificationException.class,ex -> Mono.error(new JWTVerificationException(ex.getMessage(),ex)))
-                .onErrorResume(Throwable.class,ex -> Mono.error(new Throwable(ex.getMessage(),ex)))
-                .onErrorResume(RuntimeException.class,ex -> Mono.error(new RuntimeException(ex.getMessage(),ex)))
-                .onErrorResume(Exception.class, ex -> Mono.error(new Exception(ex.getMessage(), ex)));
+                });
     }
 
 }

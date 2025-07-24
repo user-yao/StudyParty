@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.studyparty.studyparty_dubboapi.Mapper.UserMapper">
+    <select id="selectGroupUser" resultType="com.studyParty.entity.user.User">
+        SELECT `users`.*
+        FROM `users` join group_user on `users`.id = group_user.group_user
+        where group_user.group_id = #{groupId}
+    </select>
+</mapper>

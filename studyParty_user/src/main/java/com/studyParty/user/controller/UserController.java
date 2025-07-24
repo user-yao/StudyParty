@@ -2,11 +2,12 @@ package com.studyParty.user.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.studyParty.entity.user.User;
 import com.studyParty.user.Utils.MyFileUtil;
 import com.studyParty.user.Utils.PasswordEncoder;
 import com.studyParty.user.Utils.RedisUtil;
 import com.studyParty.user.common.Result;
-import com.studyParty.entity.user.*;
+
 import com.studyParty.user.domain.entity.UserToken;
 import com.studyParty.user.mapper.UserMapper;
 import com.studyParty.user.services.UserServer;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -129,22 +131,40 @@ public class UserController {
         return Result.success();
     }
     @PostMapping("/updateHead")
-    public Result<?> updateHead(@RequestParam("photo")MultipartFile photo,@RequestHeader("X-User-Id") String userId){
-        String path = saveHead + userId;
-        File file = new File(path);
-        try {
-            if (file.exists() || file.isDirectory()) {
-                Files.createDirectories(Path.of(path));
-                userMapper.update(null,new LambdaUpdateWrapper<User>()
-                        .eq(User::getId,userId)
-                        .set(User::getHead, head + userId + "/userHeadPhoto" ));
-            }
-            photo.transferTo(new File(path + "/userHeadPhoto"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public Result<?> updateHead(@RequestParam("photo") MultipartFile photo, @RequestHeader("X-User-Id") String userId) {
+        // 防止非法字符导致路径穿越
+        if (userId.contains("..") || userId.contains(File.separator)) {
+            return Result.error("非法用户ID");
         }
-        return Result.success(head + userId + "/userHeadPhoto");
+
+        // 使用 Paths 构建安全路径
+        Path dirPath = Paths.get(saveHead, userId);
+        Path targetPath = dirPath.resolve("userHeadPhoto.png");
+        File targetFile = targetPath.toFile();
+
+        try {
+            // 确保目录存在
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath);
+            }
+
+            // 更新用户头像路径
+            userMapper.update(null, new LambdaUpdateWrapper<User>()
+                    .eq(User::getId, userId)
+                    .set(User::getHead, head + userId + "/userHeadPhoto.png"));
+
+            // 保存上传的文件
+            photo.transferTo(targetFile);
+            return Result.success(head + userId + "/userHeadPhoto.png");
+
+        } catch (IOException e) {
+            return Result.error("文件保存失败: " + e.getMessage());
+        } catch (Exception e) {
+            return Result.error("系统错误: " + e.getMessage());
+        }
     }
+
+
    /* @PostMapping("/updateHead")
     public Result<?> updateHead(@RequestParam("photo")MultipartFile photo,@RequestParam("id") int id,@RequestParam("oldPhoto") String oldPhoto){
         String photoName = photo.getOriginalFilename();

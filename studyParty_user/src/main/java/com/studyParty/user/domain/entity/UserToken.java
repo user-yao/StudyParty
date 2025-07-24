@@ -1,6 +1,5 @@
 package com.studyParty.user.domain.entity;
-
-import com.studyParty.user.domain.User;
+import com.studyParty.entity.user.User;
 import lombok.*;
 
 @Data
