@@ -69,3 +69,15 @@ knife4j:
     language: zh_cn
 head: static/head/
 saveHead: D:/studyParty/head/
+# 自定义配置
+app:
+  # 文件上传路径配置
+  upload:
+    # 本地存储路径
+    base-path: D:/studyParty/uploads/
+    # 访问URL前缀
+    base-url: http://localhost:8080/static/uploads/
+    # 允许的图片类型
+    allowed-types: image/jpeg,image/png,image/gif,image/bmp,image/webp
+    # 最大文件大小(MB)
+    max-size: 10
