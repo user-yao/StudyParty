@@ -16,6 +16,7 @@ public class Image {
     private Long id;
     private String image;
     private String url;
+    private String filePath;
     private Long articleId;
     private Long groupTaskId;
     private Long achievementId;

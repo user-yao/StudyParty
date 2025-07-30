@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.sql.Timestamp;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,9 +19,8 @@ public class GroupTask {
     private int groupId;
     private String groupTask;
     private String groupTaskUploader;
-    private String groupTaskStartTime;
-    private String groupTaskLastTime;
-    private String groupTaskImage;
+    private Timestamp groupTaskStartTime;
+    private Timestamp groupTaskLastTime;
     private String groupTaskFinish;
     private String groupTaskContext;
     private String groupTaskUnfinished;

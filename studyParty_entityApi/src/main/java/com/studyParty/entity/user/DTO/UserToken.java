@@ -1,4 +1,4 @@
-package com.studyParty.entity.user.entity;
+package com.studyParty.entity.user.DTO;
 
 import com.studyParty.entity.user.User;
 import lombok.*;
