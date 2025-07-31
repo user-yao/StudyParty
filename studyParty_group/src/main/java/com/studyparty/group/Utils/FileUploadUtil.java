@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.studyParty.entity.Source;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,7 +41,7 @@ public class FileUploadUtil {
      * @param file 上传的文件
      * @return 图片访问URL
      */
-    public static String uploadImage(MultipartFile file) {
+    public static Source uploadImage(MultipartFile file) {
         // 验证文件是否为空
         if (file.isEmpty()) {
             throw new BusinessException("上传文件不能为空");
@@ -53,11 +54,14 @@ public class FileUploadUtil {
                     ", 允许的类型: " + uploadProperties.getAllowedTypes());
         }
 
-        // 验证文件大小
-        long fileSize = file.getSize();
-        long maxSize = uploadProperties.getMaxSize() * 1024 * 1024; // 转换为字节
-        if (fileSize > maxSize) {
-            throw new BusinessException("文件大小超过限制: " + uploadProperties.getMaxSize() + "MB");
+
+        // 获取对应类型的最大大小（单位：MB）
+        long maxSizeInMB = getMaxSizeByType(contentType);
+        long maxSizeInBytes = maxSizeInMB * 1024 * 1024; // 转为字节
+
+        if (file.getSize() > maxSizeInBytes) {
+            String typeName = getFileTypeName(contentType);
+            throw new BusinessException(typeName + "文件大小不能超过 " + maxSizeInMB + " MB");
         }
 
         try {
@@ -78,8 +82,8 @@ public class FileUploadUtil {
             // 创建目录(如果不存在)
             File saveFile = new File(filePath);
             if (!saveFile.getParentFile().exists()) {
-                boolean mkdirs = saveFile.getParentFile().mkdirs();
-                if (!mkdirs) {
+                boolean mkdir = saveFile.getParentFile().mkdirs();
+                if (!mkdir) {
                     throw new BusinessException("创建目录失败: " + saveFile.getParentFile().getPath());
                 }
             }
@@ -89,12 +93,32 @@ public class FileUploadUtil {
             log.info("文件上传成功: {}", filePath);
 
             // 生成访问URL
-            return uploadProperties.getBaseUrl() + dateDir + fileName;
+            return new Source(fileName,uploadProperties.getBaseUrl() + dateDir + fileName, filePath, null);
 
         } catch (IOException e) {
             log.error("文件上传失败", e);
             throw new BusinessException("文件上传失败: " + e.getMessage());
         }
+    }
+
+    private static long getMaxSizeByType(String contentType) {
+        // 优先使用 maxSizes 配置
+        if (contentType.startsWith("image/")) {
+            return uploadProperties.getMaxSizes().getOrDefault("image", uploadProperties.getMaxSize());
+        } else if (contentType.startsWith("audio/")) {
+            return uploadProperties.getMaxSizes().getOrDefault("audio", uploadProperties.getMaxSize());
+        } else if (contentType.startsWith("video/")) {
+            return uploadProperties.getMaxSizes().getOrDefault("video", uploadProperties.getMaxSize());
+        }
+        // 默认回退
+        return uploadProperties.getMaxSize();
+    }
+
+    private static String getFileTypeName(String contentType) {
+        if (contentType.startsWith("image/")) return "图片";
+        if (contentType.startsWith("audio/")) return "音频";
+        if (contentType.startsWith("video/")) return "视频";
+        return "文件";
     }
 
     /**

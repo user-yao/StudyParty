@@ -4,6 +4,9 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 文件上传配置属性类
  * 用于读取application.yml中的上传配置
@@ -29,7 +32,12 @@ public class UploadProperties {
     private String allowedTypes;
 
     /**
-     * 最大文件大小(MB)
+     * 统一默认最大大小(MB)
      */
-    private Integer maxSize;
+    private Long maxSize;
+
+    /**
+     * 按类型设置最大大小(MB)，例如：image=10, audio=50, video=200
+     */
+    private Map<String, Long> maxSizes = new HashMap<>();
 }

@@ -1,6 +1,6 @@
 package com.studyParty.entity.group.DTO;
 
-import com.studyParty.entity.Image;
+import com.studyParty.entity.Source;
 import com.studyParty.entity.group.GroupTask;
 import lombok.*;
 
@@ -13,6 +13,5 @@ import java.util.List;
 @Data
 public class GroupTaskDTO {
     private GroupTask groupTask;
-    private String htmlContent;
-    private List<Image> images;
+    private List<Source> sources;
 }

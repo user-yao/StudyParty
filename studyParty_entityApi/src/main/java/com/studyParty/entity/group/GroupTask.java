@@ -15,13 +15,13 @@ import java.sql.Timestamp;
 @TableName("group_task")
 public class GroupTask {
     @TableId(type = IdType.AUTO)
-    private int id;
-    private int groupId;
+    private Long id;
+    private Long groupId;
     private String groupTask;
     private String groupTaskUploader;
     private Timestamp groupTaskStartTime;
     private Timestamp groupTaskLastTime;
-    private String groupTaskFinish;
+    private Long groupTaskFinish;
     private String groupTaskContext;
-    private String groupTaskUnfinished;
+    private Long groupTaskUnfinished;
 }

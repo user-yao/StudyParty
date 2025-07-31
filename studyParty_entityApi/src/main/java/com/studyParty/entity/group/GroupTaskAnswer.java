@@ -1,23 +1,24 @@
-package com.studyParty.entity;
+package com.studyParty.entity.group;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.sql.Timestamp;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("image")
-@Data
-public class Image {
+@TableName("group_task_answer")
+public class GroupTaskAnswer {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String image;
-    private String url;
-    private String filePath;
-    private Long articleId;
     private Long groupTaskId;
-    private Long achievementId;
+    private Long userId;
+    private String context;
+    private Timestamp time;
+    private int haveSource;
 }

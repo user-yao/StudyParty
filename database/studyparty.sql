@@ -170,12 +170,12 @@ CREATE TABLE `group_user`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for image
+-- Table structure for source
 -- ----------------------------
-DROP TABLE IF EXISTS `image`;
-CREATE TABLE `image`  (
+DROP TABLE IF EXISTS `source`;
+CREATE TABLE `source`  (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '图片名称',
+  `source` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '图片名称',
   `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '路径',
   `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '类型（头像，图片，工具）',
   PRIMARY KEY (`id`) USING BTREE
@@ -224,7 +224,7 @@ DROP TABLE IF EXISTS `task`;
 CREATE TABLE `task`  (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
   `uploader` int UNSIGNED NULL DEFAULT NULL COMMENT '上传者',
-  `image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '图片路径',
+  `source` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '图片路径',
   `context` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '问题描述',
   `isOver` tinyint NULL DEFAULT NULL COMMENT '是否完成',
   `star_coin` int NULL DEFAULT NULL COMMENT '悬赏星币',
@@ -244,7 +244,7 @@ CREATE TABLE `task_answer`  (
   `task_id` int UNSIGNED NULL DEFAULT NULL COMMENT '任务id',
   `answerer` int UNSIGNED NULL DEFAULT NULL COMMENT '回答者',
   `context` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '答案文本',
-  `image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '路径',
+  `source` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '路径',
   `isTrue` tinyint NULL DEFAULT NULL COMMENT '是否被认可',
   `nice` int NULL DEFAULT NULL COMMENT '点赞量',
   PRIMARY KEY (`id`) USING BTREE,

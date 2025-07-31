@@ -2,15 +2,15 @@ package com.studyparty.group.services.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.studyParty.entity.Image;
+import com.studyParty.entity.Source;
 import com.studyParty.entity.group.DTO.GroupTaskDTO;
 import com.studyParty.entity.group.GroupTask;
 import com.studyparty.group.Utils.BusinessException;
 import com.studyparty.group.mapper.GroupTaskMapper;
-import com.studyparty.group.mapper.ImageMapper;
+import com.studyparty.group.mapper.SourceMapper;
 import com.studyparty.group.services.GroupTaskServer;
-import com.studyparty.group.services.ImageServer;
 import com.studyparty.group.services.MarkdownService;
+import com.studyparty.group.services.SourceServer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +21,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GroupTaskServerImpl extends ServiceImpl<GroupTaskMapper, GroupTask> implements GroupTaskServer {
-    private final ImageServer imageServer;
-    private final ImageMapper imageMapper;
+    private final SourceServer sourceServer;
+    private final SourceMapper sourceMapper;
     private final MarkdownService markdownService;
     private final GroupTaskMapper groupTaskMapper;
 
@@ -53,17 +53,14 @@ public class GroupTaskServerImpl extends ServiceImpl<GroupTaskMapper, GroupTask>
         if (groupTask == null) {
             throw new BusinessException("任务不存在");
         }
-        // 将Markdown转换为HTML
-        String htmlContent = markdownService.renderToHtml(groupTask.getGroupTaskContext());
-        QueryWrapper<Image> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<Source> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_task_id", id);
         // 查询帖子图片
-        List<Image> images = imageMapper.selectList(queryWrapper);
+        List<Source> sources = sourceMapper.selectList(queryWrapper);
         // 构建DTO返回
         return new GroupTaskDTO(
                 groupTask,
-                htmlContent,
-                images
+                sources
         );
     }
     @Transactional
@@ -72,8 +69,7 @@ public class GroupTaskServerImpl extends ServiceImpl<GroupTaskMapper, GroupTask>
         if (groupTaskMapper.selectById(id) == null) {
             throw new BusinessException("帖子不存在");
         }
-
-        imageServer.deleteImage(id);
+        sourceServer.deleteSource(id);
         // 删除帖子
         groupTaskMapper.deleteById(id);
     }

@@ -18,4 +18,9 @@ public class BusinessServerImpl implements BusinessServer {
     public List<User> selectUser(int groupId, String userId) {
         return userMapper.selectGroupUser(groupId, userId);
     }
+    @DubboService
+    @Override
+    public User selectUserById(int userId) {
+        return userMapper.selectById(userId);
+    }
 }

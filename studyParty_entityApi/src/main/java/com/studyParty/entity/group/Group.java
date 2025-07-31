@@ -31,6 +31,8 @@ public class Group {
     private String head;
     private Date createTime;
     private int canJoin;
+    private int teacher;
+    private int enterprise;
 
     /// 创建小组专用
     public Group(int leader, String groupName,String slogan, String rule,Date createTime, int canJoin) {

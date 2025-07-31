@@ -7,11 +7,14 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupUser;
+import com.studyParty.entity.user.User;
 import com.studyparty.group.common.Result;
 import com.studyparty.group.mapper.GroupMapper;
 import com.studyparty.group.mapper.GroupUserMapper;
 import com.studyparty.group.services.GroupServer;
 import com.studyparty.group.services.GroupUserServer;
+import com.studyparty.studyparty_dubboapi.services.BusinessServer;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -39,6 +42,8 @@ public class GroupController {
     private GroupUserMapper groupUserMapper;
     @Autowired
     private GroupUserServer groupUserServer;
+    @DubboReference
+    private BusinessServer businessServer;
 
     @PostMapping("/searchGroup")
     public Result<?> searchGroup(String searchContext, int currentPage,boolean canJoin) {
@@ -194,6 +199,48 @@ public class GroupController {
         queryWrapper2.set("experience", groupMapper.selectById(groupId).getExperience() + 20);
         return Result.success();
     }
-
-
+    @PostMapping("/invitePredecessor")
+    public Result<?> inviteTeacher(int groupId, int predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
+        Group group = groupMapper.selectById(groupId);
+        if (group.getLeader()!= Integer.parseInt(userId)){
+            return Result.error("权限错误");
+        }
+        if (status == 1){
+            return Result.error("只能邀请老师与企业");
+        }
+        User user = businessServer.selectUserById(predecessorId);
+        if(user.getStatus() == status ){
+            return Result.error("身份错误");
+        }
+        if (status == 2){
+            group.setTeacher(predecessorId);
+            groupMapper.updateById(group);
+            groupUserServer.saveOrUpdate(new GroupUser(groupId, predecessorId));
+        }
+        if (status == 3){
+            group.setEnterprise(predecessorId);
+            groupMapper.updateById(group);
+            groupUserServer.saveOrUpdate(new GroupUser(groupId, predecessorId));
+        }
+        return Result.success();
+    }
+    @PostMapping("/clearPredecessor")
+    public Result<?> clearPredecessor(int groupId, int predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
+        Group group = groupMapper.selectById(groupId);
+        if (group.getLeader()!= Integer.parseInt(userId)){
+            return Result.error("权限错误");
+        }
+        if (status == 1){
+            return Result.error("只能选择老师与企业");
+        }
+        if (status == 2){
+            group.setTeacher(0);
+        }
+        if (status == 3){
+            group.setEnterprise(0);
+        }
+        groupMapper.updateById(group);
+        groupUserMapper.delete(new QueryWrapper<GroupUser>().eq("groupId", groupId).eq("userId", predecessorId));
+        return Result.success();
+    }
 }
