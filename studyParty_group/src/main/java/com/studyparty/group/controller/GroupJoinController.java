@@ -6,17 +6,21 @@ import com.studyparty.group.common.Result;
 import com.studyparty.group.mapper.GroupJoinMapper;
 import com.studyparty.group.mapper.GroupMapper;
 import com.studyparty.group.services.GroupJoinServer;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+/***
+ * url:功能说明
+ * /joinGroup:申请加入群组
+ * /getGroupJoin:获取用户申请加入的群组
+ * /agreeJoin:同意加入群组
+ */
 @RestController("/groupJoin")
+@RequiredArgsConstructor
 public class GroupJoinController {
-    @Autowired
-    private GroupJoinMapper groupJoinMapper;
-    @Autowired
-    private GroupJoinServer groupJoinServer;
-    @Autowired
-    private GroupMapper groupMapper;
+    private final GroupJoinMapper groupJoinMapper;
+    private final GroupJoinServer groupJoinServer;
+    private final GroupMapper groupMapper;
 
     @PostMapping("/joinGroup")
     public Result<?> joinGroup(@RequestBody GroupJoin groupJoin, @RequestHeader("X-User-Id") String userId){
@@ -44,29 +48,24 @@ public class GroupJoinController {
     }
     @GetMapping("/getGroupJoin")
     public Result<?> getGroupJoin(@RequestHeader("X-User-Id") String userId){
-        return Result.success(groupJoinServer.findMyGroups(Integer.parseInt(userId)));
+        return Result.success(groupJoinServer.findMyGroups(Long.valueOf(userId)));
     }
 
     @PostMapping("/agreeJoin")
-    public Result<?> agreeJoin(int groupJoinId,boolean agree,@RequestHeader("X-User-Id") String userId){
+    public Result<?> agreeJoin(Long groupJoinId,boolean agree,@RequestHeader("X-User-Id") String userId){
         GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
+        if (groupJoin.getGroupLeader() != Integer.parseInt(userId)){
+            return Result.error("用户权限不足");
+        }
         if (agree){
-            if (groupJoin.getGroupLeader() != Integer.parseInt(userId)){
-                return Result.error("用户权限不足");
-            }
-            if(groupJoinServer.agreeJoin(groupJoinId,Integer.parseInt(userId),groupJoin)){
-                groupJoin.setIsPass(1);
-                groupJoinMapper.updateById(groupJoin);
+            if(groupJoinServer.agreeJoin(groupJoinId,Long.valueOf(userId),groupJoin)){
                 return Result.success();
-            }else{
-                return Result.error("服务器错误");
             }
         }else{
-            if(groupJoinServer.disagreeJoin(groupJoinId,Integer.parseInt(userId),groupJoin)){
+            if(groupJoinServer.disagreeJoin(groupJoinId,Long.valueOf(userId),groupJoin)){
                 return Result.success();
-            }else {
-                return Result.error("服务器错误");
             }
         }
+        return Result.error();
     }
 }

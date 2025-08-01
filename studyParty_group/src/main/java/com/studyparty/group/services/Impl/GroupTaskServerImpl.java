@@ -63,14 +63,4 @@ public class GroupTaskServerImpl extends ServiceImpl<GroupTaskMapper, GroupTask>
                 sources
         );
     }
-    @Transactional
-    public void deletePost(Long id) {
-        // 查询帖子是否存在
-        if (groupTaskMapper.selectById(id) == null) {
-            throw new BusinessException("帖子不存在");
-        }
-        sourceServer.deleteSource(id);
-        // 删除帖子
-        groupTaskMapper.deleteById(id);
-    }
 }

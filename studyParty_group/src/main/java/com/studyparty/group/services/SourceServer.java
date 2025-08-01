@@ -29,10 +29,14 @@ public class SourceServer {
         return source;
     }
     @Transactional
-    public boolean deleteSource(Long groupTaskId) {
+    public boolean deleteSource(Long Id,boolean isAnswer) {
         // 从数据库查询图片
         QueryWrapper<Source> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("group_task_id", groupTaskId);
+        if(isAnswer){
+            queryWrapper.eq("group_task_answer_id", Id);
+        }else {
+            queryWrapper.eq("group_task_id", Id);
+        }
         List<Source> sources = sourceMapper.selectList(queryWrapper);
         if (sources.isEmpty()) {
             return false;

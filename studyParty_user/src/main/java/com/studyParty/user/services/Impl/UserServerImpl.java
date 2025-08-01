@@ -3,9 +3,9 @@ package com.studyParty.user.services.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.studyParty.entity.user.DTO.UserToken;
 import com.studyParty.user.Utils.TokenUtil;
 import com.studyParty.entity.user.User;
-import com.studyParty.user.domain.entity.UserToken;
 import com.studyParty.user.mapper.UserMapper;
 import com.studyParty.user.services.UserServer;
 import org.springframework.beans.factory.annotation.Autowired;

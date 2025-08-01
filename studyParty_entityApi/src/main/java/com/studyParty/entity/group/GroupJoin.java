@@ -16,15 +16,15 @@ import java.time.LocalDateTime;
 @TableName("group_join")
 public class GroupJoin {
     @TableId(type = IdType.AUTO)
-    private int id;
-    private int groupId;
-    private int groupLeader;
-    private int userId;
+    private Long id;
+    private Long groupId;
+    private Long groupLeader;
+    private Long userId;
     private String context;
     private int isPass;//1:待审核 2:通过 3:未通过
     private Timestamp joinTime;
 
-    public GroupJoin(int groupId, int groupLeader, int userId, String context, int isPass) {
+    public GroupJoin(Long groupId, Long groupLeader, Long userId, String context, int isPass) {
         this.groupId = groupId;
         this.groupLeader = groupLeader;
         this.userId = userId;

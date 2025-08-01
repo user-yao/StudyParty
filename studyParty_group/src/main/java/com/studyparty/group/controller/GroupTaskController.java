@@ -5,43 +5,36 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.studyParty.entity.Source;
 import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupTask;
+import com.studyParty.entity.group.GroupTaskAnswer;
 import com.studyParty.entity.group.GroupUser;
-import com.studyParty.entity.user.User;
 import com.studyparty.group.common.Result;
-import com.studyparty.group.mapper.GroupMapper;
-import com.studyparty.group.mapper.GroupTaskMapper;
-import com.studyparty.group.mapper.GroupUserMapper;
-import com.studyparty.group.mapper.SourceMapper;
+import com.studyparty.group.mapper.*;
 import com.studyparty.group.services.MarkdownService;
 import com.studyparty.group.services.SourceServer;
-import io.swagger.v3.oas.annotations.Parameter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Pattern;
 
+/***
+ * url:功能说明
+ * /selectMyGroupTask:查询用户加入的群组任务
+ * /deleteGroupTask:删除群组任务
+ * /upload-markdown:上传群组任务
+ */
 @RestController("/groupTask")
+@RequiredArgsConstructor
 public class GroupTaskController {
-    @Autowired
-    private  GroupTaskMapper groupTaskMapper;
-    @Autowired
-    private SourceServer sourceServer;
-    @Autowired
-    private MarkdownService markdownService;
-    @Autowired
-    private GroupMapper groupMapper;
-    @Autowired
-    private SourceMapper sourceMapper;
-    @Autowired
-    private GroupUserMapper groupUserMapper;
+    private final GroupTaskMapper groupTaskMapper;
+    private final SourceServer sourceServer;
+    private final MarkdownService markdownService;
+    private final GroupMapper groupMapper;
+    private final SourceMapper sourceMapper;
+    private final GroupUserMapper groupUserMapper;
+    private final GroupTaskAnswerMapper groupTaskAnswerMapper;
 
     @PostMapping("/selectMyGroupTask")
     public Result<?> selectMyGroupTask( String groupId, Integer currentPage) {
@@ -53,18 +46,27 @@ public class GroupTaskController {
         }
         Page<GroupTask> page = new Page<>(currentPage, 10);
         QueryWrapper<GroupTask> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("groupId", groupId);
+        queryWrapper.eq("group_id", groupId);
         return Result.success(groupTaskMapper.selectPage(page, queryWrapper));
     }
-    @DeleteMapping("/{id}")
-    public Result<?> deletePost(@PathVariable Long id) {
-        groupTaskMapper.deleteById(id);
-        sourceServer.deleteSource(id);
+    @DeleteMapping("deleteGroupTask/{id}")
+    public Result<?> deleteGroupTask(@PathVariable Long id,@RequestHeader("X-User-Id") String userId) {
+        if(groupMapper.selectById(userId).getLeader() != Integer.parseInt(userId) ||
+                groupMapper.selectById(userId).getDeputy() != Integer.parseInt(userId)){
+            return Result.error("权限错误");
+        }
+        QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("group_task_id", id);
+        groupTaskAnswerMapper.delete(queryWrapper);
+        if(groupTaskMapper.deleteById(id) == 0){
+            return Result.error("任务不存在");
+        }
+        sourceServer.deleteSource(id,false);
         return Result.success();
     }
 
     @PostMapping("/upload-markdown")
-    public Result<?> uploadMarkdownFile(@RequestParam("file") MultipartFile file,
+    public Result<?> uploadMarkdownFile(@RequestParam("file") MultipartFile markdown,
                                         @RequestParam("file") MultipartFile[] sources,
                                         Long groupId,
                                         Timestamp deadline,
@@ -83,45 +85,17 @@ public class GroupTaskController {
         if(group.getEnterprise() != Integer.parseInt(userId)){
             return Result.error("权限错误");
         }
-        // 1. 检查文件类型
-        if (!"text/markdown".equals(file.getContentType()) &&
-                !Objects.requireNonNull(file.getOriginalFilename()).endsWith(".md")) {
-            return Result.error("文件类型错误");
+        String processedMarkdown = markdownService.checkMarkdown(markdown);
+        if(processedMarkdown == null){
+            return Result.error("上传文件错误");
         }
-        // 2. 读取文件内容
-        String processedMarkdown = null;
-        try {
-            processedMarkdown = new String(file.getBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            return Result.error("文件读取失败");
-        }
-
         Map<String, Source> sourceMap = new HashMap<>();
         for (MultipartFile source : sources) {
             Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
             sourceMap.put(source.getOriginalFilename(), source1);
         }
         // 替换 Markdown 中的文件引用
-        for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
-            String originalFilename = entry.getKey();
-            String serverUrl = entry.getValue().getUrl();
-
-            // 处理标准 Markdown 图片语法: ![](filename.jpg)
-            String imagePattern = "!\\$$(.*?)\\$\\$" + Pattern.quote(originalFilename) + "\\$";
-            processedMarkdown = processedMarkdown.replaceAll(imagePattern, "![$1](" + serverUrl + ")");
-
-            // 处理普通链接语法: [](filename.jpg)
-            String linkPattern = "\\$$(.*?)\\$\\$" + Pattern.quote(originalFilename) + "\\$";
-            processedMarkdown = processedMarkdown.replaceAll(linkPattern, "[$1](" + serverUrl + ")");
-
-            // 处理 HTML 音频标签: <audio src="filename.mp3">
-            String audioPattern = "<audio(.*?)src=(\"|')" + Pattern.quote(originalFilename) + "(\"|')(.*?)>";
-            processedMarkdown = processedMarkdown.replaceAll(audioPattern, "<audio$1src=\"" + serverUrl + "\"$4>");
-
-            // 处理 HTML 视频标签: <video src="filename.mp4">
-            String videoPattern = "<video(.*?)src=(\"|')" + Pattern.quote(originalFilename) + "(\"|')(.*?)>";
-            processedMarkdown = processedMarkdown.replaceAll(videoPattern, "<video$1src=\"" + serverUrl + "\"$4>");
-        }
+        processedMarkdown = markdownService.updateMarkdown(markdown, sourceMap, processedMarkdown);
         GroupTask groupTask = new GroupTask();
         groupTask.setGroupId(groupId);
         groupTask.setGroupTask(processedMarkdown);
@@ -130,7 +104,7 @@ public class GroupTaskController {
         groupTask.setGroupTaskLastTime(deadline);
         groupTask.setGroupTaskFinish(0L);
         QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("groupId", groupId);
+        queryWrapper.eq("group_id", groupId);
         int predecessor = 0;
         if (group.getTeacher() != 0){
             predecessor++;

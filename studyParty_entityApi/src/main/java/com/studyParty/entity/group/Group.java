@@ -16,9 +16,9 @@ import java.time.LocalDate;
 @TableName("`group`")
 public class Group {
     @TableId(type = IdType.AUTO)
-    private int id;
-    private int leader;
-    private int deputy;
+    private Long id;
+    private Long leader;
+    private Long deputy;
     private Date deputyTime;
     private String groupName;
     private int groupLevel;
@@ -31,11 +31,11 @@ public class Group {
     private String head;
     private Date createTime;
     private int canJoin;
-    private int teacher;
-    private int enterprise;
+    private Long teacher;
+    private Long enterprise;
 
     /// 创建小组专用
-    public Group(int leader, String groupName,String slogan, String rule,Date createTime, int canJoin) {
+    public Group(Long leader, String groupName,String slogan, String rule,Date createTime, int canJoin) {
         this.leader = leader;
         this.deputy = leader;
         this.deputyTime = Date.valueOf(LocalDate.now());

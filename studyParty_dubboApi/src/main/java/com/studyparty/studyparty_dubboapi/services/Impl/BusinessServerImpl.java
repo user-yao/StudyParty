@@ -15,12 +15,12 @@ public class BusinessServerImpl implements BusinessServer {
     private UserMapper userMapper;
     @Override
     @DubboService
-    public List<User> selectUser(int groupId, String userId) {
+    public List<User> selectUser(Long groupId, Long userId) {
         return userMapper.selectGroupUser(groupId, userId);
     }
     @DubboService
     @Override
-    public User selectUserById(int userId) {
+    public User selectUserById(Long userId) {
         return userMapper.selectById(userId);
     }
 }

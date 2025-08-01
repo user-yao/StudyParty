@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.List;
 
 public interface BusinessServer {
-    List<User> selectUser(int groupId, String userId);
+    List<User> selectUser(Long groupId, Long userId);
 
-    User selectUserById(int userId);
+    User selectUserById(Long userId);
 }

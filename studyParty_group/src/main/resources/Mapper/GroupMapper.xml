@@ -5,7 +5,7 @@
 
 <mapper namespace="com.studyparty.group.mapper.GroupMapper">
 
-    <select id="findMyGroups" resultType="com.studyparty.group.domian.Group">
+    <select id="findMyGroups" resultType="com.studyParty.entity.group.Group">
         SELECT group_user.group_user,`group`.*
         FROM `group` join group_user on `group`.id = group_user.group_id
         where group_user.group_user = #{id}

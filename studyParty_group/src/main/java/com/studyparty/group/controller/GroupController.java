@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupUser;
+import com.studyParty.entity.group.Level;
 import com.studyParty.entity.user.User;
 import com.studyparty.group.common.Result;
 import com.studyparty.group.mapper.GroupMapper;
@@ -14,10 +15,9 @@ import com.studyparty.group.mapper.GroupUserMapper;
 import com.studyparty.group.services.GroupServer;
 import com.studyparty.group.services.GroupUserServer;
 import com.studyparty.studyparty_dubboapi.services.BusinessServer;
+import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,20 +28,32 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/***
+ * url:功能说明
+ *  /searchGroup：搜索群组
+ *  /getMyGroup：获取用户创建的群组和加入的群组
+ *  /createGroup：创建群组
+ *  /updateHead：更新群组头像
+ *  /updateGroup：更新群组信息
+ *  /deleteGroup：删除群组
+ *  /transferGroup：群组转让
+ *  /changeDeputy：更改群组当周负责人
+ *  /changeCanJoin：更改群组可加入状态
+ *  /contributionGroup：贡献群组 --- 完成任务加20积分
+ *  /invitePredecessor：邀请群组前辈（老师，企业）
+ *  /clearPredecessor：删除群组前辈
+ */
 @RestController("/group")
+@RequiredArgsConstructor
 public class GroupController {
-    @Autowired
-    private GroupMapper groupMapper;
-    @Autowired
-    private GroupServer groupServer;
     @Value("${head}")
     private String head;
     @Value("${saveHead}")
     private String saveHead;
-    @Autowired
-    private GroupUserMapper groupUserMapper;
-    @Autowired
-    private GroupUserServer groupUserServer;
+    private final GroupMapper groupMapper;
+    private final GroupServer groupServer;
+    private final GroupUserMapper groupUserMapper;
+    private final GroupUserServer groupUserServer;
     @DubboReference
     private BusinessServer businessServer;
 
@@ -63,7 +75,7 @@ public class GroupController {
         return Result.success(groupMapper.selectPage(page, queryWrapper));
     }
     @GetMapping("/getMyGroup")
-    public Result<?> getMyGroup(int userId) {
+    public Result<?> getMyGroup(Long userId) {
         QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("leader", userId);
         List<List<Group>> list = new ArrayList<>();
@@ -87,7 +99,7 @@ public class GroupController {
         }
         group.setHead(head + "group.png");
         groupServer.save(group);
-        groupUserServer.save(new GroupUser(Integer.parseInt(userId), group.getId()));
+        groupUserServer.save(new GroupUser(Long.getLong(userId), group.getId()));
         return Result.success();
     }
     @PostMapping("/updateHead")
@@ -124,7 +136,7 @@ public class GroupController {
         return Result.success(groupMapper.update(null, updateWrapper));
     }
     @PostMapping("/deleteGroup")
-    public Result<?> deleteGroup(int groupId, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> deleteGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
         LambdaQueryWrapper<Group> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Group::getId, groupId);
         queryWrapper.eq(Group::getLeader, Integer.parseInt(userId));
@@ -135,7 +147,7 @@ public class GroupController {
         return Result.success();
     }
     @PostMapping("/transferGroup")
-    public Result<?> transferGroup(int groupId, int newLeader, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> transferGroup(Long groupId, Long newLeader, @RequestHeader("X-User-Id") String userId) {
         if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
             return Result.error("权限错误");
         }
@@ -148,7 +160,7 @@ public class GroupController {
         return Result.success();
     }
     @PostMapping("/changeDeputy")
-    public Result<?> changeDeputy(int groupId, int deputy, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> changeDeputy(Long groupId, int deputy, @RequestHeader("X-User-Id") String userId) {
         if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
             return Result.error("权限错误");
         }
@@ -167,7 +179,7 @@ public class GroupController {
         return Result.success();
     }
     @PostMapping("/changeCanJoin")
-    public Result<?> changeCanJoin(int groupId, int canJoin, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> changeCanJoin(Long groupId, int canJoin, @RequestHeader("X-User-Id") String userId) {
         if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
             return Result.error("权限错误");
         }
@@ -180,27 +192,43 @@ public class GroupController {
         return Result.success();
     }
     @PostMapping("/contributionGroup")
-    public Result<?> contributionGroup(int groupId, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> contributionGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
         QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("groupId", groupId);
         queryWrapper.eq("userId", userId);
-        if (groupUserMapper.selectOne(queryWrapper) == null){
+        GroupUser groupUser = groupUserMapper.selectOne(queryWrapper);
+        if (groupUser == null){
             return Result.error("未找到对应的群组成员");
         }
+        groupUser.setContribution(groupUser.getContribution() + 20);
         UpdateWrapper<GroupUser> queryWrapper1 = new UpdateWrapper<>();
-        queryWrapper1.eq("groupId", groupId);
-        queryWrapper1.eq("userId", userId);
+        queryWrapper1.eq("id", groupUser.getId());
         queryWrapper1.set("contribution", groupUserMapper.selectById(userId).getContribution() + 20);
         if (groupUserMapper.update(null, queryWrapper1) == 0) {
             return Result.error("未找到对应的群组，可能已被删除");
         }
         UpdateWrapper<Group> queryWrapper2 = new UpdateWrapper<>();
         queryWrapper2.eq("id", groupId);
-        queryWrapper2.set("experience", groupMapper.selectById(groupId).getExperience() + 20);
+        Group group = groupMapper.selectById(groupId);
+        int experience = group.getExperience() + 20;
+        if (experience+20 >= group.getNeedExperience()){
+            if(group.getGroupLevel() < 10){
+                Level level = Level.getLevel(group.getGroupLevel()+1);
+                group.setGroupLevel(level.getLevel());
+                queryWrapper2.set("need_experience", level.getNeedExperience());
+                queryWrapper2.set("max_people_num", level.getMaxPeopleNum());
+                queryWrapper2.set("experience",experience + 20 - group.getNeedExperience());
+            }else {
+                queryWrapper2.set("experience", group.getNeedExperience());
+            }
+        }else{
+            queryWrapper2.set("experience", experience + 20);
+        }
+        groupMapper.update(null, queryWrapper2);
         return Result.success();
     }
     @PostMapping("/invitePredecessor")
-    public Result<?> inviteTeacher(int groupId, int predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> inviteTeacher(Long groupId, Long predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
         Group group = groupMapper.selectById(groupId);
         if (group.getLeader()!= Integer.parseInt(userId)){
             return Result.error("权限错误");
@@ -225,7 +253,7 @@ public class GroupController {
         return Result.success();
     }
     @PostMapping("/clearPredecessor")
-    public Result<?> clearPredecessor(int groupId, int predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> clearPredecessor(Long groupId, Long predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
         Group group = groupMapper.selectById(groupId);
         if (group.getLeader()!= Integer.parseInt(userId)){
             return Result.error("权限错误");
@@ -234,10 +262,10 @@ public class GroupController {
             return Result.error("只能选择老师与企业");
         }
         if (status == 2){
-            group.setTeacher(0);
+            group.setTeacher(0L);
         }
         if (status == 3){
-            group.setEnterprise(0);
+            group.setEnterprise(0L);
         }
         groupMapper.updateById(group);
         groupUserMapper.delete(new QueryWrapper<GroupUser>().eq("groupId", groupId).eq("userId", predecessorId));

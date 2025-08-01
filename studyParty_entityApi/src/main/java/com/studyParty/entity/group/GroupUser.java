@@ -16,13 +16,13 @@ import java.time.LocalDate;
 @TableName("group_user")
 public class GroupUser {
     @TableId(type = IdType.AUTO)
-    private int id;
-    private int groupId;
-    private int userId;
+    private Long id;
+    private Long groupId;
+    private Long userId;
     private int contribution;
     private Date addTime;
     /// 新加群员专用
-    public GroupUser(int groupId, int userId) {
+    public GroupUser(Long groupId, Long userId) {
         this.groupId = groupId;
         this.userId = userId;
         this.contribution = 0;

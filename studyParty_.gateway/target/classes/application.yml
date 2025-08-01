@@ -35,18 +35,35 @@ spring:
           uri: no://op
           predicates:
            - Path=/v3/api-docs/**  # 关键路径匹配
+
         - id: userServiceRoute
           uri: lb://studyParty-user
           predicates:
             - Path=/user/**, /studyParty-user/**
           filters:
             - StripPrefix=1
+        - id: websocket
+          uri: lb://studyParty-websocket
+          predicates:
+            - Path=/websocket/**, /studyParty-websocket/**
+          filters:
+            - StripPrefix=1
+
         -  id: groupServiceRoute
            uri: lb://studyParty-group
            predicates:
             - Path=/group/**, /studyParty-group/**
            filters:
             -  StripPrefix=1
+
+        - id: dubboApiRoute
+          uri: lb://studyParty-dubboApi
+          predicates:
+            - Path=/dubboApi/**, /studyParty-dubboApi/**
+          filters:
+            - StripPrefix=1
+
+
 
         - id: resources
           uri: lb://studyParty-resources

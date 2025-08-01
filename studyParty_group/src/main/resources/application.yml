@@ -33,7 +33,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 mybatis-plus:
-  type-aliases-package: com.studyParty.group.domain
+  type-aliases-package: com.studyParty.entity.group;
   mapper-locations: classpath:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true

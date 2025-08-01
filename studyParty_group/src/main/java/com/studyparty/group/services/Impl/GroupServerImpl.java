@@ -15,7 +15,7 @@ public class GroupServerImpl extends ServiceImpl<GroupMapper, Group> implements 
     @Autowired
     private GroupMapper groupMapper;
     @Override
-    public List<Group> findMyGroups(int id) {
+    public List<Group> findMyGroups(Long id) {
         return groupMapper.findMyGroups(id);
     }
 }

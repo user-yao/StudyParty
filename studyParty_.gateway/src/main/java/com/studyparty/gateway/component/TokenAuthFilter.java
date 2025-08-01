@@ -34,6 +34,7 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
             "/doc.html",
             "/studyParty-user/v3/api-docs",
             "/studyParty-group/v3/api-docs",
+            "/studyParty-websocket/v3/api-docs",
             "/static/**"
     );
 
@@ -54,7 +55,6 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
         if (StringUtils.isEmpty(token)) {
             return unauthorized(exchange.getResponse(), "无权限");
         }
-
         // 3. 异步校验 Token（非阻塞）
         return validateTokenAsync(token)
                 .flatMap(userId -> {

@@ -21,4 +21,6 @@ public class GroupTaskAnswer {
     private String context;
     private Timestamp time;
     private int haveSource;
+    private int score;
+
 }

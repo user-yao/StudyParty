@@ -26,7 +26,7 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
     private GroupUserMapper groupUserMapper;
 
     @Override
-    public List<List<GroupJoin>> findMyGroups(int userId) {
+    public List<List<GroupJoin>> findMyGroups(Long userId) {
         List<List<GroupJoin>> list = new ArrayList<>();
         QueryWrapper<GroupJoin> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_leader", userId);
@@ -38,7 +38,7 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
     }
 
     @Override
-    public boolean agreeJoin(int groupId, int userId, GroupJoin groupJoin) {
+    public boolean agreeJoin(Long groupId, Long userId, GroupJoin groupJoin) {
         Group group = groupMapper.selectById(groupId);
         if (group.getPeopleNum() < group.getMaxPeopleNum()) {
             group.setPeopleNum(group.getPeopleNum() + 1);
@@ -51,13 +51,13 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
     }
 
     @Override
-    public boolean disagreeJoin(int groupJoinId, int userId, GroupJoin groupJoin) {
+    public boolean disagreeJoin(Long groupJoinId, Long userId, GroupJoin groupJoin) {
         groupJoin.setIsPass(2);
         return groupJoinMapper.update(groupJoin, new QueryWrapper<GroupJoin>().eq("id", groupJoinId)) == 1;
     }
 
     @Override
-    public boolean isJoined(int groupId, int userId) {
+    public boolean isJoined(Long groupId, Long userId) {
         QueryWrapper<GroupJoin> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_id", groupId).eq("user_id", userId);
         if (groupJoinMapper.selectOne(queryWrapper) != null) {
