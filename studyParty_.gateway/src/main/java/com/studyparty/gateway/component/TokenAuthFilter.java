@@ -31,6 +31,8 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
     private static final List<String> ALLOWED_PATHS = Arrays.asList(
             "/user/login",
             "/user/register",
+            "/studyParty-user/login",
+            "/studyParty-user/register",
             "/doc.html",
             "/studyParty-user/v3/api-docs",
             "/studyParty-group/v3/api-docs",

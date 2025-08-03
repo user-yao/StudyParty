@@ -28,11 +28,15 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   webflux:
     static-path-pattern: /** # 静态资源路径模式
   web:
     resources:
-      static-locations: classpath:/static/
+      static-locations: classpath:/static/,file:./uploads/
 
 springdoc:
   api-docs:
@@ -78,3 +82,6 @@ logging:
 websocket:
   endpoint: /ws # WebSocket端点路径
   allowed-origins: "*" # 允许的跨域来源
+# 文件上传配置
+file:
+  upload-dir: ./uploads

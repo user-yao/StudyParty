@@ -51,11 +51,16 @@ public class UserController {
         try {
             UserToken userToken = userServer.login(phone, password);
             if (StringUtils.hasLength(userToken.getToken())){
-                LocalDate lastLoginDate = userToken.getUser().getLastLogin().toLocalDate();
-                if (ChronoUnit.DAYS.between(LocalDate.now(), lastLoginDate) == 1){
-                    userToken.getUser().setClockIn(userToken.getUser().getClockIn()+1);
-                }else {
+                Date lastLogin = userToken.getUser().getLastLogin();
+                if (lastLogin == null){
                     userToken.getUser().setClockIn(1);
+                }else{
+                    LocalDate lastLoginDate = lastLogin.toLocalDate();
+                    if (ChronoUnit.DAYS.between(LocalDate.now(), lastLoginDate) == 1 || lastLoginDate == null){
+                        userToken.getUser().setClockIn(userToken.getUser().getClockIn()+1);
+                    }else {
+                        userToken.getUser().setClockIn(1);
+                    }
                 }
                 redisUtil.saveToRedis(userToken.getToken(),userToken.getUser().getPassword());
                 userMapper.update(null,new LambdaUpdateWrapper<User>()
