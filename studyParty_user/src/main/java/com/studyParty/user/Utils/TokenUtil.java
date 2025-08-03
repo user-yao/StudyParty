@@ -32,7 +32,7 @@ public class TokenUtil {
                 .withClaim("id",user.getId())
                 .withClaim("phone",user.getPhone())
                 .withClaim("passwordHash", passwordHash)
-                .withExpiresAt(new Date(System.currentTimeMillis()+60*60*1000))//1h
+                .withExpiresAt(new Date(System.currentTimeMillis()+60*60*1000*24))//1h
                 .sign(algorithm);
     }
 

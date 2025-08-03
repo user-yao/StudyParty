@@ -84,4 +84,4 @@ websocket:
   allowed-origins: "*" # 允许的跨域来源
 # 文件上传配置
 file:
-  upload-dir: ./uploads
+  upload-dir: D:/studyParty/websocket/

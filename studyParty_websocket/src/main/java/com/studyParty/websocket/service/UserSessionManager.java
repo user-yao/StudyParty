@@ -210,6 +210,8 @@ public class UserSessionManager {
     private void sendOfflineMessages(String userId, WebSocketSession session) {
         redisUtil.getOfflineMessages(userId)
             .flatMap(messages -> {
+                // 反转消息列表以确保按正确的时间顺序发送
+                java.util.Collections.reverse(messages);
                 for (String message : messages) {
                     if (!message.isEmpty()) {
                         try {

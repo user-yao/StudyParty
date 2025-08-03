@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/file")
+@RequestMapping("/websocket")
 public class FileUploadController {
 
-    @Value("${file.upload-dir:./uploads}")
+    @Value("${file.upload-dir}")
     private String uploadDir;
     
     @Autowired
@@ -37,13 +37,14 @@ public class FileUploadController {
             @RequestParam(required = false) String groupId,
             @RequestParam(required = false) String fileType,
             @RequestParam(required = false) String content,
+            @RequestHeader("X-User-Id") String userId,
             @RequestParam(required = false) String senderId) {
         
         Map<String, Object> response = new HashMap<>();
         
         try {
             // 确保上传目录存在
-            Path uploadPath = Paths.get(uploadDir);
+            Path uploadPath = Paths.get(uploadDir + "/" + userId);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -61,7 +62,7 @@ public class FileUploadController {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // 构建文件访问URL
-            String fileUrl = "/file/download/" + uniqueFilename;
+            String fileUrl = "/static/websocket/" + userId +"/"+ uniqueFilename;
             
             // 如果提供了发送者ID，则自动发送文件消息
             if (senderId != null && !senderId.isEmpty()) {
@@ -96,12 +97,13 @@ public class FileUploadController {
         }
     }
 
-    @GetMapping("/download/{filename}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
+    @GetMapping("/download")
+    public ResponseEntity<Resource> downloadFile(String userId,String filename) {
         try {
+            filename = userId +"/"+ filename;
             Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
             Resource resource = new UrlResource(filePath.toUri());
-            
+
             if (resource.exists()) {
                 return ResponseEntity.ok()
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
