@@ -21,7 +21,7 @@
     <modules>
         <module>studyParty_user</module>
         <module>studyParty_group</module>
-        <module>studyParty_community</module>
+        <module>studyParty_article</module>
         <module>studyParty_enterprise</module>
         <module>studyParty_websocket</module>
         <module>studyParty_AI</module>

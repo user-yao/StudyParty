@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.studyparty.group.mapper.GroupMapper">
+<mapper namespace="com.studyParty.group.mapper.GroupMapper">
 
     <select id="findMyGroups" resultType="com.studyParty.entity.group.Group">
         SELECT group_user.group_user,`group`.*

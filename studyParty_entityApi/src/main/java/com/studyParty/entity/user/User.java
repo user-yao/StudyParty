@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Data
 @Getter
 @Setter
-@TableName("users")
+@TableName("`users`")
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.sql.Date;
 import java.time.LocalDate;
 
@@ -14,7 +16,9 @@ import java.time.LocalDate;
 @Setter
 @Data
 @TableName("`group`")
-public class Group {
+public class Group implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long leader;

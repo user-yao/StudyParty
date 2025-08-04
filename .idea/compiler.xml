@@ -8,7 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="studyParty_entityApi" />
-        <module name="studyParty_community" />
+        <module name="studyParty_article" />
         <module name="studyParty_user" />
         <module name="studyParty_websocket" />
         <module name="studyParty_gateway" />
@@ -27,7 +27,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="studyParty_AI" options="-parameters" />
       <module name="studyParty_admin" options="-parameters" />
-      <module name="studyParty_community" options="-parameters" />
+      <module name="studyParty_article" options="-parameters" />
       <module name="studyParty_dubboApi" options="-parameters" />
       <module name="studyParty_enterprise" options="-parameters" />
       <module name="studyParty_entity" options="-parameters" />

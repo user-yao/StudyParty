@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Data
@@ -12,8 +14,10 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("group_task_answer")
-public class GroupTaskAnswer {
+@TableName("`group_task_answer`")
+public class GroupTaskAnswer implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long groupTaskId;

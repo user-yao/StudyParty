@@ -4,6 +4,8 @@ import com.studyParty.entity.Source;
 import com.studyParty.entity.group.GroupTask;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 @AllArgsConstructor
@@ -11,7 +13,9 @@ import java.util.List;
 @Getter
 @Setter
 @Data
-public class GroupTaskDTO {
+public class GroupTaskDTO implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private GroupTask groupTask;
     private List<Source> sources;
 }

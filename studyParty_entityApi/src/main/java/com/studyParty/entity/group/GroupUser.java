@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.sql.Date;
 import java.time.LocalDate;
 
@@ -13,8 +15,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("group_user")
-public class GroupUser {
+@TableName("`group_user`")
+public class GroupUser implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long groupId;
