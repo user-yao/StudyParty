@@ -1,5 +1,6 @@
 package com.studyParty.dubboApi.services.Impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.studyParty.entity.user.User;
 import com.studyParty.dubboApi.Mapper.UserMapper;
 import com.studyParty.dubboApi.services.BusinessServer;
@@ -22,6 +23,16 @@ public class BusinessServerImpl implements BusinessServer {
     @Override
     public User selectUserById(Long userId) {
         return userMapper.selectById(userId);
+    }
+
+    @Override
+    @DubboService
+    public void addStarPrestige(Long userId, Long starPrestige) {
+        User user = userMapper.selectById(userId);
+        UpdateWrapper<User> queryWrapper = new UpdateWrapper<>();
+        queryWrapper.eq("id", userId);
+        queryWrapper.set("star_prestige", user.getStarPrestige()+starPrestige);
+        userMapper.update(queryWrapper);
     }
 
 }

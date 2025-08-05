@@ -10,4 +10,5 @@ public interface BusinessServer {
     List<User> selectUser(Long groupId, Long userId);
 
     User selectUserById(Long userId);
+    void addStarPrestige(Long userId, Long starPrestige);
 }

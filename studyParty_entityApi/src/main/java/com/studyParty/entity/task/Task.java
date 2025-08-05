@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +24,9 @@ public class Task implements Serializable {
     private String title;
     private String context;
     private Integer isOver;
-    private String starCoin;
-    private String starPrestige;
-    private String createTime;
+    private Long isTrueId;
+    private Long starCoin;
+    private Long starPrestige;
+    private Timestamp createTime;
+    private Integer status;
 }

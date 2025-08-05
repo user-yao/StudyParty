@@ -16,6 +16,7 @@
         <option value="$PROJECT_DIR$/studyParty_entity/pom.xml" />
         <option value="$PROJECT_DIR$/studyParty_dubboApi/pom.xml" />
         <option value="$PROJECT_DIR$/studyparty_entityApi/pom.xml" />
+        <option value="$PROJECT_DIR$/studyParty_article/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

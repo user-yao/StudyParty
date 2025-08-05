@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,4 +25,7 @@ public class TaskAnswer implements Serializable {
     private String context;
     private Long nice;
     private Integer isTrue;
+    private Timestamp createTime;
+    private Integer status;
+
 }

@@ -55,4 +55,31 @@ public class SourceServer {
         }
         return false;
     }
+    @Transactional
+    public boolean deleteTaskSource(Long Id,boolean isAnswer) {
+        // 从数据库查询图片
+        QueryWrapper<Source> queryWrapper = new QueryWrapper<>();
+        if(isAnswer){
+            queryWrapper.eq("task_answer_id", Id);
+        }else{
+            queryWrapper.eq("task_id", Id);
+        }
+        List<Source> sources = sourceMapper.selectList(queryWrapper);
+        if (sources.isEmpty()) {
+            return false;
+        }
+        boolean deleted = true;
+        // 删除文件
+        for (Source source : sources){
+            if (!FileUploadUtil.deleteFile(source.getFilePath())){
+                deleted = false;
+            }
+        }
+        if (deleted) {
+            // 删除数据库记录
+            sourceMapper.delete(queryWrapper);
+            return true;
+        }
+        return false;
+    }
 }

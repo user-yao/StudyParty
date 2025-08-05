@@ -27,6 +27,8 @@ public class Source implements Serializable {
     private Long groupTaskId;
     private Long achievementId;
     private Long groupTaskAnswerId;
+    private Long taskId;
+    private Long taskAnswerId;
 
     public Source(String name, String url, String filePath) {
         this.name = name;
