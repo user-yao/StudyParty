@@ -50,22 +50,22 @@ public class GroupTaskController {
         return Result.success(groupTaskMapper.selectPage(page, queryWrapper));
     }
     @PostMapping("/deleteGroupTask")
-    public Result<?> deleteGroupTask(Long id,@RequestHeader("X-User-Id") String userId) {
+    public Result<?> deleteGroupTask(Long groupTaskId,@RequestHeader("X-User-Id") String userId) {
         if(groupMapper.selectById(userId).getLeader() != Integer.parseInt(userId) ||
                 groupMapper.selectById(userId).getDeputy() != Integer.parseInt(userId)){
             return Result.error("权限错误");
         }
         QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("group_task_id", id);
+        queryWrapper.eq("group_task_id", groupTaskId);
         groupTaskAnswerMapper.delete(queryWrapper);
-        if(groupTaskMapper.deleteById(id) == 0){
+        if(groupTaskMapper.deleteById(groupTaskId) == 0){
             return Result.error("任务不存在");
         }
-        sourceServer.deleteSource(id,false);
+        sourceServer.deleteSource(groupTaskId,false);
         return Result.success();
     }
 
-    @PostMapping("/upload-markdown")
+    @PostMapping("/uploadMarkdown")
     public Result<?> uploadMarkdownFile(@RequestParam("file") MultipartFile markdown,
                                         @RequestParam("file") MultipartFile[] sources,
                                         Long groupId,

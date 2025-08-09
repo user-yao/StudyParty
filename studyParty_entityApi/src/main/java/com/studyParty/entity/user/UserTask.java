@@ -1,0 +1,25 @@
+package com.studyParty.entity.user;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Getter
+@Setter
+@TableName("`user_task`")
+public class UserTask implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    private Long userId;
+    private Long taskId;
+    private int taskType;
+}

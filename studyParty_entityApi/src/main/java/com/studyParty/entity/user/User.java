@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -17,12 +18,13 @@ import java.time.LocalDate;
 @Setter
 @TableName("`users`")
 public class User implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
     private int id;
     private String name;
     private String password;
-    private  String head;
+    private String head;
     private String sex;
     private String major;
     private String grade;
@@ -36,6 +38,7 @@ public class User implements Serializable {
     private String email;
     private Date lastLogin;
     private Date createDate;
+    private Integer finishTask;
 
     public User(String name, String password) {
         this.name = name;
@@ -57,6 +60,7 @@ public class User implements Serializable {
         this.starPrestige = 0;
         this.clockIn = 1;
         this.lastLogin = Date.valueOf(LocalDate.now());
+        this.finishTask = 0;
     }
     /// 修改个人信息专用
     public User(int id, String name, String sex, String major, String grade, String phone, String school, String email) {

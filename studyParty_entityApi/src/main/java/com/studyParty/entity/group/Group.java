@@ -39,7 +39,7 @@ public class Group implements Serializable {
     private Long enterprise;
 
     /// 创建小组专用
-    public Group(Long leader, String groupName,String slogan, String rule,Date createTime, int canJoin) {
+    public Group(Long leader, String groupName,String slogan, String rule,int canJoin) {
         this.leader = leader;
         this.deputy = leader;
         this.deputyTime = Date.valueOf(LocalDate.now());

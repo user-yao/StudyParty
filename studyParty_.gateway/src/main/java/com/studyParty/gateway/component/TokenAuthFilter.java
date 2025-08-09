@@ -52,8 +52,14 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange); // 直接放行
         }
 
-        // 2. 从请求头获取 Token
+        // 2. 从请求头和路径参数获取 Token
         String token = request.getHeaders().getFirst("Authorization");
+
+        // 如果请求头中没有token，则尝试从路径参数获取
+        if (StringUtils.isEmpty(token)) {
+            token = request.getQueryParams().getFirst("Authorization");
+        }
+
         if (StringUtils.isEmpty(token)) {
             return unauthorized(exchange.getResponse(), "无权限");
         }

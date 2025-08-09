@@ -75,11 +75,11 @@ public class GroupController {
         return Result.success(groupMapper.selectPage(page, queryWrapper));
     }
     @GetMapping("/getMyGroup")
-    public Result<?> getMyGroup(Long userId) {
+    public Result<?> getMyGroup(@RequestHeader("X-User-Id") String userId) {
         QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("leader", userId);
         List<List<Group>> list = new ArrayList<>();
-        list.add(groupMapper.findMyGroups(userId));
+        list.add(groupMapper.findMyGroups(Long.valueOf(userId)));
         list.add(groupMapper.selectList(queryWrapper));
         return Result.success(list);
     }

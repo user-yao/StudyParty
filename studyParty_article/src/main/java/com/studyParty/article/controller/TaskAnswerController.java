@@ -76,18 +76,18 @@ public class TaskAnswerController {
         return Result.success();
     }
     @PostMapping("/deleteTaskAnswer")
-    public Result<?> deleteTask(Long taskId, @RequestHeader("X-User-Id") String userId){
-        Task task = taskMapper.selectById(taskId);
-        if(task == null){
+    public Result<?> deleteTaskAnswer(Long taskAnswerId, @RequestHeader("X-User-Id") String userId){
+        TaskAnswer taskAnswer = taskAnswerMapper.selectById(taskAnswerId);
+        if(taskAnswer == null){
             return Result.error("任务不存在");
         }
-        if(!task.getUploader().equals(Long.parseLong(userId))){
+        if(!taskAnswer.getAnswerer().equals(Long.parseLong(userId))){
             return Result.error("没有权限");
         }
-        if(!sourceServer.deleteTaskSource(taskId,true)){
+        if(!sourceServer.deleteTaskSource(taskAnswerId,true)){
             return Result.error("删除文件失败");
         }
-        taskMapper.deleteById(taskId);
+        taskAnswerMapper.deleteById(taskAnswerId);
         return Result.success();
     }
     @PostMapping("trueTaskAnswer")

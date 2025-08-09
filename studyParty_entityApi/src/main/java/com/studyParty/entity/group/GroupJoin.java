@@ -28,9 +28,8 @@ public class GroupJoin implements Serializable {
     private int isPass;//1:待审核 2:通过 3:未通过
     private Timestamp joinTime;
 
-    public GroupJoin(Long groupId, Long groupLeader, Long userId, String context, int isPass) {
+    public GroupJoin(Long groupId, Long userId, String context) {
         this.groupId = groupId;
-        this.groupLeader = groupLeader;
         this.userId = userId;
         this.context = context;
         this.isPass = 0;

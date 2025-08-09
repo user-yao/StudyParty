@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@RestController("Article")
+@RestController("article")
 public class ArticleController {
     private final ArticleMapper articleMapper;
     private final SourceMapper sourceMapper;
