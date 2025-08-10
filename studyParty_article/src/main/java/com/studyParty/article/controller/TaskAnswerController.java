@@ -13,6 +13,7 @@ import com.studyParty.article.services.TaskAnswerServer;
 import com.studyParty.article.services.TaskServer;
 import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.entity.Source;
+import com.studyParty.entity.task.DTO.TaskAnswerDTO;
 import com.studyParty.entity.task.Task;
 import com.studyParty.entity.task.TaskAnswer;
 import com.studyParty.entity.user.User;
@@ -104,15 +105,15 @@ public class TaskAnswerController {
             return Result.error("任务不存在");
         }
         businessServer.addStarPrestige(task.getUploader(),task.getStarPrestige());
+        businessServer.addUserTask(task.getUploader(),1,taskAnswerId);
         return Result.success();
     }
     @PostMapping("/TaskAnswerList")
     public Result<?> TaskAnswerList(Long taskId,
                                     @RequestParam(defaultValue = "1") int currentPage){
-        Page<TaskAnswer> page = new Page<>(currentPage,10);
-        QueryWrapper<TaskAnswer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("task_id", taskId);
-        return Result.success(taskAnswerMapper.selectPage(page, queryWrapper));
+        Page<TaskAnswerDTO> page = new Page<>(currentPage,10);
+
+        return Result.success(taskAnswerMapper.selectTaskAnswerWithUser(page, taskId));
     }
     @PostMapping("/selectTaskAnswer")
     public Result<?> selectTaskAnswer(Long taskId){
@@ -123,9 +124,6 @@ public class TaskAnswerController {
         if(task.getIsOver() == 0){
             return Result.error("任务未结束");
         }
-        QueryWrapper<TaskAnswer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("task_id",taskId);
-        queryWrapper.eq("is_true",1);
-        return Result.success(taskAnswerMapper.selectOne(queryWrapper));
+        return Result.success(taskAnswerMapper.selectTaskTrueAnswer(taskId));
     }
 }

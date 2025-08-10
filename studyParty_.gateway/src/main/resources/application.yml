@@ -71,6 +71,12 @@ spring:
             - Path=/group/**, /studyParty-group/**
            filters:
             -  StripPrefix=1
+        - id: articleServiceRoute
+          uri: lb://studyParty-article
+          predicates:
+            - Path=/article/**, /studyParty-article/**
+          filters:
+            - StripPrefix=1
 
         - id: dubboApiRoute
           uri: lb://studyParty-dubboApi

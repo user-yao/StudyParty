@@ -24,4 +24,14 @@ public class UserPlan implements Serializable {
     private Timestamp startTime;
     private Timestamp endTime;
     private int isStart;
+    private int isEnd;
+
+    public UserPlan(String planContext, Timestamp startTime, Long userId) {
+        this.planContext = planContext;
+        this.startTime = startTime;
+        this.endTime = null;
+        this.userId = userId;
+        this.isStart = 0;
+        this.isEnd = 0;
+    }
 }

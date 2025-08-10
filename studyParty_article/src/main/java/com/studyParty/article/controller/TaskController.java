@@ -9,6 +9,7 @@ import com.studyParty.article.services.MarkdownService;
 import com.studyParty.article.services.SourceServer;
 import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.entity.Source;
+import com.studyParty.entity.task.DTO.TaskDTO;
 import com.studyParty.entity.task.Task;
 import com.studyParty.entity.user.User;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController("/task")
@@ -81,25 +83,10 @@ public class TaskController {
     }
 
     @PostMapping("/searchTask")
-    public Result<?> searchTask(String searchContent, boolean isOver,
+    public Result<?> searchTask(String searchContent,
                                       @RequestParam(defaultValue = "1") int currentPage) {
         // 创建分页对象
-        Page<Task> page = new Page<>(currentPage, 10);
-        // 创建查询条件
-        QueryWrapper<Task> queryWrapper = new QueryWrapper<>();
-        // 如果提供了搜索内容，则添加搜索条件
-        if (searchContent != null && !searchContent.trim().isEmpty()) {
-            queryWrapper.like("title", searchContent.trim())
-                      .or()
-                      .like("context", searchContent.trim());
-        }
-        // 根据isOver参数添加任务状态条件
-        queryWrapper.eq("is_over", isOver ? 1 : 0);
-        // 按创建时间倒序排列（最新的在前）
-        queryWrapper.orderByDesc("create_time");
-        // 执行分页查询
-        Page<Task> resultPage = taskMapper.selectPage(page, queryWrapper);
-        return Result.success(resultPage);
+        Page<TaskDTO> page = new Page<>(currentPage, 10);
+        return Result.success(taskMapper.selectTaskWithUser(page, searchContent));
     }
-
 }

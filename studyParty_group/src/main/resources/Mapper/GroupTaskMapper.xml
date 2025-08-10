@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.studyParty.group.mapper.GroupTaskMapper">
+    <select id="selectGroupTaskWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskDTO">
+        SELECT
+            `group_task`.*,
+            users.id as user_id,
+            users.name as user_name,
+            users.head as user_head,
+            users.status as user_status,
+            users.school as user_school
+        FROM group_task
+                 LEFT JOIN users ON group_task.group_task_uploader = users.id
+        WHERE group_task.group_id = #{groupId}
+        ORDER BY group_task.create_time DESC
+    </select>
+</mapper>

@@ -10,6 +10,7 @@ import com.studyParty.article.services.SourceServer;
 import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.entity.Source;
 import com.studyParty.entity.article.Article;
+import com.studyParty.entity.article.DTO.ArticleDTO;
 import com.studyParty.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -50,13 +51,8 @@ public class ArticleController {
         if (currentPage <= 0) {
             currentPage = 1;
         }
-        Page<Article> page = new Page<>(currentPage, 10);
-        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("id", "uploader",  "title", "summary", "nice", "collect", "view_cont", "comment_cont", "create_time", "is_featured", "status");
-        queryWrapper.like("title", searchContext.trim())
-                .or()
-                .like("summary", searchContext.trim());
-        return Result.success(articleMapper.selectPage(page, queryWrapper));
+        Page<ArticleDTO> page = new Page<>(currentPage, 10);
+        return Result.success(articleMapper.selectArticleWithUser(page, searchContext));
     }
     @PostMapping("/createArticle")
     public Result<?> createArticle(String title,

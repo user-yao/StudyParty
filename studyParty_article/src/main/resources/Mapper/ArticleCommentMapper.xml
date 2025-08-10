@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyParty.article.mapper.ArticleCommentMapper">
+    <!-- ArticleCommentMapper.xml -->
+    <select id="selectArticleCommentWithUser" resultType="com.studyParty.entity.article.DTO.ArticleCommentDTO">
+        SELECT
+            `article_comment`.*,
+            `users`.id as user_id,
+            `users`.name as user_name,
+            `users`.head as user_head,
+            `users`.status as user_status,
+            `users`.school as user_school
+        FROM `article_comment`
+                 LEFT JOIN `users` ON `article_comment`.user_id = `users`.id
+        WHERE `article_comment`.article_id = #{articleId}
+        ORDER BY `article_comment`.create_time DESC
+    </select>
+</mapper>

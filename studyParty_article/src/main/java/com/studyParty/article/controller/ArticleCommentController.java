@@ -11,6 +11,7 @@ import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.entity.Source;
 import com.studyParty.entity.article.Article;
 import com.studyParty.entity.article.ArticleComment;
+import com.studyParty.entity.article.DTO.ArticleCommentDTO;
 import com.studyParty.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController("articleComment")
+@RestController("/articleComment")
 @RequiredArgsConstructor
 public class ArticleCommentController {
     private final ArticleMapper articleMapper;
@@ -72,9 +73,9 @@ public class ArticleCommentController {
     }
     @PostMapping("/getArticleComment")
     public Result<?> getArticleComment(Long articleId, int currentPage){
-        Page<ArticleComment> page = new Page<>(currentPage, 10);
-        QueryWrapper<ArticleComment> queryWrapper = new QueryWrapper<>();
+        Page<ArticleCommentDTO> page = new Page<>(currentPage, 10);
+        QueryWrapper<ArticleCommentDTO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("article_id", articleId);
-        return Result.success(articleCommentMapper.selectPage(page, queryWrapper));
+        return Result.success(articleCommentMapper.selectArticleCommentWithUser(page, articleId));
     }
 }

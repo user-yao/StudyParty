@@ -100,12 +100,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.studyParty.user</groupId>
-            <artifactId>studyParty_user</artifactId>
-            <version>V0.0.1</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>

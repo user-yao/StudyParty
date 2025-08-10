@@ -11,6 +11,7 @@ import com.studyParty.user.common.Result;
 
 import com.studyParty.user.mapper.UserMapper;
 import com.studyParty.user.services.UserServer;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -33,15 +34,12 @@ import java.util.logging.Logger;
 /// 修改密码
 /// 更新个人信息
 @RestController
+@RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private MyFileUtil fileUtil;
-    @Autowired
-    private RedisUtil redisUtil;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private UserServer userServer;
+    private final MyFileUtil fileUtil;
+    private final RedisUtil redisUtil;
+    private final UserMapper userMapper;
+    private final UserServer userServer;
     @Value("${head}")
     private String head;
     @Value("${saveHead}")

@@ -3,6 +3,7 @@ package com.studyParty.group.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.studyParty.entity.Source;
+import com.studyParty.entity.group.DTO.GroupTaskDTO;
 import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupTask;
 import com.studyParty.entity.group.GroupTaskAnswer;
@@ -37,17 +38,15 @@ public class GroupTaskController {
     private final GroupTaskAnswerMapper groupTaskAnswerMapper;
 
     @PostMapping("/selectMyGroupTask")
-    public Result<?> selectMyGroupTask( String groupId, Integer currentPage) {
+    public Result<?> selectMyGroupTask(Long groupId, Integer currentPage) {
         if (groupId == null) {
             return Result.error("参数错误");
         }
         if (currentPage == null || currentPage < 1) {
             currentPage = 1;
         }
-        Page<GroupTask> page = new Page<>(currentPage, 10);
-        QueryWrapper<GroupTask> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("group_id", groupId);
-        return Result.success(groupTaskMapper.selectPage(page, queryWrapper));
+        Page<GroupTaskDTO> page = new Page<>(currentPage, 10);
+        return Result.success(groupTaskMapper.selectGroupTaskWithUser(page, groupId));
     }
     @PostMapping("/deleteGroupTask")
     public Result<?> deleteGroupTask(Long groupTaskId,@RequestHeader("X-User-Id") String userId) {
@@ -64,7 +63,6 @@ public class GroupTaskController {
         sourceServer.deleteSource(groupTaskId,false);
         return Result.success();
     }
-
     @PostMapping("/uploadMarkdown")
     public Result<?> uploadMarkdownFile(@RequestParam("file") MultipartFile markdown,
                                         @RequestParam("file") MultipartFile[] sources,
@@ -121,5 +119,4 @@ public class GroupTaskController {
         }
         return Result.success();
     }
-
 }

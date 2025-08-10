@@ -51,7 +51,7 @@ springdoc:
 # application.yml示例
 dubbo:
   application:
-    name: studyParty-dubboApi # 应用名称
+    name: studyParty-websocket # 应用名称
   registry:
     address: nacos://localhost:8848?username=nacos&password=nacos&namespace=086bcf84-a9bb-4265-aa7c-98fcad205276 # 注册中心地址
   protocol:

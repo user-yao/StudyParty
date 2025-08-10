@@ -94,6 +94,7 @@ public class GroupTaskAnswerController {
                 sourceMapper.insert(source);
             }
         }
+        businessServer.addUserTask(Long.valueOf(userId), 2, groupTaskId);
         return Result.success();
     }
     @PostMapping("/score")
@@ -120,15 +121,10 @@ public class GroupTaskAnswerController {
         }
         QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_task_id", groupTaskId);
-        List<GroupTaskAnswer> groupTaskAnswers = groupTaskAnswerMapper.selectList(queryWrapper);
-        return Result.success(businessServer.selectUser(groupTask.getGroupId(),Long.valueOf(userId)));
+        return Result.success(groupTaskAnswerMapper.selectGroupTaskAnswerWithUser(groupTaskId));
     }
     @PostMapping("/getMyGroupTaskAnswers")
     public Result<?> getMyGroupTaskAnswers(Long groupTaskId, @RequestHeader("X-User-Id") String userId){
-        GroupTask groupTask = groupTaskMapper.selectById(groupTaskId);
-        QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("group_task_id", groupTaskId);
-        queryWrapper.eq("user_id", userId);
-        return Result.success(groupTaskAnswerMapper.selectOne(queryWrapper));
+        return Result.success(groupTaskAnswerMapper.selectMyGroupTaskAnswerWithUser(groupTaskId, Long.valueOf(userId)));
     }
 }

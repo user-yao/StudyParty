@@ -28,4 +28,5 @@ public class GroupTask implements Serializable {
     private Long groupTaskFinish;
     private String groupTaskContext;
     private Long groupTaskUnfinished;
+    private Timestamp createTime;
 }

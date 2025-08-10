@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.studyParty.group.mapper.GroupTaskAnswerMapper">
+    <select id="selectGroupTaskAnswerWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskAnswerDTO">
+        SELECT `group_task_answer`.*,
+               users.id     as user_id,
+               users.name   as user_name,
+               users.head   as user_head,
+               users.status as user_status,
+               users.school as user_school
+        FROM group_task_answer
+                 LEFT JOIN users ON group_task_answer.user_id = users.id
+        WHERE group_task_answer.group_task_id = #{groupTaskId}
+        ORDER BY group_task_answer.time
+    </select>
+    <select id="selectMyGroupTaskAnswerWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskAnswerDTO">
+        SELECT
+            `group_task_answer`.*,
+            users.id as user_id,
+            users.name as user_name,
+            users.head as user_head,
+            users.status as user_status,
+            users.school as user_school
+        FROM group_task_answer
+                 LEFT JOIN users ON group_task_answer.user_id = users.id
+        WHERE group_task_answer.group_task_id = #{groupTaskId}
+        and group_task_answer.user_id = #{userId}
+    </select>
+</mapper>

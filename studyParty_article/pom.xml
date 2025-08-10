@@ -11,8 +11,8 @@
 
 	<artifactId>studyParty_article</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>studyParty_community</name>
-	<description>studyParty_community</description>
+	<name>studyParty_article</name>
+	<description>studyParty_article</description>
 	<url/>
 	<packaging>jar</packaging>
 	<licenses>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.studyParty.dubboApi.Mapper.TaskAnswerMapper">
+    <select id="selectTrueTaskAnswer" resultType="com.studyParty.entity.task.TaskAnswer">
+        select task_answer.*
+        from task_answer
+        join task on task_answer.id = task.is_true_id
+        where task_answer.answerer = #{userId}
+    </select>
+</mapper>
