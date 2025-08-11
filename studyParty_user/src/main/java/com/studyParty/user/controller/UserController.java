@@ -54,9 +54,9 @@ public class UserController {
                     userToken.getUser().setClockIn(1);
                 }else{
                     LocalDate lastLoginDate = lastLogin.toLocalDate();
-                    if (ChronoUnit.DAYS.between(LocalDate.now(), lastLoginDate) == 1 || lastLoginDate == null){
-                        userToken.getUser().setClockIn(userToken.getUser().getClockIn()+1);
-                    }else {
+                    if (ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()) == 1 ){
+                        userToken.getUser().setClockIn(userToken.getUser().getClockIn() + 1);
+                    }else if (ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()) > 1){
                         userToken.getUser().setClockIn(1);
                     }
                 }

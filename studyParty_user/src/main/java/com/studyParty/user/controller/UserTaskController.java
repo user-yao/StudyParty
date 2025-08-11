@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController("/UserTask")
+@RestController()
 @RequiredArgsConstructor
 public class UserTaskController {
     private final UserTaskMapper userTaskMapper;
     @DubboReference
     private BusinessServer businessServer;
     @PostMapping("/selectMyUserTasks")
-    public Result<?> selectMyUserTasks(@RequestHeader("H-User-Id") String userId){
+    public Result<?> selectMyUserTasks(@RequestHeader("X-User-Id") String userId){
         List<UserTaskTask> userTaskTasks = businessServer.selectUserTaskTask(Long.parseLong(userId));
         List<UserTaskGroup> userTaskGroups = businessServer.selectUserTaskGroup(Long.parseLong(userId));
         List<List<?>> list = new ArrayList<>();

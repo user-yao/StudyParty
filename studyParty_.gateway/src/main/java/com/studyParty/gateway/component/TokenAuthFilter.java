@@ -9,6 +9,8 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -48,6 +50,19 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
+        
+        // 处理OPTIONS预检请求
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            ServerHttpResponse response = exchange.getResponse();
+            HttpHeaders headers = response.getHeaders();
+            headers.add("Access-Control-Allow-Origin", "*");
+            headers.add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+            headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-User-Id");
+            headers.add("Access-Control-Max-Age", "3600");
+            response.setStatusCode(HttpStatus.OK);
+            return Mono.empty();
+        }
+        
         // 1. 检查是否在白名单中
         if (isAllowedPath(path)) {
             return chain.filter(exchange); // 直接放行
