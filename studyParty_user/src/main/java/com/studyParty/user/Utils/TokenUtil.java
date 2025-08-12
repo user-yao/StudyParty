@@ -25,7 +25,6 @@ public class TokenUtil {
         if (redisUtil.getFromRedis(user.getPhone())==null){
             redisUtil.saveToRedis(user.getPhone(),passwordHash);
         }
-        System.out.println("Id"+user.getId());
         return JWT.create()
                 .withIssuer("yzt")
                 .withSubject(String.valueOf(user.getId()))
