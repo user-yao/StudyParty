@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +16,13 @@ import java.io.Serializable;
 public class FriendRequestDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    private FriendRequest friendRequest;
-    private UserDTO user;
+    private Long id;
+    private Long userId;
+    private Long friendId;
+    private Timestamp createTime;
+    private int isConsent;
+    private String name;
+    private String head;
+    private String status;
+    private String school;
 }

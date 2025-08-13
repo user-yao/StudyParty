@@ -11,6 +11,14 @@ import lombok.*;
 @Setter
 @Data
 public class ArticleCommentDTO {
-    private ArticleComment articleComment;
-    private UserDTO user;
+    private Long id;
+    private Long articleId;
+    private Long userId;
+    private String content;
+    private Long nice;
+    private String createTime;
+    private int status;
+    private String name;
+    private String head;
+    private String school;
 }

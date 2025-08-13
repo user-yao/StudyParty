@@ -16,10 +16,8 @@
             article.create_time as article_create_time,
             article.is_featured as article_is_featured,
             article.stastus as article_status,
-            users.id as user_id,
             users.name as user_name,
             users.head as user_head,
-            users.status as user_status,
             users.school as user_school
         FROM article
                  LEFT JOIN users ON article.uploader = users.id

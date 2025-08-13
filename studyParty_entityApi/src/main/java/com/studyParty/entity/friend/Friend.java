@@ -20,13 +20,14 @@ public class Friend implements Serializable {
     private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
     private Long id;
-    private Long user1Id;
-    private Long user2Id;
+    private Long userId;
+    private Long friendId;
     private Timestamp createTime;
+    private String remark;
 
-    public Friend(Long user1Id, Long user2Id) {
-        this.user1Id = user1Id;
-        this.user2Id = user2Id;
+    public Friend(Long userId, Long friendId) {
+        this.userId = userId;
+        this.friendId = friendId;
         this.createTime = new Timestamp(System.currentTimeMillis());
     }
 }

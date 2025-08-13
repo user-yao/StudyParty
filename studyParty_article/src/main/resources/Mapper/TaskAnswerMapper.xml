@@ -6,10 +6,8 @@
     <select id="selectTaskAnswerWithUser" resultType="com.studyParty.entity.task.DTO.TaskDTO">
         SELECT
             `task_answer`.*,
-            `users`.id as user_id,
             `users`.name as user_name,
             `users`.head as user_head,
-            `users`.status as user_status,
             `users`.school as user_school
         FROM `task_answer`
                  LEFT JOIN `users` ON `task_answer`.answerer = `users`.id

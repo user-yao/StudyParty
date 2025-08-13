@@ -7,10 +7,8 @@
     <select id="selectArticleCommentWithUser" resultType="com.studyParty.entity.article.DTO.ArticleCommentDTO">
         SELECT
             `article_comment`.*,
-            `users`.id as user_id,
             `users`.name as user_name,
             `users`.head as user_head,
-            `users`.status as user_status,
             `users`.school as user_school
         FROM `article_comment`
                  LEFT JOIN `users` ON `article_comment`.user_id = `users`.id
