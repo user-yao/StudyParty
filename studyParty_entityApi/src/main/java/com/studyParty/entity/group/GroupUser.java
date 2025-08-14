@@ -22,13 +22,13 @@ public class GroupUser implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long groupId;
-    private Long userId;
+    private Long groupUser;
     private int contribution;
     private Date addTime;
     /// 新加群员专用
-    public GroupUser(Long groupId, Long userId) {
+    public GroupUser(Long groupId, Long groupUser) {
         this.groupId = groupId;
-        this.userId = userId;
+        this.groupUser = groupUser;
         this.contribution = 0;
         this.addTime = Date.valueOf(LocalDate.now());
     }

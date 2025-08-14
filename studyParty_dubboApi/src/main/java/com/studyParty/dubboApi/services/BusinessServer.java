@@ -14,4 +14,5 @@ public interface BusinessServer {
     void addUserTask(Long userId, int taskType, Long taskId);
     List<UserTaskTask> selectUserTaskTask(Long userId);
     List<UserTaskGroup> selectUserTaskGroup(Long userId);
+    List<Long> selectGroupUser(Long groupId);
 }

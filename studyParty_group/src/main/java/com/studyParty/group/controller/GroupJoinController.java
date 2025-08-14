@@ -25,8 +25,8 @@ public class GroupJoinController {
     private final GroupMapper groupMapper;
 
     @PostMapping("/joinGroup")
-    public Result<?> joinGroup(@RequestBody GroupJoin groupJoin, @RequestHeader("X-User-Id") String userId){
-
+    public Result<?> joinGroup(Long groupId,Long user, String context, @RequestHeader("X-User-Id") String userId){
+        GroupJoin groupJoin = new GroupJoin(groupId,user,context);
         if(groupJoin.getUserId() != Integer.parseInt(userId)){
             return Result.error("用户身份错误");
         }
@@ -58,15 +58,18 @@ public class GroupJoinController {
     @PostMapping("/agreeJoin")
     public Result<?> agreeJoin(Long groupJoinId,boolean agree,@RequestHeader("X-User-Id") String userId){
         GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
+        if (groupJoin.getIsPass() != 0){
+            return Result.error("申请已处理");
+        }
         if (groupJoin.getGroupLeader() != Integer.parseInt(userId)){
             return Result.error("用户权限不足");
         }
         if (agree){
-            if(groupJoinServer.agreeJoin(groupJoinId,Long.valueOf(userId),groupJoin)){
+            if(groupJoinServer.agreeJoin(groupJoinId,groupJoin.getUserId(),groupJoin)){
                 return Result.success();
             }
         }else{
-            if(groupJoinServer.disagreeJoin(groupJoinId,Long.valueOf(userId),groupJoin)){
+            if(groupJoinServer.disagreeJoin(groupJoinId,groupJoin.getUserId(),groupJoin)){
                 return Result.success();
             }
         }

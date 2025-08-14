@@ -2,8 +2,10 @@ package com.studyParty.websocket.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.websocket.model.WebSocketMessage;
 import com.studyParty.websocket.handler.ChatWebSocketHandler;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 public class UserSessionManager {
+    @DubboReference
+    private BusinessServer businessServer;
     
     private static final Logger logger = LoggerFactory.getLogger(UserSessionManager.class);
     
@@ -118,13 +122,7 @@ public class UserSessionManager {
             try {
                 // 检查是否是文件消息
                 WebSocketMessage wsMessage = objectMapper.readValue(message, WebSocketMessage.class);
-                if (wsMessage.getFileUrl() != null && !wsMessage.getFileUrl().isEmpty()) {
-                    // 发送二进制消息
-                    sendBinaryMessage(session, wsMessage);
-                } else {
-                    // 发送文本消息
-                    session.sendMessage(new TextMessage(message));
-                }
+                session.sendMessage(new TextMessage(message));
                 // 更新最后活动时间
                 updateLastActiveTime(userId);
             } catch (Exception e) {
@@ -146,16 +144,11 @@ public class UserSessionManager {
      * @param message 消息内容
      */
     public void sendMessageToGroup(String groupId, String message) {
-        redisUtil.getGroupMembers(groupId)
-            .flatMap(members -> {
-                for (String userId : members) {
-                    sendMessageToUser(userId, message);
-                }
-                return Mono.empty();
-            })
-            .subscribe();
+        for (Long userId : businessServer.selectGroupUser(Long.parseLong(groupId))){
+            sendMessageToUser(userId.toString(), message);
+        }
     }
-    
+
     /**
      * 向所有用户广播消息
      * 
@@ -219,15 +212,8 @@ public class UserSessionManager {
                             WebSocketMessage offlineMsg = objectMapper.readValue(message, WebSocketMessage.class);
                             offlineMsg.setType("offline_" + offlineMsg.getType());
                             offlineMsg.setOfflineMessage(true);
-                            
-                            // 检查是否是文件消息
-                            if (offlineMsg.getFileUrl() != null && !offlineMsg.getFileUrl().isEmpty()) {
-                                // 发送二进制消息
-                                sendBinaryMessage(session, offlineMsg);
-                            } else {
-                                // 发送文本消息
-                                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(offlineMsg)));
-                            }
+                            // 发送文本消息
+                            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(offlineMsg)));
                         } catch (IOException e) {
                             // 如果解析失败，直接发送原始消息
                             try {

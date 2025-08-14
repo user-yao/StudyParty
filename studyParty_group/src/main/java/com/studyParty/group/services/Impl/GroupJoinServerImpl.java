@@ -44,7 +44,7 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
             groupJoin.setIsPass(1);
             return groupJoinMapper.update(groupJoin, new QueryWrapper<GroupJoin>().eq("id", groupJoin.getId())) == 1 &&
                     groupMapper.updateById(group) == 1 &&
-                    groupUserMapper.insert(new GroupUser(groupId, userId)) == 1;
+                    groupUserMapper.insert(new GroupUser(groupId, groupJoin.getUserId())) == 1;
         }
         return false;
     }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.studyParty.dubboApi.Mapper.*;
 import com.studyParty.entity.group.GroupTask;
 import com.studyParty.entity.group.GroupTaskAnswer;
+import com.studyParty.entity.group.GroupUser;
 import com.studyParty.entity.task.Task;
 import com.studyParty.entity.task.TaskAnswer;
 import com.studyParty.entity.user.DTO.UserTaskGroup;
@@ -30,6 +31,7 @@ public class BusinessServerImpl implements BusinessServer {
     private final TaskAnswerMapper taskAnswerMapper;
     private final GroupTaskAnswerMapper groupTaskAnswerMapper;
     private final GroupTaskMapper groupTaskMapper;
+    private final GroupUserMapper groupUserMapper;
 
     @Override
     @DubboService
@@ -88,6 +90,14 @@ public class BusinessServerImpl implements BusinessServer {
             userTaskGroups.add(new UserTaskGroup(groupTask, groupTaskAnswer));
         }
         return userTaskGroups;
+    }
+
+    @Override
+    public List<Long> selectGroupUser(Long groupId) {
+        QueryWrapper<GroupUser> wrapper = new QueryWrapper<>();
+        wrapper.select("group_user");
+        wrapper.eq("group_id", groupId);
+        return groupUserMapper.selectObjs( wrapper);
     }
 
 }
