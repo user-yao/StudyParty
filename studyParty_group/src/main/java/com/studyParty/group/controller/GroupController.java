@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,9 +98,41 @@ public class GroupController {
         if(group.getLeader() != Integer.parseInt(userId)){
             return Result.error("身份错误，请重新登录");
         }
+        
+        // 先保存群组信息，获取群组ID
         group.setHead(head + "group.png");
         groupServer.save(group);
-        groupUserServer.save(new GroupUser(Long.getLong(userId), group.getId()));
+        
+        // 创建群组头像目录并复制默认头像
+        Path dirPath = Paths.get(saveHead, String.valueOf(group.getId()));
+        Path targetPath = dirPath.resolve("groupHeadPhoto.png");
+        File targetFile = targetPath.toFile();
+        
+        try {
+            // 确保目录存在
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath);
+            }
+            
+            // 查找默认群组头像
+            Path sourcePath = Paths.get(saveHead, "group.png");
+            
+            // 如果默认头像文件存在，则复制到群组目录
+            if (Files.exists(sourcePath)) {
+                Files.copy(sourcePath, targetPath);
+            }
+            
+            // 更新群组头像路径
+            groupMapper.update(null, new LambdaUpdateWrapper<Group>()
+                    .eq(Group::getId, group.getId())
+                    .set(Group::getHead, head + group.getId() + "/groupHeadPhoto.png"));
+            
+        } catch (IOException e) {
+            // 即使头像复制失败，也继续创建群组流程
+            System.err.println("复制默认群组头像失败: " + e.getMessage());
+        }
+        
+        groupUserServer.save(new GroupUser(Long.valueOf(userId), group.getId()));
         return Result.success();
     }
     @PostMapping("/updateHead")
@@ -110,15 +143,15 @@ public class GroupController {
             if (file.exists() || file.isDirectory()) {
                 Files.createDirectories(Path.of(path));
             }
-            photo.transferTo(new File(path+ "/groupHeadPhoto"));
+            photo.transferTo(new File(path+ "/groupHeadPhoto.png"));
             groupMapper.update(null,new LambdaUpdateWrapper<Group>()
                     .eq(Group::getLeader, Integer.parseInt(userId))
-                    .set(Group::getHead, head + userId +"/groupHeadPhoto")
+                    .set(Group::getHead, head + userId +"/groupHeadPhoto.png")
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return Result.success(head + userId + "/groupHeadPhoto");
+        return Result.success(head + userId + "/groupHeadPhoto.png");
     }
     @PostMapping("/updateGroup")
     public Result<?> updateGroup(String slogan, String rule, String groupName, @RequestHeader("X-User-Id") String userId) {

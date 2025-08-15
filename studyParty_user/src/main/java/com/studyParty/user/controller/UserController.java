@@ -82,11 +82,43 @@ public class UserController {
             if(userByPhone != null){
                 return Result.error("用户名已存在");
             }
-            user.setHead(head + (user.getSex().equals("男") ? "boys.png" : "girls.png"));
+
+            // 先保存用户信息，获取用户ID
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
             user.setCreateDate(Date.valueOf(LocalDate.now()));
             userServer.save(user);
+            
+            // 创建用户头像目录并复制默认头像
+            Path dirPath = Paths.get(saveHead, String.valueOf(user.getId()));
+            Path targetPath = dirPath.resolve("userHeadPhoto.png");
+            File targetFile = targetPath.toFile();
+            
+            try {
+                // 确保目录存在
+                if (!Files.exists(dirPath)) {
+                    Files.createDirectories(dirPath);
+                }
+                
+                // 根据性别选择默认头像
+                String defaultAvatar = user.getSex().equals("男") ? "boys.png" : "girls.png";
+                Path sourcePath = Paths.get(saveHead, defaultAvatar);
+                
+                // 如果默认头像文件存在，则复制到用户目录
+                if (Files.exists(sourcePath)) {
+                    Files.copy(sourcePath, targetPath);
+                }
+                
+                // 更新用户头像路径
+                userMapper.update(null, new LambdaUpdateWrapper<User>()
+                        .eq(User::getId, user.getId())
+                        .set(User::getHead, head + user.getId() + "/userHeadPhoto.png"));
+                
+            } catch (IOException e) {
+                Logger.getGlobal().log(Level.WARNING, "复制默认头像失败: " + e.getMessage());
+                // 即使头像复制失败，也继续注册流程
+            }
+
             return  Result.success("注册成功");
         } catch (Exception e) {
             System.err.println(e.getMessage());
