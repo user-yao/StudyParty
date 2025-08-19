@@ -198,6 +198,15 @@ public class UserController {
             return Result.error("系统错误: " + e.getMessage());
         }
     }
+    @PostMapping("/selectUser")
+    public Result<?> selectUser( Long id ){
+        User user = userMapper.selectById(id);
+        if (  user == null){
+            return Result.error("用户不存在");
+        }
+        user.setPassword(null);
+        return Result.success(user);
+    }
 
 
    /* @PostMapping("/updateHead")

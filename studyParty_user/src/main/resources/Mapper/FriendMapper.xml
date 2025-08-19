@@ -7,6 +7,7 @@
     <select id="friendList" resultType="com.studyParty.entity.friend.DTO.FriendDTO">
         SELECT
             `friend`.*,
+            `users`.`phone`,
             `users`.`name`,
             `users`.`head`,
             `users`.`status`,

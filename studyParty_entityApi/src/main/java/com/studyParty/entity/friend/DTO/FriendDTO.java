@@ -1,8 +1,5 @@
 package com.studyParty.entity.friend.DTO;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.studyParty.entity.friend.Friend;
-import com.studyParty.entity.user.DTO.UserDTO;
 import lombok.*;
 
 import java.io.Serial;
@@ -26,4 +23,5 @@ public class FriendDTO implements Serializable {
     private String head;
     private String status;
     private String school;
+    private String phone;
 }

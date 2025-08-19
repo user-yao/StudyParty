@@ -1,9 +1,8 @@
 package com.studyParty.entity.group.DTO;
 
-import com.studyParty.entity.group.GroupTaskAnswer;
-import com.studyParty.entity.user.DTO.UserDTO;
-import com.studyParty.entity.user.User;
 import lombok.*;
+
+import java.sql.Timestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -11,6 +10,15 @@ import lombok.*;
 @Setter
 @Data
 public class GroupTaskAnswerDTO {
-    private GroupTaskAnswer groupTaskAnswer;
-    private UserDTO user;
+    private Long id;
+    private Long groupTaskId;
+    private Long userId;
+    private String context;
+    private Timestamp time;
+    private int haveSource;
+    private int score;
+    private String username;
+    private String head;
+    private String status;
+    private String school;
 }

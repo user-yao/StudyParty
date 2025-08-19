@@ -1,7 +1,6 @@
 package com.studyParty.entity.friend.DTO;
 
-import com.studyParty.entity.friend.FriendRequest;
-import com.studyParty.entity.user.DTO.UserDTO;
+
 import lombok.*;
 
 import java.io.Serial;
