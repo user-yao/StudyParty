@@ -4,4 +4,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.studyParty.entity.friend.Friend;
 
 public interface FriendServer extends IService<Friend> {
+    boolean isFriend( Long userId, Long friendId);
 }

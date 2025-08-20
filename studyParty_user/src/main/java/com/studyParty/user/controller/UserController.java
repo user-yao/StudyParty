@@ -2,6 +2,7 @@ package com.studyParty.user.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.studyParty.entity.user.DTO.UserDTO;
 import com.studyParty.entity.user.DTO.UserToken;
 import com.studyParty.entity.user.User;
 import com.studyParty.user.Utils.MyFileUtil;
@@ -9,10 +10,10 @@ import com.studyParty.user.Utils.PasswordEncoder;
 import com.studyParty.user.Utils.RedisUtil;
 import com.studyParty.user.common.Result;
 
+import com.studyParty.user.mapper.FriendMapper;
 import com.studyParty.user.mapper.UserMapper;
 import com.studyParty.user.services.UserServer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,8 @@ import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /// 登录
@@ -40,6 +43,7 @@ public class UserController {
     private final RedisUtil redisUtil;
     private final UserMapper userMapper;
     private final UserServer userServer;
+    private final FriendMapper friendMapper;
     @Value("${head}")
     private String head;
     @Value("${saveHead}")
@@ -80,9 +84,13 @@ public class UserController {
             queryWrapper.eq("phone",user.getPhone());
             User userByPhone = userMapper.selectOne(queryWrapper);
             if(userByPhone != null){
-                return Result.error("用户名已存在");
+                return Result.error("用户已存在");
             }
-
+            user.setStarCoin(100);
+            user.setGroupCoin(0);
+            user.setStarPrestige(0);
+            user.setClockIn(1);
+            user.setFinishTask(0);
             // 先保存用户信息，获取用户ID
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
@@ -199,13 +207,61 @@ public class UserController {
         }
     }
     @PostMapping("/selectUser")
-    public Result<?> selectUser( Long id ){
-        User user = userMapper.selectById(id);
-        if (  user == null){
-            return Result.error("用户不存在");
+    public Result<?> selectUser( @RequestParam(required = false) Long id,
+                                 @RequestParam(required = false) String name,
+                                 @RequestParam(required = false) String phone, @RequestHeader("X-User-Id") String userId ){
+        // 如果提供了phone参数，则进行精确查询
+        if (phone != null && !phone.isEmpty()) {
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("phone", phone);
+            User user = userMapper.selectOne(queryWrapper);
+            
+            if (user == null) {
+                return Result.error("用户不存在");
+            }
+            
+            UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
+            if (friend == null) {
+                friend = new UserDTO(null, user);
+            }
+            return Result.success(friend);
         }
-        user.setPassword(null);
-        return Result.success(user);
+        if (id != null) {
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("id", id);
+            User user = userMapper.selectOne(queryWrapper);
+
+            if (user == null) {
+                return Result.error("用户不存在");
+            }
+
+            UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
+            if (friend == null) {
+                friend = new UserDTO(null, user);
+            }
+            return Result.success(friend);
+        }
+        
+        // 如果提供了id或name参数，则进行查询
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        if (name != null && !name.isEmpty()) {
+            // name使用模糊查询
+            queryWrapper.like("name", name);
+        }
+        if ( name != null && !name.isEmpty()) {
+            List<User> users = userMapper.selectList(queryWrapper);
+            List<UserDTO> userDTOs = new ArrayList<>();
+            for (User user : users) {
+                UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
+                if (friend == null) {
+                    friend = new UserDTO(null, user);
+                }
+                userDTOs.add(friend);
+            }
+            return Result.success(userDTOs);
+        }
+        // 如果没有提供任何参数，则返回错误
+        return Result.error("请提供查询参数");
     }
 
 

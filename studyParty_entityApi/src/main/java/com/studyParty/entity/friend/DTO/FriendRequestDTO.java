@@ -19,6 +19,7 @@ public class FriendRequestDTO implements Serializable {
     private Long userId;
     private Long friendId;
     private Timestamp createTime;
+    private String context;
     private int isConsent;
     private String name;
     private String head;

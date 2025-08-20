@@ -17,4 +17,13 @@
         WHERE `friend`.user_id = #{userId}
         ORDER BY `users`.`name`
     </select>
+    <select id="selectUserAndRemarkById" resultType="com.studyParty.entity.user.DTO.UserDTO">
+        SELECT
+            `users`.*,
+            `friend`.`remark`
+        FROM `users`
+                 LEFT JOIN `friend` ON `friend`.friend_id = `users`.id
+        WHERE `friend`.user_id = #{userId}
+              AND `friend`.friend_id = #{id}
+    </select>
 </mapper>

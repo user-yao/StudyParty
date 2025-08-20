@@ -23,12 +23,14 @@ public class FriendRequest implements Serializable {
     private Long id;
     private Long userId;
     private Long friendId;
+    private String context;
     private Timestamp createTime;
     private int isConsent;
 
-    public FriendRequest(Long userId, Long friendId) {
+    public FriendRequest(Long userId, Long friendId, String context) {
         this.userId = userId;
         this.friendId = friendId;
+        this.context = context;
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.isConsent = 0;
     }

@@ -24,8 +24,17 @@ public class UserFriendController {
     private final FriendMapper friendMapper;
 
     @PostMapping("/request")
-    public Result<?> request(Long friendId, @RequestHeader("X-User-Id") String userId) {
-        friendRequestServer.save(new FriendRequest(Long.valueOf(userId), friendId));
+    public Result<?> request(Long friendId, String context, @RequestHeader("X-User-Id") String userId) {
+        if (friendId == null){
+            return Result.error("请选择好友");
+        }
+        if (friendId.equals(Long.valueOf(userId))){
+            return Result.error("不能添加自己为好友");
+        }
+        if (friendServer.isFriend(Long.valueOf(userId), friendId)){
+            return Result.error("已经是好友");
+        }
+        friendRequestServer.save(new FriendRequest(Long.valueOf(userId), friendId, context));
         return Result.success();
     }
     @PostMapping("/accept")
@@ -51,6 +60,20 @@ public class UserFriendController {
         friendRequestServer.updateById(friendRequest);
         return Result.success();
     }
+    @PostMapping("/remark")
+    public Result<?> remark(Long friendId, String remark, @RequestHeader("X-User-Id") String userId) {
+        QueryWrapper<Friend> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", Long.valueOf(userId));
+        queryWrapper.eq("friend_id", friendId);
+        Friend friend = friendMapper.selectOne(queryWrapper);
+        if (friend == null){
+            return Result.error("请选择好友");
+        }
+        friend.setRemark(remark);
+        friendMapper.updateById(friend);
+        return Result.success();
+    }
+
     @PostMapping("/delete")
     public Result<?> delete(Long friendId, @RequestHeader("X-User-Id") String userId) {
         QueryWrapper<Friend> queryWrapper = new QueryWrapper<>();
@@ -70,5 +93,9 @@ public class UserFriendController {
     @PostMapping("/friendRequestList")
     public Result<?> friendRequestList(@RequestHeader("X-User-Id") String userId) {
         return Result.success(friendRequestMapper.friendRequestList(Long.valueOf(userId)));
+    }
+    @PostMapping("/myFriendRequestList")
+    public Result<?> myFriendRequestList(@RequestHeader("X-User-Id") String userId) {
+        return Result.success(friendRequestMapper.myFriendRequestList(Long.valueOf(userId)));
     }
 }

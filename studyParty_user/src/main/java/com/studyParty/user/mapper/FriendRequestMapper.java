@@ -9,4 +9,6 @@ import java.util.List;
 @Mapper
 public interface FriendRequestMapper extends BaseMapper<FriendRequest> {
     List<FriendRequest> friendRequestList(Long userId);
+
+    List<FriendRequest> myFriendRequestList(Long userId);
 }
