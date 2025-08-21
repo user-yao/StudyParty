@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Timestamp;
+
 @RestController
 @RequestMapping("/friend")
 @RequiredArgsConstructor
@@ -34,7 +36,18 @@ public class UserFriendController {
         if (friendServer.isFriend(Long.valueOf(userId), friendId)){
             return Result.error("已经是好友");
         }
-        friendRequestServer.save(new FriendRequest(Long.valueOf(userId), friendId, context));
+        QueryWrapper< FriendRequest> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", Long.valueOf(userId));
+        queryWrapper.eq("friend_id", friendId);
+        FriendRequest friendRequest = friendRequestMapper.selectOne(queryWrapper);
+        if (friendRequest != null){
+            friendRequest.setContext(context);
+            friendRequest.setIsConsent(0);
+            friendRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            friendRequestMapper.updateById(friendRequest);
+        }else{
+            friendRequestServer.save(new FriendRequest(Long.valueOf(userId), friendId, context));
+        }
         return Result.success();
     }
     @PostMapping("/accept")
@@ -42,7 +55,7 @@ public class UserFriendController {
         QueryWrapper<FriendRequest> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", applicant);
         queryWrapper.eq("friend_id", Long.valueOf(userId));
-        queryWrapper.eq("status", 0);
+        queryWrapper.eq("is_consent", 0);
         FriendRequest friendRequest = friendRequestMapper.selectOne(queryWrapper);
         if (friendRequest == null){
             return Result.error("请求不存在");

@@ -13,8 +13,8 @@
             `users`.status,
             `users`.school
         FROM `friend_request`
-                 LEFT JOIN `users` ON `friend_request`.friend_id = `users`.id
-        WHERE `friend_request`.user_id = #{userId}
+                 LEFT JOIN `users` ON `friend_request`.user_id = `users`.id
+        WHERE `friend_request`.friend_id = #{userId}
         ORDER BY `friend_request`.create_time DESC
     </select>
     <select id="myFriendRequestList" resultType="com.studyParty.entity.friend.DTO.FriendRequestDTO">
@@ -27,7 +27,7 @@
             `users`.school
         FROM `friend_request`
                  LEFT JOIN `users` ON `friend_request`.friend_id = `users`.id
-        WHERE `friend_request`.friend_id = #{userId}
+        WHERE `friend_request`.user_id = #{userId}
         ORDER BY `friend_request`.create_time DESC
     </select>
 </mapper>

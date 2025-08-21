@@ -27,6 +27,7 @@ public class UserDTO {
     private Date lastLogin;
     private Date createDate;
     private Integer finishTask;
+    private boolean friend;
 
     public UserDTO(String remark, User  user) {
         this.remark = remark;
@@ -45,5 +46,6 @@ public class UserDTO {
         this.lastLogin = user.getLastLogin();
         this.createDate = user.getCreateDate();
         this.finishTask = user.getFinishTask();
+        this.friend = false;//默认不是好友
     }
 }

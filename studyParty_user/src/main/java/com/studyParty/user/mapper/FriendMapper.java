@@ -13,4 +13,6 @@ public interface FriendMapper extends BaseMapper<Friend> {
     List<FriendDTO> friendList(Long userId);
 
     UserDTO selectUserAndRemarkById(Long id, Long userId);
+    
+    boolean isFriend(Long userId, Long friendId);
 }

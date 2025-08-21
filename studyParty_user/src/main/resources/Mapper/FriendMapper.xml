@@ -26,4 +26,13 @@
         WHERE `friend`.user_id = #{userId}
               AND `friend`.friend_id = #{id}
     </select>
+    
+    <select id="isFriend" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM `friend`
+            WHERE `friend`.user_id = #{userId}
+              AND `friend`.friend_id = #{friendId}
+        )
+    </select>
 </mapper>

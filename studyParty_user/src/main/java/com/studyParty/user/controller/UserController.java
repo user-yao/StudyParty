@@ -215,33 +215,32 @@ public class UserController {
             QueryWrapper<User> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("phone", phone);
             User user = userMapper.selectOne(queryWrapper);
-            
             if (user == null) {
                 return Result.error("用户不存在");
             }
-            
             UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
+            boolean isFriend = friendMapper.isFriend(Long.valueOf(userId), (long)user.getId());
             if (friend == null) {
                 friend = new UserDTO(null, user);
             }
+            friend.setFriend(isFriend);
             return Result.success(friend);
         }
         if (id != null) {
             QueryWrapper<User> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("id", id);
             User user = userMapper.selectOne(queryWrapper);
-
             if (user == null) {
                 return Result.error("用户不存在");
             }
-
             UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
+            boolean isFriend = friendMapper.isFriend(Long.valueOf(userId), (long)user.getId());
             if (friend == null) {
                 friend = new UserDTO(null, user);
             }
+            friend.setFriend(isFriend);
             return Result.success(friend);
         }
-        
         // 如果提供了id或name参数，则进行查询
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (name != null && !name.isEmpty()) {
@@ -253,9 +252,11 @@ public class UserController {
             List<UserDTO> userDTOs = new ArrayList<>();
             for (User user : users) {
                 UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
+                boolean isFriend = friendMapper.isFriend(Long.valueOf(userId), (long)user.getId());
                 if (friend == null) {
                     friend = new UserDTO(null, user);
                 }
+                friend.setFriend(isFriend);
                 userDTOs.add(friend);
             }
             return Result.success(userDTOs);
