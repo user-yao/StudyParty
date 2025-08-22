@@ -85,7 +85,12 @@ public class GroupController {
         return Result.success(list);
     }
     @PostMapping("/createGroup")
-    public Result<?> createGroup(@RequestBody Group group, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> createGroup(Long leader,
+                                 String groupName,
+                                 String slogan,
+                                 String rule,
+                                 Integer canJoin,@RequestHeader("X-User-Id") String userId) {
+        Group group = new Group(leader, groupName, slogan, rule, canJoin);
         if (group.getGroupName().trim().isEmpty()){
             return Result.error("请输入正确的群组名称");
         }
@@ -107,31 +112,25 @@ public class GroupController {
         Path dirPath = Paths.get(saveHead, String.valueOf(group.getId()));
         Path targetPath = dirPath.resolve("groupHeadPhoto.png");
         File targetFile = targetPath.toFile();
-        
         try {
             // 确保目录存在
             if (!Files.exists(dirPath)) {
                 Files.createDirectories(dirPath);
             }
-            
             // 查找默认群组头像
             Path sourcePath = Paths.get(saveHead, "group.png");
-            
             // 如果默认头像文件存在，则复制到群组目录
             if (Files.exists(sourcePath)) {
                 Files.copy(sourcePath, targetPath);
             }
-            
             // 更新群组头像路径
             groupMapper.update(null, new LambdaUpdateWrapper<Group>()
                     .eq(Group::getId, group.getId())
                     .set(Group::getHead, head + group.getId() + "/groupHeadPhoto.png"));
-            
         } catch (IOException e) {
             // 即使头像复制失败，也继续创建群组流程
             System.err.println("复制默认群组头像失败: " + e.getMessage());
         }
-        
         groupUserServer.save(new GroupUser(Long.valueOf(userId), group.getId()));
         return Result.success();
     }
@@ -193,7 +192,7 @@ public class GroupController {
         return Result.success();
     }
     @PostMapping("/changeDeputy")
-    public Result<?> changeDeputy(Long groupId, int deputy, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> changeDeputy(Long groupId, Integer deputy, @RequestHeader("X-User-Id") String userId) {
         if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
             return Result.error("权限错误");
         }
@@ -212,7 +211,7 @@ public class GroupController {
         return Result.success();
     }
     @PostMapping("/changeCanJoin")
-    public Result<?> changeCanJoin(Long groupId, int canJoin, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> changeCanJoin(Long groupId, Integer canJoin, @RequestHeader("X-User-Id") String userId) {
         if (groupMapper.selectById(groupId).getLeader()!= Integer.parseInt(userId)){
             return Result.error("权限错误");
         }
