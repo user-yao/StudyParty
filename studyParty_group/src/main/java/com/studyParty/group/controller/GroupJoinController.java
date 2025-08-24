@@ -17,8 +17,9 @@ import java.util.Objects;
  * /getGroupJoin:获取用户申请加入的群组
  * /agreeJoin:同意加入群组
  */
-@RestController("/groupJoin")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/groupJoin")
 public class GroupJoinController {
     private final GroupJoinMapper groupJoinMapper;
     private final GroupJoinServer groupJoinServer;

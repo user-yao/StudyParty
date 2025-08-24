@@ -9,14 +9,16 @@ import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 /***
  * url:功能说明
  * /deleteUser:删除成员
  * /selectUser:查询用户
  */
-@RestController("/groupUser")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/groupUser")
 public class GroupUserController {
     private final GroupServer groupServer;
     private final GroupUserServer groupUserServer;

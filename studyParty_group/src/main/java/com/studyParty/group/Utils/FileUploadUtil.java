@@ -142,6 +142,20 @@ public class FileUploadUtil {
         String relativePath = url.substring(baseUrl.length());
         String filePath = uploadProperties.getBasePath() + relativePath;
 
+        return deleteFileByPath(filePath);
+    }
+    
+    /**
+     * 通过文件物理路径删除文件
+     *
+     * @param filePath 文件物理路径
+     * @return 是否删除成功
+     */
+    public static boolean deleteFileByPath(String filePath) {
+        if (StrUtil.isEmpty(filePath)) {
+            return false;
+        }
+
         Path path = Paths.get(filePath);
         if (Files.exists(path)) {
             try {
@@ -149,7 +163,7 @@ public class FileUploadUtil {
                 log.info("文件删除成功: {}", filePath);
                 return true;
             } catch (IOException e) {
-                log.error("文件删除失败", e);
+                log.error("文件删除失败: {}", filePath, e);
                 return false;
             }
         }
@@ -158,3 +172,4 @@ public class FileUploadUtil {
         return false;
     }
 }
+

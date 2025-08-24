@@ -15,10 +15,7 @@ import com.studyParty.group.services.SourceServer;
 import com.studyParty.dubboApi.services.BusinessServer;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
@@ -34,8 +31,9 @@ import java.util.Objects;
  * /getGroupTaskAnswers:获取作业列表
  * /getGroupTaskAnswer:获取我的作业
  */
-@RestController("/groupTaskAnswer")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/groupTaskAnswer")
 public class GroupTaskAnswerController {
     private final GroupTaskMapper groupTaskMapper;
     private final SourceMapper sourceMapper;

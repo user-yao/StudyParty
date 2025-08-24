@@ -44,7 +44,8 @@ public class SourceServer {
         boolean deleted = true;
         // 删除文件
         for (Source source : sources){
-            if (!FileUploadUtil.deleteFile(source.getFilePath())){
+            // 使用新的方法通过物理路径删除文件
+            if (!FileUploadUtil.deleteFileByPath(source.getFilePath())){
                 deleted = false;
             }
         }

@@ -12,7 +12,11 @@ import com.studyParty.group.common.Result;
 import com.studyParty.group.mapper.*;
 import com.studyParty.group.services.MarkdownService;
 import com.studyParty.group.services.SourceServer;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,8 +30,9 @@ import java.util.Map;
  * /deleteGroupTask:删除群组任务
  * /upload-markdown:上传群组任务
  */
-@RestController("/groupTask")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/groupTask")
 public class GroupTaskController {
     private final GroupTaskMapper groupTaskMapper;
     private final SourceServer sourceServer;
@@ -48,43 +53,63 @@ public class GroupTaskController {
         Page<GroupTaskDTO> page = new Page<>(currentPage, 10);
         return Result.success(groupTaskMapper.selectGroupTaskWithUser(page, groupId));
     }
+
     @PostMapping("/deleteGroupTask")
-    public Result<?> deleteGroupTask(Long groupTaskId,@RequestHeader("X-User-Id") String userId) {
-        if(groupMapper.selectById(userId).getLeader() != Integer.parseInt(userId) ||
-                groupMapper.selectById(userId).getDeputy() != Integer.parseInt(userId)){
+    public Result<?> deleteGroupTask(Long groupTaskId, @RequestHeader("X-User-Id") String userId) {
+        if (groupMapper.selectById(userId).getLeader() != Integer.parseInt(userId) ||
+                groupMapper.selectById(userId).getDeputy() != Integer.parseInt(userId)) {
             return Result.error("权限错误");
         }
         QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_task_id", groupTaskId);
         groupTaskAnswerMapper.delete(queryWrapper);
-        if(groupTaskMapper.deleteById(groupTaskId) == 0){
+        if (groupTaskMapper.deleteById(groupTaskId) == 0) {
             return Result.error("任务不存在");
         }
-        sourceServer.deleteSource(groupTaskId,false);
+        sourceServer.deleteSource(groupTaskId, false);
         return Result.success();
     }
-    @PostMapping("/uploadMarkdown")
-    public Result<?> uploadMarkdownFile(@RequestParam("file") MultipartFile markdown,
-                                        @RequestParam("file") MultipartFile[] sources,
-                                        Long groupId,
-                                        Timestamp deadline,
-                                        Timestamp startTime,
-                                        @RequestHeader("X-User-Id") String userId){
+
+    @Operation(summary = "上传Markdown文件", description = "上传Markdown文件及相关资源文件")
+    @PostMapping(value = "/uploadMarkdown", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Result<?> uploadMarkdownFile(
+            @Parameter(description = "Markdown文件", schema = @Schema(type = "string", format = "binary"))
+            @RequestPart("markdown") MultipartFile markdown,
+            @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
+            @RequestPart("sources") MultipartFile[] sources,
+            @Parameter(description = "任务标题")
+            @RequestParam String content,
+            @Parameter(description = "群组ID")
+            @RequestParam Long groupId,
+            @Parameter(description = "截止时间戳（毫秒）")
+            @RequestParam Long deadline,
+            @Parameter(description = "开始时间戳（毫秒）")
+            @RequestParam Long startTime,
+            @RequestHeader("X-User-Id") String userId) {
         Group group = groupMapper.selectById(groupId);
-        if(group.getLeader() != Integer.parseInt(userId)){
-             return Result.error("权限错误");
-        }
-        if(group.getDeputy() != Integer.parseInt(userId)){
+        if (group.getLeader() != Integer.parseInt(userId)) {
             return Result.error("权限错误");
         }
-        if(group.getTeacher() != Integer.parseInt(userId)){
+        
+        // 修改权限检查逻辑，处理可能为null的字段
+        if (group.getDeputy() != null && group.getDeputy() != Integer.parseInt(userId)) {
             return Result.error("权限错误");
         }
-        if(group.getEnterprise() != Integer.parseInt(userId)){
+        
+        if (group.getTeacher() != null && group.getTeacher() != Integer.parseInt(userId)) {
             return Result.error("权限错误");
         }
+        
+        if (group.getEnterprise() != null && group.getEnterprise() != Integer.parseInt(userId)) {
+            return Result.error("权限错误");
+        }
+        
+        // 将Long类型的时间戳转换为Timestamp类型
+        Timestamp deadlineTimestamp = new Timestamp(deadline);
+        Timestamp startTimeTimestamp = new Timestamp(startTime);
+        
         String processedMarkdown = markdownService.checkMarkdown(markdown);
-        if(processedMarkdown == null){
+        if (processedMarkdown == null) {
             return Result.error("上传文件错误");
         }
         Map<String, Source> sourceMap = new HashMap<>();
@@ -96,18 +121,20 @@ public class GroupTaskController {
         processedMarkdown = markdownService.updateMarkdown(markdown, sourceMap, processedMarkdown);
         GroupTask groupTask = new GroupTask();
         groupTask.setGroupId(groupId);
-        groupTask.setGroupTask(processedMarkdown);
+        groupTask.setGroupTask(content);
+        groupTask.setGroupTaskContext(processedMarkdown);
         groupTask.setGroupTaskUploader(userId);
-        groupTask.setGroupTaskStartTime(startTime);
-        groupTask.setGroupTaskLastTime(deadline);
+        groupTask.setGroupTaskStartTime(startTimeTimestamp);
+        groupTask.setGroupTaskLastTime(deadlineTimestamp);
         groupTask.setGroupTaskFinish(0L);
+        groupTask.setCreateTime(new Timestamp(System.currentTimeMillis()));
         QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_id", groupId);
         int predecessor = 0;
-        if (group.getTeacher() != 0){
+        if (group.getTeacher() != null && group.getTeacher() != 0) {
             predecessor++;
         }
-        if (group.getEnterprise() != 0){
+        if (group.getEnterprise() != null && group.getEnterprise() != 0) {
             predecessor++;
         }
         groupTask.setGroupTaskUnfinished(groupUserMapper.selectCount(queryWrapper) - predecessor);
@@ -119,4 +146,5 @@ public class GroupTaskController {
         }
         return Result.success();
     }
+
 }

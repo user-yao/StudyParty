@@ -12,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("`image`")
+@TableName("`source`")
 @Data
 public class Source implements Serializable {
     @Serial

@@ -23,10 +23,9 @@ public class GroupTaskDTO implements Serializable {
     private String groupTaskContext;
     private Long groupTaskUnfinished;
     private Timestamp createTime;
-    private Long groupTaskId;
     private Long userId;
-    private String context;
-    private Timestamp time;
-    private int haveSource;
-    private int score;
+    private String userName;
+    private String userHead;
+    private int userStatus;
+    private String userSchool;
 }

@@ -88,21 +88,24 @@ public class FileUploadController {
                 // 发送文件消息给接收者
                 webSocketMessageService.sendFileMessage(message);
                 
-                // 发送回执给发送者（和ChatWebSocketHandler中实现的一样）
-                WebSocketMessage receiptMessage = new WebSocketMessage();
-                receiptMessage.setType(message.getType());
-                receiptMessage.setContent(message.getContent());
-                receiptMessage.setSenderId(message.getSenderId());
-                receiptMessage.setReceiverId(message.getReceiverId());
-                receiptMessage.setGroupId(message.getGroupId());
-                receiptMessage.setFileName(message.getFileName());
-                receiptMessage.setFileUrl(message.getFileUrl());
-                receiptMessage.setFileSize(message.getFileSize());
-                receiptMessage.setFileType(message.getFileType());
-                receiptMessage.setTimestamp(message.getTimestamp());
-                
-                // 直接给发送者发送回执消息
-                userSessionManager.sendMessageToUser(senderId, toJson(receiptMessage));
+                // 只有在私聊场景下才发送回执消息给发送者
+                if ((receiverId != null && !receiverId.isEmpty()) && (groupId == null || groupId.isEmpty())) {
+                    // 发送回执给发送者
+                    WebSocketMessage receiptMessage = new WebSocketMessage();
+                    receiptMessage.setType(message.getType());
+                    receiptMessage.setContent(message.getContent());
+                    receiptMessage.setSenderId(message.getSenderId());
+                    receiptMessage.setReceiverId(message.getReceiverId());
+                    receiptMessage.setGroupId(message.getGroupId());
+                    receiptMessage.setFileName(message.getFileName());
+                    receiptMessage.setFileUrl(message.getFileUrl());
+                    receiptMessage.setFileSize(message.getFileSize());
+                    receiptMessage.setFileType(message.getFileType());
+                    receiptMessage.setTimestamp(message.getTimestamp());
+                    
+                    // 直接给发送者发送回执消息
+                    userSessionManager.sendMessageToUser(senderId, toJson(receiptMessage));
+                }
             }
 
             // 返回文件信息

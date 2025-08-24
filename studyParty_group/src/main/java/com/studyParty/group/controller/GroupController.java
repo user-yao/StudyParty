@@ -28,6 +28,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /***
  * url:功能说明
@@ -44,7 +46,7 @@ import java.util.List;
  *  /invitePredecessor：邀请群组前辈（老师，企业）
  *  /clearPredecessor：删除群组前辈
  */
-@RestController("/group")
+@RestController
 @RequiredArgsConstructor
 public class GroupController {
     @Value("${head}")
@@ -75,13 +77,25 @@ public class GroupController {
         }
         return Result.success(groupMapper.selectPage(page, queryWrapper));
     }
-    @GetMapping("/getMyGroup")
+    @PostMapping("/getMyGroup")
     public Result<?> getMyGroup(@RequestHeader("X-User-Id") String userId) {
         QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("leader", userId);
+        List<Group> leaderGroups = groupMapper.selectList(queryWrapper);
+        List<Group> memberGroups = groupMapper.findMyGroups(Long.valueOf(userId));
+        
+        // 过滤掉同时作为leader的群组
+        Set<Long> leaderGroupIds = leaderGroups.stream()
+                .map(Group::getId)
+                .collect(Collectors.toSet());
+        
+        List<Group> filteredMemberGroups = memberGroups.stream()
+                .filter(group -> !leaderGroupIds.contains(group.getId()))
+                .collect(Collectors.toList());
+        
         List<List<Group>> list = new ArrayList<>();
-        list.add(groupMapper.findMyGroups(Long.valueOf(userId)));
-        list.add(groupMapper.selectList(queryWrapper));
+        list.add(leaderGroups);
+        list.add(filteredMemberGroups);
         return Result.success(list);
     }
     @PostMapping("/createGroup")
@@ -302,5 +316,12 @@ public class GroupController {
         groupMapper.updateById(group);
         groupUserMapper.delete(new QueryWrapper<GroupUser>().eq("groupId", groupId).eq("userId", predecessorId));
         return Result.success();
+    }
+    @PostMapping("/selectGroupById")
+    public Result<?> selectGroupById(Long groupId) {
+        if (groupMapper.selectById(groupId) == null){
+            return Result.error("未找到对应的群组");
+        }
+        return Result.success(groupMapper.selectById(groupId));
     }
 }
