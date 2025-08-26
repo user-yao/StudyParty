@@ -26,8 +26,8 @@ public class GroupJoinController {
     private final GroupMapper groupMapper;
 
     @PostMapping("/joinGroup")
-    public Result<?> joinGroup(Long groupId,Long user, String context, @RequestHeader("X-User-Id") String userId){
-        GroupJoin groupJoin = new GroupJoin(groupId,user,context);
+    public Result<?> joinGroup(Long groupId, String context, @RequestHeader("X-User-Id") String userId){
+        GroupJoin groupJoin = new GroupJoin(groupId,Long.valueOf(userId),context);
         if(groupJoin.getUserId() != Integer.parseInt(userId)){
             return Result.error("用户身份错误");
         }

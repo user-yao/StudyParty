@@ -61,7 +61,7 @@ public class GroupController {
     private BusinessServer businessServer;
 
     @PostMapping("/searchGroup")
-    public Result<?> searchGroup(String searchContext, int currentPage,boolean canJoin) {
+    public Result<?> searchGroup(String searchContext, int currentPage,Integer canJoin) {
         if (currentPage <= 0){
             currentPage = 1;
         }
@@ -72,8 +72,8 @@ public class GroupController {
         LambdaQueryWrapper<Group> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(Group::getGroupName, searchContext.trim());
         queryWrapper.or().like(Group::getSlogan, searchContext.trim());
-        if (canJoin){
-            queryWrapper.eq(Group::getCanJoin, 1);
+        if (canJoin == 1){
+            queryWrapper.eq(Group::getCanJoin, canJoin);
         }
         return Result.success(groupMapper.selectPage(page, queryWrapper));
     }
