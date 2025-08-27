@@ -70,9 +70,14 @@ public class GroupController {
         }
         Page<Group> page = new Page<>(currentPage, 10);
         LambdaQueryWrapper<Group> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(Group::getGroupName, searchContext.trim());
-        queryWrapper.or().like(Group::getSlogan, searchContext.trim());
-        if (canJoin == 1){
+        // 构建搜索条件，确保括号正确包含OR条件
+        queryWrapper.and(wrapper -> wrapper
+                .like(Group::getGroupName, searchContext.trim())
+                .or()
+                .like(Group::getSlogan, searchContext.trim()));
+        
+        // 添加canJoin过滤条件
+        if (canJoin != null && canJoin == 1){
             queryWrapper.eq(Group::getCanJoin, canJoin);
         }
         return Result.success(groupMapper.selectPage(page, queryWrapper));
@@ -99,12 +104,14 @@ public class GroupController {
         return Result.success(list);
     }
     @PostMapping("/createGroup")
-    public Result<?> createGroup(Long leader,
+    public Result<?> createGroup(
                                  String groupName,
                                  String slogan,
                                  String rule,
-                                 Integer canJoin,@RequestHeader("X-User-Id") String userId) {
-        Group group = new Group(leader, groupName, slogan, rule, canJoin);
+                                 Integer canJoin,
+                                 @RequestParam(value = "photo", required = false) MultipartFile photo,
+                                 @RequestHeader("X-User-Id") String userId) {
+        Group group = new Group(Long.valueOf(userId), groupName, slogan, rule, canJoin);
         if (group.getGroupName().trim().isEmpty()){
             return Result.error("请输入正确的群组名称");
         }
@@ -122,30 +129,38 @@ public class GroupController {
         group.setHead(head + "group.png");
         groupServer.save(group);
         
-        // 创建群组头像目录并复制默认头像
+        // 创建群组头像目录
         Path dirPath = Paths.get(saveHead, String.valueOf(group.getId()));
         Path targetPath = dirPath.resolve("groupHeadPhoto.png");
-        File targetFile = targetPath.toFile();
+        
         try {
             // 确保目录存在
             if (!Files.exists(dirPath)) {
                 Files.createDirectories(dirPath);
             }
-            // 查找默认群组头像
-            Path sourcePath = Paths.get(saveHead, "group.png");
-            // 如果默认头像文件存在，则复制到群组目录
-            if (Files.exists(sourcePath)) {
-                Files.copy(sourcePath, targetPath);
+            
+            // 如果上传了头像，则使用上传的头像，否则复制默认头像
+            if (photo != null && !photo.isEmpty()) {
+                photo.transferTo(targetPath);
+            } else {
+                // 查找默认群组头像
+                Path sourcePath = Paths.get(saveHead, "group.png");
+                // 如果默认头像文件存在，则复制到群组目录
+                if (Files.exists(sourcePath)) {
+                    Files.copy(sourcePath, targetPath);
+                }
             }
+            
             // 更新群组头像路径
             groupMapper.update(null, new LambdaUpdateWrapper<Group>()
                     .eq(Group::getId, group.getId())
                     .set(Group::getHead, head + group.getId() + "/groupHeadPhoto.png"));
         } catch (IOException e) {
-            // 即使头像复制失败，也继续创建群组流程
-            System.err.println("复制默认群组头像失败: " + e.getMessage());
+            // 即使头像处理失败，也继续创建群组流程
+            System.err.println("处理群组头像失败: " + e.getMessage());
         }
-        groupUserServer.save(new GroupUser(Long.valueOf(userId), group.getId()));
+        
+        groupUserServer.save(new GroupUser(group.getId(),Long.valueOf(userId)));
         return Result.success();
     }
     @PostMapping("/updateHead")

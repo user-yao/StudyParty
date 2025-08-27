@@ -76,4 +76,16 @@ public class GroupJoinController {
         }
         return Result.error();
     }
+    @PostMapping("/cancelJoin")
+    public Result<?> cancelJoin(Long groupJoinId,@RequestHeader("X-User-Id") String userId){
+        GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
+        if (groupJoin.getIsPass() != 0){
+            return Result.error("申请已处理");
+        }
+        if (groupJoin.getUserId() != Integer.parseInt(userId)){
+            return Result.error("用户权限不足");
+        }
+        groupJoinMapper.deleteById(groupJoinId);
+        return Result.success();
+    }
 }
