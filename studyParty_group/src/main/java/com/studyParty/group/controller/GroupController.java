@@ -182,19 +182,45 @@ public class GroupController {
         return Result.success(head + userId + "/groupHeadPhoto.png");
     }
     @PostMapping("/updateGroup")
-    public Result<?> updateGroup(String slogan, String rule, String groupName, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> updateGroup(
+            String slogan, 
+            String rule, 
+            String groupName, 
+            @RequestParam(value = "photo", required = false) MultipartFile photo,
+            @RequestHeader("X-User-Id") String userId) {
+        
+        // 更新小组信息
         LambdaUpdateWrapper<Group> updateWrapper = new LambdaUpdateWrapper<>();
-        if (!groupName.trim().isEmpty()) {
+        if (groupName != null && !groupName.trim().isEmpty()) {
             updateWrapper.set(Group::getGroupName, groupName);
         }
-        if (!slogan.trim().isEmpty()) {
+        if (slogan != null && !slogan.trim().isEmpty()) {
             updateWrapper.set(Group::getSlogan, slogan);
         }
-        if (!rule.trim().isEmpty()) {
+        if (rule != null && !rule.trim().isEmpty()) {
             updateWrapper.set(Group::getRule, rule);
         }
         updateWrapper.eq(Group::getLeader, Integer.parseInt(userId));
-        return Result.success(groupMapper.update(null, updateWrapper));
+        groupMapper.update(null, updateWrapper);
+        
+        // 如果提供了头像，则更新头像
+        if (photo != null && !photo.isEmpty()) {
+            String path = saveHead + userId;
+            File file = new File(path);
+            try {
+                if (!file.exists()) {
+                    Files.createDirectories(Path.of(path));
+                }
+                photo.transferTo(new File(path + "/groupHeadPhoto.png"));
+                groupMapper.update(null, new LambdaUpdateWrapper<Group>()
+                        .eq(Group::getLeader, Integer.parseInt(userId))
+                        .set(Group::getHead, head + userId + "/groupHeadPhoto.png"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        return Result.success();
     }
     @PostMapping("/deleteGroup")
     public Result<?> deleteGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
