@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.studyParty.group.mapper.GroupJoinMapper">
+    <!-- 根据用户表users和小组表group同步获取用户的名称和小组的名称 -->
+    <select id="findMyGroupsWithDetails" resultType="com.studyParty.entity.group.DTO.GroupJoinDTO">
+        SELECT 
+            gj.id,
+            gj.group_id as groupId,
+            gj.group_leader as groupLeader,
+            gj.user_id as userId,
+            g.group_name as groupName,
+            ul.name as leaderName,
+            uu.name as username,
+            gj.context,
+            gj.is_invited as isInvited,
+            gj.is_pass as isPass,
+            gj.join_time as joinTime
+        FROM group_join gj
+        LEFT JOIN `group` g ON gj.group_id = g.id
+        LEFT JOIN users ul ON gj.group_leader = ul.id
+        LEFT JOIN users uu ON gj.user_id = uu.id
+        WHERE 
+            ((gj.group_leader = #{userId} AND gj.is_invited = 0) OR (gj.user_id = #{userId} AND gj.is_invited = 1))
+        ORDER BY gj.join_time DESC
+    </select>
+    
+    <!-- 查询我申请加入别人的群组和我邀请别人加入我的群组，需要别人处理的申请 -->
+    <select id="findMyApplicationsWithDetails" resultType="com.studyParty.entity.group.DTO.GroupJoinDTO">
+        SELECT 
+            gj.id,
+            gj.group_id as groupId,
+            gj.group_leader as groupLeader,
+            gj.user_id as userId,
+            g.group_name as groupName,
+            ul.name as leaderName,
+            uu.name as username,
+            gj.context,
+            gj.is_invited as isInvited,
+            gj.is_pass as isPass,
+            gj.join_time as joinTime
+        FROM group_join gj
+        LEFT JOIN `group` g ON gj.group_id = g.id
+        LEFT JOIN users ul ON gj.group_leader = ul.id
+        LEFT JOIN users uu ON gj.user_id = uu.id
+        WHERE 
+            ((gj.user_id = #{userId} AND gj.is_invited = 0) OR (gj.group_leader = #{userId} AND gj.is_invited = 1))
+        ORDER BY gj.join_time DESC
+    </select>
+</mapper>

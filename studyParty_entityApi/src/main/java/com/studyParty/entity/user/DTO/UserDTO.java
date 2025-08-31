@@ -3,6 +3,7 @@ package com.studyParty.entity.user.DTO;
 import com.studyParty.entity.user.User;
 import lombok.*;
 
+import java.io.Serializable;
 import java.sql.Date;
 
 @Data
@@ -10,7 +11,9 @@ import java.sql.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
+public class UserDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private int id;
     private String name;
     private String head;

@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 05/08/2025 00:43:14
+ Date: 31/08/2025 17:57:09
 */
 
 SET NAMES utf8mb4;
@@ -78,7 +78,7 @@ CREATE TABLE `article`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `uploader`(`uploader`) USING BTREE,
   CONSTRAINT `article_ibfk_1` FOREIGN KEY (`uploader`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of article
@@ -116,7 +116,7 @@ CREATE TABLE `article_comment`  (
   INDEX `user`(`user_id`) USING BTREE,
   CONSTRAINT `article_comment_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `article_comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of article_comment
@@ -135,7 +135,7 @@ CREATE TABLE `article_tags`  (
   INDEX `tags_id`(`tags_id`) USING BTREE,
   CONSTRAINT `article_tags_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `article_tags_ibfk_2` FOREIGN KEY (`tags_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of article_tags
@@ -154,11 +154,52 @@ CREATE TABLE `bill`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `user`(`user`) USING BTREE,
   CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of bill
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for friend
+-- ----------------------------
+DROP TABLE IF EXISTS `friend`;
+CREATE TABLE `friend`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NULL DEFAULT NULL,
+  `friend_id` int UNSIGNED NULL DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT NULL,
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of friend
+-- ----------------------------
+INSERT INTO `friend` VALUES (3, 3, 4, '2025-08-21 21:44:49', '小吴');
+INSERT INTO `friend` VALUES (4, 4, 3, '2025-08-21 21:44:49', NULL);
+
+-- ----------------------------
+-- Table structure for friend_request
+-- ----------------------------
+DROP TABLE IF EXISTS `friend_request`;
+CREATE TABLE `friend_request`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NULL DEFAULT NULL,
+  `friend_id` int UNSIGNED NULL DEFAULT NULL,
+  `context` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT NULL,
+  `is_consent` tinyint NULL DEFAULT NULL COMMENT '0，未处理，1同意，2不同意',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of friend_request
+-- ----------------------------
+INSERT INTO `friend_request` VALUES (1, 3, 5, '我是咱们学校的', '2025-08-14 19:25:09', 0);
+INSERT INTO `friend_request` VALUES (2, 3, 6, '你好，我跟喜欢你的博客', '2025-08-14 19:25:12', 0);
+INSERT INTO `friend_request` VALUES (3, 3, 7, '你好，我是姚镇涛，想添加你为好友,11', '2025-08-21 22:59:06', 0);
+INSERT INTO `friend_request` VALUES (4, 4, 3, '哥们，我是吴智勇哥们，我是吴智勇哥们，我是吴智勇哥们，我是吴智勇哥们，我是吴智勇哥们，我是吴智勇哥们，我是吴智勇哥们，我是吴智勇哥们，我是吴智勇', '2025-08-20 23:28:18', 1);
 
 -- ----------------------------
 -- Table structure for group
@@ -192,12 +233,16 @@ CREATE TABLE `group`  (
   CONSTRAINT `group_ibfk_2` FOREIGN KEY (`deputy`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_ibfk_3` FOREIGN KEY (`teacher`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_ibfk_4` FOREIGN KEY (`enterprise`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 24 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group
 -- ----------------------------
-INSERT INTO `group` VALUES (1, 3, NULL, NULL, '11111', 1, 11, NULL, 11, 1111, '11', '1111', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `group` VALUES (3, 3, 3, '2025-08-22 00:00:00', '职引星聚研发部门', 1, 0, 100, 1, 3, '学习就是现在！就是现在！', '需要按时完成小组任务，无私奉献，大家都要乐于帮助他人，有任何不懂的可以直接在群里提问1', 'static/head/3/groupHeadPhoto.png', '2025-08-22 00:00:00', 1, NULL, NULL);
+INSERT INTO `group` VALUES (19, 3, 3, '2025-08-27 00:00:00', '努力学习，天天向上', 1, 0, 100, 1, 3, '天之骄子要学习，666', '我靠，必须学习好不好，真的', 'static/head/19/groupHeadPhoto.png', '2025-08-27 00:00:00', 1, NULL, NULL);
+INSERT INTO `group` VALUES (20, 3, 3, '2025-08-27 00:00:00', '测试一下', 1, 0, 100, 1, 3, '测试一下', '测试一下', 'static/head/20/groupHeadPhoto.png', '2025-08-27 00:00:00', 0, NULL, NULL);
+INSERT INTO `group` VALUES (21, 3, 3, '2025-08-28 00:00:00', '学习springboot', 1, 0, 100, 1, 3, '只学习springboot以及相关的框架和工具。如mybatis，kafka，redis，还有一些非常实用的工具，例如jwt以及国产化的增强jwt工具，欢迎大家加入我们', '积极活跃', 'static/head/21/groupHeadPhoto.png', '2025-08-28 00:00:00', 1, NULL, NULL);
+INSERT INTO `group` VALUES (23, 3, 3, '2025-08-28 00:00:00', '测试', 1, 0, 100, 1, 3, '测试', '测试', 'static/head/23/groupHeadPhoto.png', '2025-08-28 00:00:00', 1, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for group_join
@@ -209,6 +254,7 @@ CREATE TABLE `group_join`  (
   `group_leader` int UNSIGNED NULL DEFAULT NULL COMMENT '组长id',
   `user_id` int UNSIGNED NULL DEFAULT NULL COMMENT '用户id',
   `context` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '申请内容',
+  `is_invited` tinyint NULL DEFAULT NULL COMMENT '是否被邀请，0否，1是',
   `is_pass` tinyint NULL DEFAULT NULL COMMENT '0.未判断 1.通过 2.拒绝',
   `join_time` timestamp NULL DEFAULT NULL COMMENT '申请时间',
   PRIMARY KEY (`id`) USING BTREE,
@@ -218,11 +264,13 @@ CREATE TABLE `group_join`  (
   CONSTRAINT `group_join_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_join_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_join_ibfk_3` FOREIGN KEY (`group_leader`) REFERENCES `group` (`leader`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_join
 -- ----------------------------
+INSERT INTO `group_join` VALUES (3, 3, 3, 4, '邀请加入', 1, 0, '2025-08-31 17:46:09');
+INSERT INTO `group_join` VALUES (4, 23, 3, 4, '我想加入啊', 0, 0, '2025-08-31 17:47:40');
 
 -- ----------------------------
 -- Table structure for group_tags
@@ -237,7 +285,7 @@ CREATE TABLE `group_tags`  (
   INDEX `tag_id`(`tag_id`) USING BTREE,
   CONSTRAINT `group_tags_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_tags
@@ -257,14 +305,17 @@ CREATE TABLE `group_task`  (
   `group_task_finish` int NULL DEFAULT NULL COMMENT '完成人数',
   `group_task_context` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '任务内容',
   `group_task_unfinished` int NULL DEFAULT NULL COMMENT '未完成人数',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `group_id`(`group_id`) USING BTREE,
   CONSTRAINT `group_task_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_task
 -- ----------------------------
+INSERT INTO `group_task` VALUES (8, 3, '学习security', 3, '2025-08-25 19:33:43', '2025-09-25 19:33:43', 0, '# 基于反向驱动式学习的产教融合平台架构设计文档（核心功能部分）\n\n## 一、功能概述 \n\n本平台以“**企业需求反向驱动教学供给**”为核心逻辑，构建“企业需求输入-课程动态适配-实践场景验证-效果反馈优化”的闭环产教融合体系。聚焦解决传统产教融合中“企业需求传递滞后、课程与岗位脱节、实践环节形式化”三大痛点，通过**需求反向传导机制**、**校企协同设计工具**、**场景化实践引擎**三大核心模块，实现企业需求与教育供给的实时匹配，推动“岗位-课程-实践-就业”的精准对接。 \n\n## 二、详细功能设计（核心模块） \n\n### （一）企业需求管理模块（反向驱动源点） \n\n![security](http://localhost:8080/static/uploads/2025/08/24/f4506b8135d94eca808a26640ed13199.png)', 1, '2025-08-24 23:25:57');
+INSERT INTO `group_task` VALUES (9, 3, '学习security', 3, '2025-08-25 19:33:43', '2025-09-25 19:33:43', 0, '# 基于反向驱动式学习的产教融合平台架构设计文档（核心功能部分）\n\n## 一、功能概述 \n\n本平台以“**企业需求反向驱动教学供给**”为核心逻辑，构建“企业需求输入-课程动态适配-实践场景验证-效果反馈优化”的闭环产教融合体系。聚焦解决传统产教融合中“企业需求传递滞后、课程与岗位脱节、实践环节形式化”三大痛点，通过**需求反向传导机制**、**校企协同设计工具**、**场景化实践引擎**三大核心模块，实现企业需求与教育供给的实时匹配，推动“岗位-课程-实践-就业”的精准对接。 \n\n## 二、详细功能设计（核心模块） \n\n### （一）企业需求管理模块（反向驱动源点） \n\n![security](http://localhost:8080/static/uploads/2025/08/25/cc9de24c38004334ac7b99d4896ff453.png)', 1, '2025-08-25 00:13:57');
 
 -- ----------------------------
 -- Table structure for group_task_answer
@@ -275,15 +326,15 @@ CREATE TABLE `group_task_answer`  (
   `group_task_id` int UNSIGNED NULL DEFAULT NULL COMMENT '任务id',
   `user_id` int UNSIGNED NULL DEFAULT NULL COMMENT '用户id',
   `context` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '任务答案',
-  `time` timestamp NULL DEFAULT NULL COMMENT '提交时间',
   `have_source` tinyint NULL DEFAULT NULL COMMENT '0 没有，1 有，有没有静态资源',
   `score` int NULL DEFAULT NULL COMMENT '成绩',
+  `time` timestamp NULL DEFAULT NULL COMMENT '提交时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `group_task_id`(`group_task_id`) USING BTREE,
   INDEX `user_id`(`user_id`) USING BTREE,
   CONSTRAINT `group_task_answer_ibfk_1` FOREIGN KEY (`group_task_id`) REFERENCES `group_task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_task_answer_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `group_user` (`group_user`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_task_answer
@@ -304,12 +355,16 @@ CREATE TABLE `group_user`  (
   INDEX `group_user`(`group_user`) USING BTREE,
   CONSTRAINT `group_user_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_user_ibfk_2` FOREIGN KEY (`group_user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_user
 -- ----------------------------
-INSERT INTO `group_user` VALUES (1, 1, 3, 0, '2025-07-20 03:52:40');
+INSERT INTO `group_user` VALUES (6, 3, 3, 0, '2025-08-22 00:00:00');
+INSERT INTO `group_user` VALUES (10, 19, 3, 0, '2025-08-27 00:00:00');
+INSERT INTO `group_user` VALUES (11, 20, 3, 0, '2025-08-27 00:00:00');
+INSERT INTO `group_user` VALUES (12, 21, 3, 0, '2025-08-28 00:00:00');
+INSERT INTO `group_user` VALUES (14, 23, 3, 0, '2025-08-28 00:00:00');
 
 -- ----------------------------
 -- Table structure for notice
@@ -339,7 +394,7 @@ CREATE TABLE `report`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `user_id`(`user_id`) USING BTREE,
   CONSTRAINT `report_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of report
@@ -362,11 +417,13 @@ CREATE TABLE `source`  (
   `task_id` int NULL DEFAULT NULL COMMENT '任务表Id',
   `task_answer_id` int NULL DEFAULT NULL COMMENT '任务回答表Id',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of source
 -- ----------------------------
+INSERT INTO `source` VALUES (6, 'f4506b8135d94eca808a26640ed13199.png', 'http://localhost:8080/static/uploads/2025/08/24/f4506b8135d94eca808a26640ed13199.png', 'D:/studyParty/uploads/2025/08/24/f4506b8135d94eca808a26640ed13199.png', NULL, NULL, NULL, 8, NULL, NULL, NULL);
+INSERT INTO `source` VALUES (7, 'cc9de24c38004334ac7b99d4896ff453.png', 'http://localhost:8080/static/uploads/2025/08/25/cc9de24c38004334ac7b99d4896ff453.png', 'D:/studyParty/uploads/2025/08/25/cc9de24c38004334ac7b99d4896ff453.png', NULL, NULL, NULL, 9, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for tags
@@ -392,14 +449,16 @@ CREATE TABLE `task`  (
   `uploader` int UNSIGNED NULL DEFAULT NULL COMMENT '上传者',
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '问题标题',
   `context` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '问题描述',
-  `isOver` tinyint NULL DEFAULT NULL COMMENT '是否完成',
+  `is_true_id` int NULL DEFAULT NULL COMMENT '确定的id',
+  `is_over` tinyint NULL DEFAULT NULL COMMENT '是否完成',
   `star_coin` int NULL DEFAULT NULL COMMENT '悬赏星币',
   `star_prestige` int NULL DEFAULT NULL COMMENT '星愿',
-  `createTime` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `status` tinyint NULL DEFAULT NULL COMMENT '身份（1学生，2老师，3企业）',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `uploader`(`uploader`) USING BTREE,
   CONSTRAINT `task_ibfk_1` FOREIGN KEY (`uploader`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of task
@@ -416,16 +475,39 @@ CREATE TABLE `task_answer`  (
   `context` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '答案文本',
   `is_true` tinyint NULL DEFAULT NULL COMMENT '是否被认可',
   `nice` int NULL DEFAULT NULL COMMENT '点赞量',
+  `create_time` timestamp NULL DEFAULT NULL,
+  `status` tinyint NULL DEFAULT NULL COMMENT '身份（1学生，2老师，3企业）',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `answerer`(`answerer`) USING BTREE,
   INDEX `task_id`(`task_id`) USING BTREE,
   CONSTRAINT `task_answer_ibfk_1` FOREIGN KEY (`answerer`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `task_answer_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of task_answer
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for user_plan
+-- ----------------------------
+DROP TABLE IF EXISTS `user_plan`;
+CREATE TABLE `user_plan`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NULL DEFAULT NULL COMMENT '用户id',
+  `plan_context` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '任务列表（自律）',
+  `start_time` timestamp NULL DEFAULT NULL COMMENT '开始时间',
+  `end_time` timestamp NULL DEFAULT NULL COMMENT '完成时间',
+  `is_start` tinyint NULL DEFAULT NULL COMMENT '是否开始（1开始，0未开始）',
+  `is_end` tinyint NULL DEFAULT NULL COMMENT '是否结束（1，结束，0，未结束）',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of user_plan
+-- ----------------------------
+INSERT INTO `user_plan` VALUES (1, 3, '学习JavaSE 基本数据结构', '2025-08-12 17:00:07', NULL, 0, 0);
+INSERT INTO `user_plan` VALUES (2, 3, '学习JavaSE 基本数据结构2', '2025-08-12 17:00:07', NULL, 0, 0);
 
 -- ----------------------------
 -- Table structure for user_tags
@@ -440,10 +522,26 @@ CREATE TABLE `user_tags`  (
   INDEX `user_tags_ibfk_2`(`tag_id`) USING BTREE,
   CONSTRAINT `user_tags_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `user_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user_tags
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for user_task
+-- ----------------------------
+DROP TABLE IF EXISTS `user_task`;
+CREATE TABLE `user_task`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NULL DEFAULT NULL,
+  `task_id` int UNSIGNED NULL DEFAULT NULL,
+  `task_type` tinyint NULL DEFAULT NULL COMMENT '1.任务所 2.小组任务',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of user_task
 -- ----------------------------
 
 -- ----------------------------
@@ -466,16 +564,22 @@ CREATE TABLE `users`  (
   `school` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '学校',
   `clock_in` int NULL DEFAULT NULL COMMENT '打卡（记录连续打卡日期）',
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '邮箱',
+  `finish_task` int NULL DEFAULT NULL COMMENT '完成的任务数量',
   `last_login` date NULL DEFAULT NULL COMMENT '最后登录日期',
   `create_date` date NULL DEFAULT NULL COMMENT '创建日期',
   PRIMARY KEY (`id`, `phone`) USING BTREE,
   INDEX `id`(`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (3, '姚镇涛', '$2a$12$e0Bk5agXDNUsBSJAStEVe.S6S3fUDPUKyOcX83IkK.lLom2G/6DZm', 'static/head/3/userHeadPhoto.png', '男', '计算机科学与技术', '大二', 1, 100, 0, 0, '13453981285', '天津职业技术师范大学', 1, '157469291@qq.com', '2025-08-04', '2025-07-14');
-INSERT INTO `users` VALUES (4, '吴智勇', '$2a$12$svql.esIY7zyoGWnO3LLCugclM5Un7c1VspIJ/x9M4Q0mAto9YKtW', 'static/head/boys.png', '男', '计算机科学与技术', '大二', 1, 0, 0, 0, '15713576510', '天津职业技术师范大学', 1, '', '2025-08-04', '2025-08-03');
+INSERT INTO `users` VALUES (3, '姚镇涛', '$2a$12$e0Bk5agXDNUsBSJAStEVe.S6S3fUDPUKyOcX83IkK.lLom2G/6DZm', 'static/head/3/userHeadPhoto.png', '男', '计算机科学与技术', '大二', 1, 100, 0, 0, '13453981285', '天津职业技术师范大学', 141, '157469291@qq.com', 0, '2025-08-31', '2025-07-14');
+INSERT INTO `users` VALUES (4, '吴智勇', '$2a$12$svql.esIY7zyoGWnO3LLCugclM5Un7c1VspIJ/x9M4Q0mAto9YKtW', 'static/head/boys.png', '男', '计算机科学与技术', '大二', 1, 100, 0, 0, '15713576510', '天津职业技术师范大学', 1, '', 0, '2025-08-31', '2025-08-03');
+INSERT INTO `users` VALUES (5, '老师A', '$2a$12$JaZq7YD9y1nRyz9Sjt9lKeIzxy.zwDnSPMiTYQEbRrNfEv8Nj1qHC', 'static/head/boys.png', '男', '计算机科学与技术', '大二', 2, 100, 0, 0, '1212121212', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-14');
+INSERT INTO `users` VALUES (6, '企业A', '$2a$12$3Y50P0n92gfn2Coei7GY/.58RbLHyi77/IwrASnnFsUlwZ08iswAK', 'static/head/boys.png', '男', '天津中铁三局', '人事部主任', 3, 100, 0, 0, '1313131313', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-14');
+INSERT INTO `users` VALUES (7, '学生A', '$2a$12$y4//67E9uxNjhYTkrsR42OqkBDqX7owHhzm7dCdU5fyg18VFHxfuu', 'static/head/boys.png', '男', '软件工程', '大一', 1, 100, 0, 0, '123123123', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-14');
+INSERT INTO `users` VALUES (8, '学生B', '$2a$12$WUBxREyyj8vXdm/k/dpeWOXOwEH2y5R29ToYfbPaQxKRL8Swn/gym', 'static/head/8/userHeadPhoto.png', '男', '软件工程', '大一', 1, 100, 0, 0, '12341234', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-16');
+INSERT INTO `users` VALUES (13, '学生C', '$2a$12$TkmR9LqnGDpzhWsKJhxOnepj6lbkzihUt7HBfEbvWPSbrcIQv3ZAy', 'static/head/13/userHeadPhoto.png', '女', '软件工程', '大一', 1, 100, 0, 0, '1234512345', '天津职业技术师范大学', 1, '', 0, '2025-08-21', '2025-08-21');
 
 SET FOREIGN_KEY_CHECKS = 1;

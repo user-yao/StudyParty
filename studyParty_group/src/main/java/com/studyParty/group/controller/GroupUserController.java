@@ -38,6 +38,7 @@ public class GroupUserController {
     }
     @PostMapping("selectGroupUser")
     public Result<?> selectUser(Long groupId,  @RequestHeader("X-User-Id") String userId){
+        System.out.println(businessServer.selectUser(groupId, Long.valueOf(userId)).toString());
         return Result.success(businessServer.selectUser(groupId, Long.valueOf(userId)));
     }
 }

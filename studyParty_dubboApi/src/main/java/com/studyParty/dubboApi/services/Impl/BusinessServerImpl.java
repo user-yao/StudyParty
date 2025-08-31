@@ -9,6 +9,7 @@ import com.studyParty.entity.group.GroupTaskAnswer;
 import com.studyParty.entity.group.GroupUser;
 import com.studyParty.entity.task.Task;
 import com.studyParty.entity.task.TaskAnswer;
+import com.studyParty.entity.user.DTO.UserDTO;
 import com.studyParty.entity.user.DTO.UserTaskGroup;
 import com.studyParty.entity.user.DTO.UserTaskTask;
 import com.studyParty.entity.user.User;
@@ -35,7 +36,7 @@ public class BusinessServerImpl implements BusinessServer {
 
     @Override
     @DubboService
-    public List<User> selectUser(Long groupId, Long userId) {
+    public List<UserDTO> selectUser(Long groupId, Long userId) {
         return userMapper.selectGroupUser(groupId, userId);
     }
     @DubboService
