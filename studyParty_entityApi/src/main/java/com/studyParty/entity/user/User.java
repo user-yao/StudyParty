@@ -21,7 +21,7 @@ public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
-    private int id;
+    private Long id;
     private String name;
     private String password;
     private String head;
@@ -63,7 +63,7 @@ public class User implements Serializable {
         this.finishTask = 0;
     }
     /// 修改个人信息专用
-    public User(int id, String name, String sex, String major, String grade, String phone, String school, String email) {
+    public User(Long id, String name, String sex, String major, String grade, String phone, String school, String email) {
         this.id = id;
         this.name = name;
         this.sex = sex;

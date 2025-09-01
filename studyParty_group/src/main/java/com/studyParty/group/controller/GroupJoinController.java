@@ -1,18 +1,24 @@
 package com.studyParty.group.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.entity.group.DTO.GroupJoinDTO;
 import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupJoin;
 import com.studyParty.entity.group.GroupUser;
+import com.studyParty.entity.user.User;
 import com.studyParty.group.common.Result;
 import com.studyParty.group.mapper.GroupJoinMapper;
 import com.studyParty.group.mapper.GroupMapper;
 import com.studyParty.group.mapper.GroupUserMapper;
 import com.studyParty.group.services.GroupJoinServer;
 import lombok.RequiredArgsConstructor;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +36,8 @@ public class GroupJoinController {
     private final GroupJoinServer groupJoinServer;
     private final GroupMapper groupMapper;
     private final GroupUserMapper groupUserMapper;
-
+    @DubboReference
+    private BusinessServer businessServer;
     @PostMapping("/joinGroup")
     public Result<?> joinGroup(Long groupId, String context, @RequestHeader("X-User-Id") String userId){
         GroupJoin groupJoin = new GroupJoin(groupId,Long.valueOf(userId),context);
@@ -47,8 +54,16 @@ public class GroupJoinController {
         if (group.getPeopleNum() >= group.getMaxPeopleNum()){
             return Result.error("群组已满");
         }
-        if (groupJoinServer.isJoined(groupJoin.getGroupId(),groupJoin.getUserId())){
-            return Result.error("已经申请加入");
+        // 检查是否已经申请加入
+        QueryWrapper<GroupJoin> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("group_id", groupId).eq("user_id", groupJoin.getUserId()).eq("is_pass", 0);
+        GroupJoin existingGroupJoin = groupJoinMapper.selectOne(queryWrapper);
+        if (existingGroupJoin != null) {
+            // 如果已经申请加入，并且还没有被处理，则更新申请内容和时间
+            existingGroupJoin.setContext(context);
+            existingGroupJoin.setJoinTime(Timestamp.valueOf(LocalDateTime.now()));
+            groupJoinMapper.updateById(existingGroupJoin);
+            return Result.success("申请已更新");
         }
         if(group.getCanJoin() == 0){
             return Result.error("群组不允许加入");
@@ -121,11 +136,21 @@ public class GroupJoinController {
                 // 更新邀请状态为已通过
                 groupJoin.setIsPass(1);
                 groupJoinMapper.updateById(groupJoin);
-
-                // 更新群组人数
-                group.setPeopleNum(group.getPeopleNum() + 1);
-                groupMapper.updateById(group);
-
+                // 只有当加入的用户是学生时才更新群组人数
+                User user = businessServer.selectUserById(groupJoin.getUserId());
+                if (user != null && user.getStatus() == 1) { // 1代表学生
+                    // 更新群组人数
+                    group.setPeopleNum(group.getPeopleNum() + 1);
+                    groupMapper.updateById(group);
+                }
+                if (user != null && user.getStatus() == 2){
+                    group.setTeacher(user.getId());
+                    groupMapper.updateById(group);
+                }
+                if (user != null && user.getStatus() == 3){
+                    group.setEnterprise(user.getId());
+                    groupMapper.updateById(group);
+                }
                 return Result.success("成功加入群组");
             } else {
                 // 拒绝邀请
@@ -160,7 +185,7 @@ public class GroupJoinController {
             }
 
             if (Boolean.TRUE.equals(agree)) {
-                if (groupJoinServer.agreeJoin(groupJoinId, groupJoin.getUserId(), groupJoin)) {
+                if (groupJoinServer.agreeJoin(groupJoin.getGroupId(), groupJoin.getUserId(), groupJoin)) {
                     return Result.success();
                 }
             } else {

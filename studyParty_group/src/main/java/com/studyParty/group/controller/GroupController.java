@@ -479,114 +479,40 @@ public class GroupController {
         
         return Result.success("已邀请" + userRole + "加入群组");
     }
-    
-    @PostMapping("/acceptGroupInvitation")
-    public Result<?> acceptGroupInvitation(Long groupJoinId, @RequestHeader("X-User-Id") String userId) {
-        // 检查邀请记录是否存在
-        GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
-        if (groupJoin == null) {
-            return Result.error("未找到邀请记录");
-        }
-        
-        // 检查是否是被邀请用户本人操作
-        if (!groupJoin.getUserId().toString().equals(userId)) {
-            return Result.error("权限错误");
-        }
-        
-        // 检查是否是邀请类型
-        if (groupJoin.getIsInvited() != 1) {
-            return Result.error("不是邀请记录");
-        }
-        
-        // 检查邀请是否已处理
-        if (groupJoin.getIsPass() != 0) {
-            return Result.error("邀请已处理");
-        }
-        
-        // 检查群组是否存在
-        Group group = groupMapper.selectById(groupJoin.getGroupId());
+    @PostMapping("/outGroup")
+    public Result<?> outGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
+        Group group = groupMapper.selectById(groupId);
         if (group == null) {
             return Result.error("未找到对应的群组");
         }
-        
-        // 检查群组是否已满
-        if (group.getPeopleNum() >= group.getMaxPeopleNum()) {
-            return Result.error("群组已满");
+        if (group.getLeader().toString().equals(userId)) {
+            return Result.error("群主不能退出群组");
         }
         
-        // 检查用户是否已经加入了群组（通过其他方式）
-        QueryWrapper<GroupUser> userCheckWrapper = new QueryWrapper<>();
-        userCheckWrapper.eq("group_id", groupJoin.getGroupId());
-        userCheckWrapper.eq("group_user", Long.valueOf(userId));
-        if (groupUserMapper.selectCount(userCheckWrapper) > 0) {
-            // 更新邀请状态为已通过
-            groupJoin.setIsPass(1);
-            groupJoinMapper.updateById(groupJoin);
-            return Result.error("您已经加入了该群组");
+        // 如果退出的人是代理组长(deputy)，就设置代理组长为组长
+        if (group.getDeputy() != null && group.getDeputy().toString().equals(userId)) {
+            // 将代理组长设置为组长
+            group.setDeputy(group.getLeader());
+            group.setPeopleNum(group.getPeopleNum() - 1);
+            groupMapper.updateById(group);
+        } 
+        // 如果退出的人是老师或者企业，就将对应的teacher或者enterprise设置为空
+        else if (group.getTeacher() != null && group.getTeacher().toString().equals(userId)) {
+            group.setTeacher(null);
+            groupMapper.updateById(group);
+        } 
+        else if (group.getEnterprise() != null && group.getEnterprise().toString().equals(userId)) {
+            group.setEnterprise(null);
+            groupMapper.updateById(group);
         }
-        
-        // 添加用户到群组
-        GroupUser groupUser = new GroupUser(groupJoin.getGroupId(), groupJoin.getUserId());
-        groupUser.setAddTime(new java.sql.Date(System.currentTimeMillis()));
-        groupUserMapper.insert(groupUser);
-        
-        // 更新邀请状态为已通过
-        groupJoin.setIsPass(1);
-        groupJoinMapper.updateById(groupJoin);
-        
-        // 更新群组人数
-        group.setPeopleNum(group.getPeopleNum() + 1);
-        groupMapper.updateById(group);
-        
-        return Result.success("成功加入群组");
-    }
-    
-    @PostMapping("/rejectGroupInvitation")
-    public Result<?> rejectGroupInvitation(Long groupJoinId, @RequestHeader("X-User-Id") String userId) {
-        // 检查邀请记录是否存在
-        GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
-        if (groupJoin == null) {
-            return Result.error("未找到邀请记录");
-        }
-        
-        // 检查是否是被邀请用户本人操作
-        if (!groupJoin.getUserId().toString().equals(userId)) {
-            return Result.error("权限错误");
-        }
-        
-        // 检查是否是邀请类型
-        if (groupJoin.getIsInvited() != 1) {
-            return Result.error("不是邀请记录");
-        }
-        
-        // 检查邀请是否已处理
-        if (groupJoin.getIsPass() != 0) {
-            return Result.error("邀请已处理");
-        }
-        
-        // 检查群组是否存在
-        Group group = groupMapper.selectById(groupJoin.getGroupId());
-        if (group == null) {
-            return Result.error("未找到对应的群组");
-        }
-        
-        // 更新邀请状态为已拒绝
-        groupJoin.setIsPass(2);
-        groupJoinMapper.updateById(groupJoin);
-        
-        // 如果是老师或企业，需要清除相关设置
-        Long userIdLong = Long.valueOf(userId);
-        if (group.getTeacher() != null && group.getTeacher().equals(userIdLong)) {
-            group.setTeacher(0L);
+        // 如果是普通成员，就直接退出，并且当前小组人数减一
+        else {
+            group.setPeopleNum(group.getPeopleNum() - 1);
             groupMapper.updateById(group);
         }
         
-        if (group.getEnterprise() != null && group.getEnterprise().equals(userIdLong)) {
-            group.setEnterprise(0L);
-            groupMapper.updateById(group);
-        }
-        
-        return Result.success("已拒绝群组邀请");
+        groupUserMapper.delete(new QueryWrapper<GroupUser>().eq("group_id", groupId).eq("group_user", userId));
+        return Result.success("已退出群组");
     }
 
 }

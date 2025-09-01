@@ -52,14 +52,12 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
             if (group == null) {
                 return false;
             }
-            
             // 使用数据库层面的原子操作来确保并发安全
             // 先尝试更新group，只有当人数未满时才更新成功
             UpdateWrapper<Group> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("id", groupId)
                     .lt("people_num", group.getMaxPeopleNum())  // 正确使用maxPeopleNum的值
                     .setSql("people_num = people_num + 1");  // 原子性地增加人数
-            
             int updated = groupMapper.update(null, updateWrapper);
             if (updated > 0) {
                 groupJoin.setIsPass(1);
