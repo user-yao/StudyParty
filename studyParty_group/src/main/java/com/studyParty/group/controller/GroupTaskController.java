@@ -76,7 +76,7 @@ public class GroupTaskController {
             @Parameter(description = "Markdown文件", schema = @Schema(type = "string", format = "binary"))
             @RequestPart("markdown") MultipartFile markdown,
             @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
-            @RequestPart("sources") MultipartFile[] sources,
+            @RequestPart(value = "sources", required = false) MultipartFile[] sources,
             @Parameter(description = "任务标题")
             @RequestParam String content,
             @Parameter(description = "群组ID")
@@ -112,13 +112,18 @@ public class GroupTaskController {
         if (processedMarkdown == null) {
             return Result.error("上传文件错误");
         }
+        
         Map<String, Source> sourceMap = new HashMap<>();
-        for (MultipartFile source : sources) {
-            Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
-            sourceMap.put(source.getOriginalFilename(), source1);
+        // 只有当sources不为null且不为空数组时才处理资源文件
+        if (sources != null && sources.length > 0) {
+            for (MultipartFile source : sources) {
+                Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
+                sourceMap.put(source.getOriginalFilename(), source1);
+            }
+            // 替换 Markdown 中的文件引用
+            processedMarkdown = markdownService.updateMarkdown(markdown, sourceMap, processedMarkdown);
         }
-        // 替换 Markdown 中的文件引用
-        processedMarkdown = markdownService.updateMarkdown(markdown, sourceMap, processedMarkdown);
+        
         GroupTask groupTask = new GroupTask();
         groupTask.setGroupId(groupId);
         groupTask.setGroupTask(content);
@@ -139,11 +144,16 @@ public class GroupTaskController {
         }
         groupTask.setGroupTaskUnfinished(groupUserMapper.selectCount(queryWrapper) - predecessor);
         groupTaskMapper.insert(groupTask);
-        for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
-            Source source = entry.getValue();
-            source.setGroupTaskId(groupTask.getId());
-            sourceMapper.insert(source);
+        
+        // 只有当sourceMap不为空时才处理资源文件插入
+        if (!sourceMap.isEmpty()) {
+            for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
+                Source source = entry.getValue();
+                source.setGroupTaskId(groupTask.getId());
+                sourceMapper.insert(source);
+            }
         }
+        
         return Result.success();
     }
 
