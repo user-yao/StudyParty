@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.studyParty.dubboApi.Mapper.*;
+import com.studyParty.entity.group.DTO.GroupUserDTO;
 import com.studyParty.entity.group.GroupTask;
 import com.studyParty.entity.group.GroupTaskAnswer;
 import com.studyParty.entity.group.GroupUser;
@@ -36,7 +37,7 @@ public class BusinessServerImpl implements BusinessServer {
 
     @Override
     @DubboService
-    public List<UserDTO> selectUser(Long groupId, Long userId) {
+    public List<GroupUserDTO> selectUser(Long groupId, Long userId) {
         return userMapper.selectGroupUser(groupId, userId);
     }
     @DubboService

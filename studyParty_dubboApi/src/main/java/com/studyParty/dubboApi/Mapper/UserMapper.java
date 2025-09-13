@@ -1,6 +1,7 @@
 package com.studyParty.dubboApi.Mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.studyParty.entity.group.DTO.GroupUserDTO;
 import com.studyParty.entity.user.DTO.UserDTO;
 import com.studyParty.entity.user.User;
 import org.apache.ibatis.annotations.Mapper;
@@ -8,5 +9,5 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
-    List<UserDTO> selectGroupUser(Long groupId, Long userId);
+    List<GroupUserDTO> selectGroupUser(Long groupId, Long userId);
 }

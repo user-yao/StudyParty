@@ -10,6 +10,7 @@ import com.studyParty.group.mapper.GroupMapper;
 import com.studyParty.group.mapper.GroupTaskAnswerMapper;
 import com.studyParty.group.mapper.GroupTaskMapper;
 import com.studyParty.group.mapper.SourceMapper;
+import com.studyParty.group.services.Impl.GroupServerImpl;
 import com.studyParty.group.services.MarkdownService;
 import com.studyParty.group.services.SourceServer;
 import com.studyParty.dubboApi.services.BusinessServer;
@@ -41,12 +42,13 @@ public class GroupTaskAnswerController {
     private final GroupTaskAnswerMapper groupTaskAnswerMapper;
     private final MarkdownService markdownService;
     private final GroupMapper groupMapper;
+    private final GroupServerImpl groupServerImpl;
     @DubboReference
     private BusinessServer businessServer;
     @PostMapping("/submit")
     public Result<?> submit(Long groupTaskId,
-                            @RequestParam("file") MultipartFile markdown,
-                            @RequestParam("file") MultipartFile[] sources,
+                            String markdown,
+                            @RequestParam(value = "file", required = false) MultipartFile[] sources,
                             @RequestHeader("X-User-Id") String userId){
         GroupTask groupTask = groupTaskMapper.selectById(groupTaskId);
         if (groupTask == null) {
@@ -56,19 +58,16 @@ public class GroupTaskAnswerController {
         queryWrapper.eq("group_task_id", groupTaskId);
         queryWrapper.eq("user_id", userId);
         GroupTaskAnswer isSubmitted = groupTaskAnswerMapper.selectOne(queryWrapper);
-        if (isSubmitted != null) {
-            sourceServer.deleteSource(isSubmitted.getGroupTaskId(),true);
-            groupTaskMapper.deleteById(isSubmitted.getId());
-        }
+
         GroupTaskAnswer groupTaskAnswer = new GroupTaskAnswer();
 
         // 1. 检查文件类型
-        String processedMarkdown = markdownService.checkMarkdown(markdown);
+        String processedMarkdown = markdown;
         if (processedMarkdown == null) {
             return Result.error("上传文件类型错误");
         }
         Map<String, Source> sourceMap = new HashMap<>();
-        if(sources.length == 0){
+        if(sources == null){
             groupTaskAnswer.setHaveSource(0);
             groupTaskAnswer.setContext(processedMarkdown);
         }else{
@@ -77,15 +76,24 @@ public class GroupTaskAnswerController {
                 Source source1 = sourceServer.getSourceUrl(source);
                 sourceMap.put(source.getOriginalFilename(), source1);
             }
-            processedMarkdown = markdownService.updateMarkdown(markdown, sourceMap, processedMarkdown);
+            processedMarkdown = markdownService.updateMarkdown( sourceMap, processedMarkdown);
             groupTaskAnswer.setContext(processedMarkdown);
         }
-        groupTaskAnswer.setGroupTaskId(groupTaskId);
-        groupTaskAnswer.setUserId(Long.valueOf(userId));
-        groupTaskAnswer.setTime(new Timestamp(System.currentTimeMillis()));
-        groupTaskAnswer.setScore(-1);
-        groupTaskAnswerMapper.insert(groupTaskAnswer);
-        if (sources.length != 0){
+        if (isSubmitted != null) {
+            isSubmitted.setContext(processedMarkdown);
+            isSubmitted.setTime(new Timestamp(System.currentTimeMillis()));
+            groupTaskAnswerMapper.updateById(isSubmitted);
+        }else{
+            groupTaskAnswer.setGroupTaskId(groupTaskId);
+            groupTaskAnswer.setUserId(Long.valueOf(userId));
+            groupTaskAnswer.setTime(new Timestamp(System.currentTimeMillis()));
+            groupTaskAnswer.setScore(-1);
+            groupTaskAnswerMapper.insert(groupTaskAnswer);
+            groupServerImpl.contributionGroup(groupTask.getGroupId(), userId);
+            groupTask.setGroupTaskFinish(groupTask.getGroupTaskFinish() + 1);
+            groupTaskMapper.updateById(groupTask);
+        }
+        if (sources ==  null){
             for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
                 Source source = entry.getValue();
                 source.setGroupTaskAnswerId(groupTaskAnswer.getId());

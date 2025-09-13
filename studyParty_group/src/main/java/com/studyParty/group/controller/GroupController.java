@@ -5,11 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.studyParty.entity.group.Group;
-import com.studyParty.entity.group.GroupUser;
-import com.studyParty.entity.group.Level;
+import com.studyParty.entity.group.*;
 import com.studyParty.entity.user.User;
-import com.studyParty.entity.group.GroupJoin; // 新增导入
 import com.studyParty.group.common.Result;
 import com.studyParty.group.mapper.GroupMapper;
 import java.sql.Date;
@@ -29,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
@@ -305,42 +303,7 @@ public class GroupController {
         return Result.success();
     }
 
-    @PostMapping("/contributionGroup")
-    public Result<?> contributionGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
-        QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("groupId", groupId);
-        queryWrapper.eq("userId", userId);
-        GroupUser groupUser = groupUserMapper.selectOne(queryWrapper);
-        if (groupUser == null) {
-            return Result.error("未找到对应的群组成员");
-        }
-        groupUser.setContribution(groupUser.getContribution() + 20);
-        UpdateWrapper<GroupUser> queryWrapper1 = new UpdateWrapper<>();
-        queryWrapper1.eq("id", groupUser.getId());
-        queryWrapper1.set("contribution", groupUserMapper.selectById(userId).getContribution() + 20);
-        if (groupUserMapper.update(null, queryWrapper1) == 0) {
-            return Result.error("未找到对应的群组，可能已被删除");
-        }
-        UpdateWrapper<Group> queryWrapper2 = new UpdateWrapper<>();
-        queryWrapper2.eq("id", groupId);
-        Group group = groupMapper.selectById(groupId);
-        int experience = group.getExperience() + 20;
-        if (experience + 20 >= group.getNeedExperience()) {
-            if (group.getGroupLevel() < 10) {
-                Level level = Level.getLevel(group.getGroupLevel() + 1);
-                group.setGroupLevel(level.getLevel());
-                queryWrapper2.set("need_experience", level.getNeedExperience());
-                queryWrapper2.set("max_people_num", level.getMaxPeopleNum());
-                queryWrapper2.set("experience", experience + 20 - group.getNeedExperience());
-            } else {
-                queryWrapper2.set("experience", group.getNeedExperience());
-            }
-        } else {
-            queryWrapper2.set("experience", experience + 20);
-        }
-        groupMapper.update(null, queryWrapper2);
-        return Result.success();
-    }
+
 
     @PostMapping("/invitePredecessor")
     public Result<?> inviteTeacher(Long groupId, Long predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
@@ -495,7 +458,7 @@ public class GroupController {
             group.setDeputy(group.getLeader());
             group.setPeopleNum(group.getPeopleNum() - 1);
             groupMapper.updateById(group);
-        } 
+        }
         // 如果退出的人是老师或者企业，就将对应的teacher或者enterprise设置为空
         else if (group.getTeacher() != null && group.getTeacher().toString().equals(userId)) {
             group.setTeacher(null);

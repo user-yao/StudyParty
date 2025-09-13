@@ -4,11 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.studyParty.dubboApi.Mapper.UserMapper">
-    <select id="selectGroupUser" resultType="com.studyParty.entity.user.DTO.UserDTO">
+    <select id="selectGroupUser" resultType="com.studyParty.entity.group.DTO.GroupUserDTO">
         SELECT `users`.id, `users`.name, `users`.head, `users`.sex, `users`.major, 
                `users`.grade, `users`.status, `users`.star_prestige,
                `users`.school, `users`.clock_in, `users`.last_login, `users`.create_date, 
-               `users`.finish_task
+               `users`.finish_task, `group_user`.contribution,`group_user`.add_time
         FROM `users` join group_user on `users`.id = group_user.group_user
         where group_user.group_id = #{groupId}
     </select>

@@ -74,7 +74,7 @@ public class GroupTaskController {
     @PostMapping(value = "/uploadMarkdown", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<?> uploadMarkdownFile(
             @Parameter(description = "Markdown文件", schema = @Schema(type = "string", format = "binary"))
-            @RequestPart("markdown") MultipartFile markdown,
+            @RequestPart("markdown") String markdown,
             @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
             @RequestPart(value = "sources", required = false) MultipartFile[] sources,
             @Parameter(description = "任务标题")
@@ -108,7 +108,7 @@ public class GroupTaskController {
         Timestamp deadlineTimestamp = new Timestamp(deadline);
         Timestamp startTimeTimestamp = new Timestamp(startTime);
         
-        String processedMarkdown = markdownService.checkMarkdown(markdown);
+        String processedMarkdown = markdown;
         if (processedMarkdown == null) {
             return Result.error("上传文件错误");
         }
@@ -121,7 +121,7 @@ public class GroupTaskController {
                 sourceMap.put(source.getOriginalFilename(), source1);
             }
             // 替换 Markdown 中的文件引用
-            processedMarkdown = markdownService.updateMarkdown(markdown, sourceMap, processedMarkdown);
+            processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
         }
         
         GroupTask groupTask = new GroupTask();

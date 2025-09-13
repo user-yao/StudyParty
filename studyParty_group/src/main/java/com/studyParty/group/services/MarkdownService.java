@@ -31,7 +31,7 @@ public class MarkdownService {
         }
         return processedMarkdown;
     }
-    public String updateMarkdown(MultipartFile markdown, Map<String, Source> sourceMap, String processedMarkdown){
+    public String updateMarkdown( Map<String, Source> sourceMap, String processedMarkdown){
         // 替换 Markdown 中的文件引用
         for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
             String originalFilename = entry.getKey();

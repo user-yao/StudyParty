@@ -6,15 +6,18 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.studyParty.entity.group.DTO.GroupJoinDTO;
 import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupJoin;
+import com.studyParty.entity.group.GroupTask;
 import com.studyParty.entity.group.GroupUser;
 import com.studyParty.group.mapper.GroupJoinMapper;
 import com.studyParty.group.mapper.GroupMapper;
+import com.studyParty.group.mapper.GroupTaskMapper;
 import com.studyParty.group.mapper.GroupUserMapper;
 import com.studyParty.group.services.GroupJoinServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +29,8 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
     private GroupMapper groupMapper;
     @Autowired
     private GroupUserMapper groupUserMapper;
+    @Autowired
+    private GroupTaskMapper groupTaskMapper;
 
     @Override
     public List<List<GroupJoinDTO>> findMyGroups(Long userId) {
@@ -60,7 +65,14 @@ public class GroupJoinServerImpl extends ServiceImpl<GroupJoinMapper, GroupJoin>
                     .setSql("people_num = people_num + 1");  // 原子性地增加人数
             int updated = groupMapper.update(null, updateWrapper);
             if (updated > 0) {
+
                 groupJoin.setIsPass(1);
+                UpdateWrapper<GroupTask> updateTaskWrapper = new UpdateWrapper<>();
+                updateTaskWrapper.ge("group_task_start_time", new Timestamp(System.currentTimeMillis()))     // A字段 >= startTime
+                        .le("group_task_last_time", new Timestamp(System.currentTimeMillis()))
+                        .eq("group_id", groupJoin.getGroupId())// B字段 <= endTime
+                        .setSql("group_task_unfinished = group_task_unfinished + 1");   // C字段自增1
+                groupTaskMapper.update(null, updateTaskWrapper);
                 return groupJoinMapper.update(groupJoin, new QueryWrapper<GroupJoin>().eq("id", groupJoin.getId())) == 1 &&
                         groupUserMapper.insert(new GroupUser(groupId, groupJoin.getUserId())) == 1;
             }

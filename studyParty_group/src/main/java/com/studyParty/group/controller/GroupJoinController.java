@@ -1,15 +1,18 @@
 package com.studyParty.group.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.entity.group.DTO.GroupJoinDTO;
 import com.studyParty.entity.group.Group;
 import com.studyParty.entity.group.GroupJoin;
+import com.studyParty.entity.group.GroupTask;
 import com.studyParty.entity.group.GroupUser;
 import com.studyParty.entity.user.User;
 import com.studyParty.group.common.Result;
 import com.studyParty.group.mapper.GroupJoinMapper;
 import com.studyParty.group.mapper.GroupMapper;
+import com.studyParty.group.mapper.GroupTaskMapper;
 import com.studyParty.group.mapper.GroupUserMapper;
 import com.studyParty.group.services.GroupJoinServer;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class GroupJoinController {
     private final GroupJoinServer groupJoinServer;
     private final GroupMapper groupMapper;
     private final GroupUserMapper groupUserMapper;
+    private final GroupTaskMapper groupTaskMapper;
     @DubboReference
     private BusinessServer businessServer;
     @PostMapping("/joinGroup")
@@ -117,8 +121,7 @@ public class GroupJoinController {
                 }
 
                 // 检查用户是否已经加入了群组（通过其他方式）
-                com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<GroupUser> userCheckWrapper = 
-                    new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+                QueryWrapper<GroupUser> userCheckWrapper = new QueryWrapper<>();
                 userCheckWrapper.eq("group_id", groupJoin.getGroupId());
                 userCheckWrapper.eq("group_user", Long.valueOf(userId));
                 if (groupUserMapper.selectCount(userCheckWrapper) > 0) {
@@ -142,6 +145,12 @@ public class GroupJoinController {
                     // 更新群组人数
                     group.setPeopleNum(group.getPeopleNum() + 1);
                     groupMapper.updateById(group);
+                    UpdateWrapper<GroupTask> updateWrapper = new UpdateWrapper<>();
+                    updateWrapper.ge("group_task_start_time", new Timestamp(System.currentTimeMillis()))     // A字段 >= startTime
+                            .le("group_task_last_time", new Timestamp(System.currentTimeMillis()))
+                            .eq("group_id", groupJoin.getGroupId())// B字段 <= endTime
+                            .setSql("group_task_unfinished = group_task_unfinished + 1");   // C字段自增1
+                    groupTaskMapper.update(null, updateWrapper);
                 }
                 if (user != null && user.getStatus() == 2){
                     group.setTeacher(user.getId());
