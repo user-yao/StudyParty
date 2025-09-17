@@ -73,8 +73,7 @@ public class GroupTaskController {
     @Operation(summary = "上传Markdown文件", description = "上传Markdown文件及相关资源文件")
     @PostMapping(value = "/uploadMarkdown", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<?> uploadMarkdownFile(
-            @Parameter(description = "Markdown文件", schema = @Schema(type = "string", format = "binary"))
-            @RequestPart("markdown") String markdown,
+            String markdown,
             @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
             @RequestPart(value = "sources", required = false) MultipartFile[] sources,
             @Parameter(description = "任务标题")
