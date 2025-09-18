@@ -38,7 +38,7 @@ public class User implements Serializable {
     private String email;
     private Date lastLogin;
     private Date createDate;
-    private Integer finishTask;
+    private Long finishTask;
 
     public User(String name, String password) {
         this.name = name;
@@ -60,7 +60,7 @@ public class User implements Serializable {
         this.starPrestige = 0;
         this.clockIn = 1;
         this.lastLogin = Date.valueOf(LocalDate.now());
-        this.finishTask = 0;
+        this.finishTask = 0L;
     }
     /// 修改个人信息专用
     public User(Long id, String name, String sex, String major, String grade, String phone, String school, String email) {

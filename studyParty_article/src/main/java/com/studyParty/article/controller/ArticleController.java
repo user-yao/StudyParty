@@ -57,21 +57,26 @@ public class ArticleController {
     @PostMapping("/createArticle")
     public Result<?> createArticle(String title,
                                    String summary,
-                                   @RequestParam("file") MultipartFile markdown,
+                                   String markdown,
                                    @RequestParam("file") MultipartFile[] sources,
                                    @RequestHeader("X-User-Id") String userId) {
         Article article = new Article();
-        String processedMarkdown = markdownService.checkMarkdown(markdown);
+        String processedMarkdown = markdown;
         if(processedMarkdown == null){
             return Result.error("上传文件错误");
         }
         Map<String, Source> sourceMap = new HashMap<>();
-        for (MultipartFile source : sources) {
-            Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
-            sourceMap.put(source.getOriginalFilename(), source1);
+        // 只有当sources不为null且不为空数组时才处理资源文件
+        if (sources != null && sources.length > 0) {
+            for (MultipartFile source : sources) {
+                Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
+                sourceMap.put(source.getOriginalFilename(), source1);
+            }
+            // 替换 Markdown 中的文件引用
+            processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
         }
         // 替换 Markdown 中的文件引用
-        processedMarkdown = markdownService.updateMarkdown(markdown, sourceMap, processedMarkdown);
+        processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
         article.setTitle(title);
         article.setSummary(summary);
         article.setContent(processedMarkdown);
@@ -84,10 +89,12 @@ public class ArticleController {
         User user = businessServer.selectUserById(Long.parseLong(userId));
         article.setStatus(user.getStatus());
         articleMapper.insert(article);
-        for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
-            Source source = entry.getValue();
-            source.setArticleId(article.getId());
-            sourceMapper.insert(source);
+        if (!sourceMap.isEmpty()) {
+            for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
+                Source source = entry.getValue();
+                source.setArticleId(article.getId());
+                sourceMapper.insert(source);
+            }
         }
         return Result.success();
     }

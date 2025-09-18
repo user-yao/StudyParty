@@ -87,7 +87,7 @@ public class BusinessServerImpl implements BusinessServer {
         List<GroupTaskAnswer> groupTaskAnswerList = groupTaskAnswerMapper.selectList(queryWrapper);
         for (GroupTaskAnswer groupTaskAnswer : groupTaskAnswerList) {
             QueryWrapper<GroupTask> queryWrapper1 = new QueryWrapper<>();
-            queryWrapper.eq("id", groupTaskAnswer.getGroupTaskId());
+            queryWrapper1.eq("id", groupTaskAnswer.getGroupTaskId());
             GroupTask groupTask = groupTaskMapper.selectOne(queryWrapper1);
             userTaskGroups.add(new UserTaskGroup(groupTask, groupTaskAnswer));
         }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.studyParty.entity.user.DTO.UserDTO;
 import com.studyParty.entity.user.DTO.UserToken;
 import com.studyParty.entity.user.User;
+import com.studyParty.entity.user.UserTask;
 import com.studyParty.user.Utils.MyFileUtil;
 import com.studyParty.user.Utils.PasswordEncoder;
 import com.studyParty.user.Utils.RedisUtil;
@@ -12,6 +13,7 @@ import com.studyParty.user.common.Result;
 
 import com.studyParty.user.mapper.FriendMapper;
 import com.studyParty.user.mapper.UserMapper;
+import com.studyParty.user.mapper.UserTaskMapper;
 import com.studyParty.user.services.UserServer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
+
 /// 登录
 /// 注册
 /// 更新头像
@@ -44,6 +49,7 @@ public class UserController {
     private final UserMapper userMapper;
     private final UserServer userServer;
     private final FriendMapper friendMapper;
+    private final UserTaskMapper userTaskMapper;
     @Value("${head}")
     private String head;
     @Value("${saveHead}")
@@ -69,6 +75,7 @@ public class UserController {
                         .eq(User::getId,userToken.getUser().getId())
                         .set(User::getLastLogin, Date.valueOf(LocalDate.now()))
                         .set(User::getClockIn,userToken.getUser().getClockIn()));
+                userToken.getUser().setFinishTask(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id",userToken.getUser().getId())));
                 return Result.success(userToken);
             }
         } catch (Exception e) {
@@ -90,7 +97,7 @@ public class UserController {
             user.setGroupCoin(0);
             user.setStarPrestige(0);
             user.setClockIn(1);
-            user.setFinishTask(0);
+            user.setFinishTask(0L);
             // 先保存用户信息，获取用户ID
             String encodedPassword = PasswordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);

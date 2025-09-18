@@ -31,27 +31,68 @@ public class MarkdownService {
         }
         return processedMarkdown;
     }
-    public String updateMarkdown(MultipartFile markdown, Map<String, Source> sourceMap, String processedMarkdown){
+    public String updateMarkdown( Map<String, Source> sourceMap, String processedMarkdown){
         // 替换 Markdown 中的文件引用
         for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
             String originalFilename = entry.getKey();
             String serverUrl = entry.getValue().getUrl();
 
-            // 处理标准 Markdown 图片语法: ![](filename.jpg)
-            String imagePattern = "!\\$$(.*?)\\$\\$" + Pattern.quote(originalFilename) + "\\$";
-            processedMarkdown = processedMarkdown.replaceAll(imagePattern, "![$1](" + serverUrl + ")");
+            // 提取文件名（不包含路径）
+            String simpleFilename = originalFilename;
+            if (originalFilename.contains("\\")) {
+                simpleFilename = originalFilename.substring(originalFilename.lastIndexOf('\\') + 1);
+            } else if (originalFilename.contains("/")) {
+                simpleFilename = originalFilename.substring(originalFilename.lastIndexOf('/') + 1);
+            }
+
+            // 转义特殊字符用于正则表达式
+            String escapedOriginalFilename = Pattern.quote(originalFilename);
+            String escapedSimpleFilename = Pattern.quote(simpleFilename);
+
+            // 处理标准 Markdown 图片语法: ![](filename.jpg) 或 ![](path/filename.jpg)
+            // 使用捕获组来保留alt文本
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "!\\[([^\\]]*)\\]\\([^\\)]*" + escapedOriginalFilename + "[^\\)]*\\)",
+                    "![$1](" + serverUrl + ")"
+            );
+
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "!\\[([^\\]]*)\\]\\([^\\)]*" + escapedSimpleFilename + "[^\\)]*\\)",
+                    "![$1](" + serverUrl + ")"
+            );
 
             // 处理普通链接语法: [](filename.jpg)
-            String linkPattern = "\\$$(.*?)\\$\\$" + Pattern.quote(originalFilename) + "\\$";
-            processedMarkdown = processedMarkdown.replaceAll(linkPattern, "[$1](" + serverUrl + ")");
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "\\[([^\\]]*)\\]\\([^\\)]*" + escapedOriginalFilename + "[^\\)]*\\)",
+                    "[$1](" + serverUrl + ")"
+            );
+
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "\\[([^\\]]*)\\]\\([^\\)]*" + escapedSimpleFilename + "[^\\)]*\\)",
+                    "[$1](" + serverUrl + ")"
+            );
 
             // 处理 HTML 音频标签: <audio src="filename.mp3">
-            String audioPattern = "<audio(.*?)src=(\"|')" + Pattern.quote(originalFilename) + "(\"|')(.*?)>";
-            processedMarkdown = processedMarkdown.replaceAll(audioPattern, "<audio$1src=\"" + serverUrl + "\"$4>");
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "<audio([^>]*?)src=[\"'][^\"']*" + escapedOriginalFilename + "[^\"']*[\"']([^>]*?)>",
+                    "<audio$1src=\"" + serverUrl + "\"$2>"
+            );
+
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "<audio([^>]*?)src=[\"'][^\"']*" + escapedSimpleFilename + "[^\"']*[\"']([^>]*?)>",
+                    "<audio$1src=\"" + serverUrl + "\"$2>"
+            );
 
             // 处理 HTML 视频标签: <video src="filename.mp4">
-            String videoPattern = "<video(.*?)src=(\"|')" + Pattern.quote(originalFilename) + "(\"|')(.*?)>";
-            processedMarkdown = processedMarkdown.replaceAll(videoPattern, "<video$1src=\"" + serverUrl + "\"$4>");
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "<video([^>]*?)src=[\"'][^\"']*" + escapedOriginalFilename + "[^\"']*[\"']([^>]*?)>",
+                    "<video$1src=\"" + serverUrl + "\"$2>"
+            );
+
+            processedMarkdown = processedMarkdown.replaceAll(
+                    "<video([^>]*?)src=[\"'][^\"']*" + escapedSimpleFilename + "[^\"']*[\"']([^>]*?)>",
+                    "<video$1src=\"" + serverUrl + "\"$2>"
+            );
         }
         return processedMarkdown;
     }
