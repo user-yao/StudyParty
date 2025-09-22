@@ -93,9 +93,9 @@ public class UserController {
             if(userByPhone != null){
                 return Result.error("用户已存在");
             }
-            user.setStarCoin(100);
-            user.setGroupCoin(0);
-            user.setStarPrestige(0);
+            user.setStarCoin(100L);
+            user.setGroupCoin(0L);
+            user.setStarPrestige(0L);
             user.setClockIn(1);
             user.setFinishTask(0L);
             // 先保存用户信息，获取用户ID

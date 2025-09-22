@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,9 +26,9 @@ public class Article implements Serializable {
     private String content;
     private Long nice;
     private Long collect;
-    private Long viewCont;
-    private Long commentCont;
-    private String createTime;
+    private Long viewCount;
+    private Long commentCount;
+    private Timestamp createTime;
     private int isFeatured;
     private int status;
 }

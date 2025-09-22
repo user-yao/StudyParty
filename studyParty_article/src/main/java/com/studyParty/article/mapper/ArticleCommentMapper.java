@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface ArticleCommentMapper extends BaseMapper<ArticleComment> {
-    IPage<ArticleCommentDTO> selectArticleCommentWithUser(IPage<ArticleCommentDTO> page, @Param("articleId") Long articleId);
+    IPage<ArticleCommentDTO> selectArticleCommentWithUser(IPage<ArticleCommentDTO> page, @Param("articleId") Long articleId, @Param("userId") Long userId);
 }

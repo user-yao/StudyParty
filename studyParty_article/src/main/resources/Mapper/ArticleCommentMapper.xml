@@ -4,14 +4,42 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.studyParty.article.mapper.ArticleCommentMapper">
     <!-- ArticleCommentMapper.xml -->
-    <select id="selectArticleCommentWithUser" resultType="com.studyParty.entity.article.DTO.ArticleCommentDTO">
+    <resultMap id="ArticleCommentDTOResultMap" type="com.studyParty.entity.article.DTO.ArticleCommentDTO">
+        <id property="id" column="id"/>
+        <result property="articleId" column="article_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="nice" column="nice"/>
+        <result property="createTime" column="create_time"/>
+        <result property="status" column="status"/>
+        <result property="name" column="user_name"/>
+        <result property="head" column="user_head"/>
+        <result property="school" column="user_school"/>
+        <result property="star_prestige" column="star_prestige"/>
+        <collection property="sources" ofType="com.studyParty.entity.Source">
+            <id property="id" column="source_id"/>
+            <result property="name" column="source_name"/>
+            <result property="url" column="source_url"/>
+            <result property="filePath" column="source_file_path"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectArticleCommentWithUser" resultMap="ArticleCommentDTOResultMap">
         SELECT
             `article_comment`.*,
             `users`.name as user_name,
             `users`.head as user_head,
-            `users`.school as user_school
+            `users`.school as user_school,
+            `users`.star_prestige,
+            `article_comment_user`.is_nice,
+            `source`.id as source_id,
+            `source`.name as source_name,
+            `source`.url as source_url,
+            `source`.file_path as source_file_path
         FROM `article_comment`
                  LEFT JOIN `users` ON `article_comment`.user_id = `users`.id
+                 LEFT JOIN `source` ON `article_comment`.id = `source`.article_comment_id
+                 LEFT JOIN `article_comment_user` ON `article_comment`.id = `article_comment_user`.article_comment_id AND `article_comment_user`.user_id = #{userId}
         WHERE `article_comment`.article_id = #{articleId}
         ORDER BY `article_comment`.create_time DESC
     </select>

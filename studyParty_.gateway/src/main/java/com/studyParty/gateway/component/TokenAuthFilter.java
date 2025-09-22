@@ -40,6 +40,7 @@ public class TokenAuthFilter implements GlobalFilter, Ordered {
             "/studyParty-group/v3/api-docs",
             "/studyParty-websocket/v3/api-docs",
             "/studyParty-article/v3/api-docs",
+            "/studyParty-dubboApi/v3/api-docs",
             "/static/**"
     );
 

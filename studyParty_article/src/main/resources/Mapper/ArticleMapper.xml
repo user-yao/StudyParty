@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.studyParty.article.mapper.ArticleMapper">
-    <select id="selectArticleWithUser" resultType="com.studyParty.entity.article.DTO.ArticleDTO">
+    <select id="selectArticle" resultType="com.studyParty.entity.article.DTO.ArticleDTO">
         SELECT
             article.id as article_id,
             article.uploader as article_uploader,
@@ -15,15 +15,74 @@
             article.comment_count as article_comment_cont,
             article.create_time as article_create_time,
             article.is_featured as article_is_featured,
-            article.stastus as article_status,
+            article.status as article_status,
             users.name as user_name,
             users.head as user_head,
-            users.school as user_school
+            users.school as user_school,
+            users.star_prestige as user_star_prestige,
+            au.is_nice,
+            au.is_collect,
+            au.is_view
         FROM article
                  LEFT JOIN users ON article.uploader = users.id
+                 LEFT JOIN article_user au ON article.id = au.article_id AND au.user_id = ${userId}
         WHERE (article.title LIKE CONCAT('%', #{searchContext}, '%')
             OR article.summary LIKE CONCAT('%', #{searchContext}, '%'))
         ORDER BY article.create_time DESC
 
+    </select>
+    <select id="recommendArticles" resultType="com.studyParty.entity.article.DTO.ArticleDTO">
+        SELECT
+            a.id,
+            a.uploader,
+            a.title,
+            a.summary,
+            a.nice,
+            a.collect,
+            a.view_count,
+            a.comment_count,
+            a.create_time,
+            a.is_featured,
+            a.status,
+            u.name,
+            u.head,
+            u.school,
+            u.star_prestige,
+            au.is_nice,
+            au.is_collect,
+            au.is_view
+        FROM
+            article a
+                LEFT JOIN users u ON a.uploader = u.id
+                LEFT JOIN article_user au ON a.id = au.article_id AND au.user_id = ${userId}
+        ORDER BY
+            CASE WHEN au.is_view = 1 THEN 1 ELSE 0 END ASC,
+            a.view_count DESC,
+            a.create_time DESC;
+    </select>
+    <select id="myArticle" resultType="com.studyParty.entity.article.DTO.ArticleDTO">
+        select article.id,
+               article.uploader,
+               article.title,
+               article.summary,
+               article.nice,
+               article.collect,
+               article.view_count,
+               article.comment_count,
+               article.create_time,
+               article.is_featured,
+               article.status,
+               users.name,
+               users.head,
+               users.school,
+               users.star_prestige,
+               au.is_nice,
+               au.is_collect,
+               au.is_view
+        from article
+                 left join users on article.uploader = users.id
+                 LEFT JOIN article_user au ON article.id = au.article_id AND au.user_id = ${userId}
+        where article.uploader = #{userId}
+        order by article.view_count desc, article.create_time desc
     </select>
 </mapper>

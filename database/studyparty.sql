@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 31/08/2025 17:57:09
+ Date: 22/09/2025 14:07:52
 */
 
 SET NAMES utf8mb4;
@@ -74,7 +74,7 @@ CREATE TABLE `article`  (
   `comment_count` int NULL DEFAULT NULL COMMENT '评论量',
   `create_time` timestamp NULL DEFAULT NULL COMMENT '发布时间',
   `is_featured` tinyint NULL DEFAULT NULL COMMENT '是否推荐，0，不推荐，1，推荐',
-  `stastus` tinyint NULL DEFAULT NULL COMMENT '身份（1学生，2老师，3企业）',
+  `status` tinyint NULL DEFAULT NULL COMMENT '身份（1学生，2老师，3企业）',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `uploader`(`uploader`) USING BTREE,
   CONSTRAINT `article_ibfk_1` FOREIGN KEY (`uploader`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -83,6 +83,8 @@ CREATE TABLE `article`  (
 -- ----------------------------
 -- Records of article
 -- ----------------------------
+INSERT INTO `article` VALUES (1, 3, '测试标题', '测试概要', '# 测试内容', 0, 0, 2, 0, '2025-09-21 22:45:15', 0, 1);
+INSERT INTO `article` VALUES (2, 3, '测试标题', '测试概要', '# 测试内容', 0, 0, 0, 0, '2025-09-21 23:29:05', 0, 1);
 
 -- ----------------------------
 -- Table structure for article_collect
@@ -121,6 +123,7 @@ CREATE TABLE `article_comment`  (
 -- ----------------------------
 -- Records of article_comment
 -- ----------------------------
+INSERT INTO `article_comment` VALUES (1, 1, 3, '测试内容', 0, '2025-09-22 13:53:18', 1);
 
 -- ----------------------------
 -- Table structure for article_tags
@@ -139,6 +142,24 @@ CREATE TABLE `article_tags`  (
 
 -- ----------------------------
 -- Records of article_tags
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for article_user
+-- ----------------------------
+DROP TABLE IF EXISTS `article_user`;
+CREATE TABLE `article_user`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `article_id` int UNSIGNED NULL DEFAULT NULL,
+  `user_id` int UNSIGNED NULL DEFAULT NULL,
+  `is_nice` tinyint NULL DEFAULT NULL COMMENT '是否点赞0否 1是',
+  `is_collect` tinyint NULL DEFAULT NULL COMMENT '是否收藏',
+  `is_view` tinyint NULL DEFAULT NULL COMMENT '是否查看过',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of article_user
 -- ----------------------------
 
 -- ----------------------------
@@ -176,7 +197,7 @@ CREATE TABLE `friend`  (
 -- ----------------------------
 -- Records of friend
 -- ----------------------------
-INSERT INTO `friend` VALUES (3, 3, 4, '2025-08-21 21:44:49', '小吴');
+INSERT INTO `friend` VALUES (3, 3, 4, '2025-08-21 21:44:49', '吴小勇');
 INSERT INTO `friend` VALUES (4, 4, 3, '2025-08-21 21:44:49', NULL);
 
 -- ----------------------------
@@ -238,11 +259,11 @@ CREATE TABLE `group`  (
 -- ----------------------------
 -- Records of group
 -- ----------------------------
-INSERT INTO `group` VALUES (3, 3, 3, '2025-08-22 00:00:00', '职引星聚研发部门', 1, 0, 100, 1, 3, '学习就是现在！就是现在！', '需要按时完成小组任务，无私奉献，大家都要乐于帮助他人，有任何不懂的可以直接在群里提问1', 'static/head/3/groupHeadPhoto.png', '2025-08-22 00:00:00', 1, NULL, NULL);
+INSERT INTO `group` VALUES (3, 4, 4, '2025-08-22 00:00:00', '职引星聚研发部门', 1, 40, 100, 2, 3, '学习就是现在！就是现在！', '需要按时完成小组任务，无私奉献，大家都要乐于帮助他人，有任何不懂的可以直接在群里提问1', 'static/head/3/groupHeadPhoto.png', '2025-08-22 00:00:00', 1, NULL, NULL);
 INSERT INTO `group` VALUES (19, 3, 3, '2025-08-27 00:00:00', '努力学习，天天向上', 1, 0, 100, 1, 3, '天之骄子要学习，666', '我靠，必须学习好不好，真的', 'static/head/19/groupHeadPhoto.png', '2025-08-27 00:00:00', 1, NULL, NULL);
 INSERT INTO `group` VALUES (20, 3, 3, '2025-08-27 00:00:00', '测试一下', 1, 0, 100, 1, 3, '测试一下', '测试一下', 'static/head/20/groupHeadPhoto.png', '2025-08-27 00:00:00', 0, NULL, NULL);
 INSERT INTO `group` VALUES (21, 3, 3, '2025-08-28 00:00:00', '学习springboot', 1, 0, 100, 1, 3, '只学习springboot以及相关的框架和工具。如mybatis，kafka，redis，还有一些非常实用的工具，例如jwt以及国产化的增强jwt工具，欢迎大家加入我们', '积极活跃', 'static/head/21/groupHeadPhoto.png', '2025-08-28 00:00:00', 1, NULL, NULL);
-INSERT INTO `group` VALUES (23, 3, 3, '2025-08-28 00:00:00', '测试', 1, 0, 100, 1, 3, '测试', '测试', 'static/head/23/groupHeadPhoto.png', '2025-08-28 00:00:00', 1, NULL, NULL);
+INSERT INTO `group` VALUES (23, 3, 3, '2025-08-28 00:00:00', '测试', 1, 0, 100, 2, 3, '测试', '测试', 'static/head/23/groupHeadPhoto.png', '2025-08-28 00:00:00', 1, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for group_join
@@ -262,15 +283,15 @@ CREATE TABLE `group_join`  (
   INDEX `user_id`(`user_id`) USING BTREE,
   INDEX `group_leader`(`group_leader`) USING BTREE,
   CONSTRAINT `group_join_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `group_join_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `group_join_ibfk_3` FOREIGN KEY (`group_leader`) REFERENCES `group` (`leader`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+  CONSTRAINT `group_join_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_join
 -- ----------------------------
-INSERT INTO `group_join` VALUES (3, 3, 3, 4, '邀请加入', 1, 0, '2025-08-31 17:46:09');
-INSERT INTO `group_join` VALUES (4, 23, 3, 4, '我想加入啊', 0, 0, '2025-08-31 17:47:40');
+INSERT INTO `group_join` VALUES (3, 3, 3, 4, '邀请加入', 1, 1, '2025-08-31 17:46:09');
+INSERT INTO `group_join` VALUES (4, 23, 3, 4, '我想加入啊', 0, 1, '2025-08-31 17:47:40');
+INSERT INTO `group_join` VALUES (5, 3, 4, 3, '我要加入！', 0, 1, '2025-09-01 21:32:02');
 
 -- ----------------------------
 -- Table structure for group_tags
@@ -314,8 +335,9 @@ CREATE TABLE `group_task`  (
 -- ----------------------------
 -- Records of group_task
 -- ----------------------------
-INSERT INTO `group_task` VALUES (8, 3, '学习security', 3, '2025-08-25 19:33:43', '2025-09-25 19:33:43', 0, '# 基于反向驱动式学习的产教融合平台架构设计文档（核心功能部分）\n\n## 一、功能概述 \n\n本平台以“**企业需求反向驱动教学供给**”为核心逻辑，构建“企业需求输入-课程动态适配-实践场景验证-效果反馈优化”的闭环产教融合体系。聚焦解决传统产教融合中“企业需求传递滞后、课程与岗位脱节、实践环节形式化”三大痛点，通过**需求反向传导机制**、**校企协同设计工具**、**场景化实践引擎**三大核心模块，实现企业需求与教育供给的实时匹配，推动“岗位-课程-实践-就业”的精准对接。 \n\n## 二、详细功能设计（核心模块） \n\n### （一）企业需求管理模块（反向驱动源点） \n\n![security](http://localhost:8080/static/uploads/2025/08/24/f4506b8135d94eca808a26640ed13199.png)', 1, '2025-08-24 23:25:57');
-INSERT INTO `group_task` VALUES (9, 3, '学习security', 3, '2025-08-25 19:33:43', '2025-09-25 19:33:43', 0, '# 基于反向驱动式学习的产教融合平台架构设计文档（核心功能部分）\n\n## 一、功能概述 \n\n本平台以“**企业需求反向驱动教学供给**”为核心逻辑，构建“企业需求输入-课程动态适配-实践场景验证-效果反馈优化”的闭环产教融合体系。聚焦解决传统产教融合中“企业需求传递滞后、课程与岗位脱节、实践环节形式化”三大痛点，通过**需求反向传导机制**、**校企协同设计工具**、**场景化实践引擎**三大核心模块，实现企业需求与教育供给的实时匹配，推动“岗位-课程-实践-就业”的精准对接。 \n\n## 二、详细功能设计（核心模块） \n\n### （一）企业需求管理模块（反向驱动源点） \n\n![security](http://localhost:8080/static/uploads/2025/08/25/cc9de24c38004334ac7b99d4896ff453.png)', 1, '2025-08-25 00:13:57');
+INSERT INTO `group_task` VALUES (8, 3, '学习security', 3, '2025-08-25 19:33:43', '2025-10-25 19:33:43', 1, '# 基于反向驱动式学习的产教融合平台架构设计文档（核心功能部分）\n\n## 一、功能概述 \n\n本平台以“**企业需求反向驱动教学供给**”为核心逻辑，构建“企业需求输入-课程动态适配-实践场景验证-效果反馈优化”的闭环产教融合体系。聚焦解决传统产教融合中“企业需求传递滞后、课程与岗位脱节、实践环节形式化”三大痛点，通过**需求反向传导机制**、**校企协同设计工具**、**场景化实践引擎**三大核心模块，实现企业需求与教育供给的实时匹配，推动“岗位-课程-实践-就业”的精准对接。 \n\n## 二、详细功能设计（核心模块） \n\n### （一）企业需求管理模块（反向驱动源点） \n\n![security](http://192.168.1.13:8080/static/uploads/2025/08/24/f4506b8135d94eca808a26640ed13199.png)', 2, '2025-08-24 23:25:57');
+INSERT INTO `group_task` VALUES (9, 3, '学习security', 3, '2025-08-25 19:33:43', '2025-10-25 19:33:43', 1, '# 基于反向驱动式学习的产教融合平台架构设计文档（核心功能部分）\n\n## 一、功能概述 \n\n本平台以“**企业需求反向驱动教学供给**”为核心逻辑，构建“企业需求输入-课程动态适配-实践场景验证-效果反馈优化”的闭环产教融合体系。聚焦解决传统产教融合中“企业需求传递滞后、课程与岗位脱节、实践环节形式化”三大痛点，通过**需求反向传导机制**、**校企协同设计工具**、**场景化实践引擎**三大核心模块，实现企业需求与教育供给的实时匹配，推动“岗位-课程-实践-就业”的精准对接。 \n\n## 二、详细功能设计（核心模块） \n\n### （一）企业需求管理模块（反向驱动源点）', 2, '2025-08-25 00:13:57');
+INSERT INTO `group_task` VALUES (10, 3, '测试内容', 4, '2025-10-02 21:22:22', '2025-10-29 21:22:22', 0, '# 基于反向驱动式学习的产教融合平台架构设计文档（核心功能部分）\n\n## 一、功能概述 \n\n本平台以“**企业需求反向驱动教学供给**”为核心逻辑，构建“企业需求输入-课程动态适配-实践场景验证-效果反馈优化”的闭环产教融合体系。聚焦解决传统产教融合中“企业需求传递滞后、课程与岗位脱节、实践环节形式化”三大痛点，通过**需求反向传导机制**、**校企协同设计工具**、**场景化实践引擎**三大核心模块，实现企业需求与教育供给的实时匹配，推动“岗位-课程-实践-就业”的精准对接。 \n\n## 二、详细功能设计（核心模块） \n\n### （一）企业需求管理模块（反向驱动源点） \n\n```java\nSystem.out.println(\"Hello World!\");\n```\n\n', 2, '2025-09-03 00:32:30');
 
 -- ----------------------------
 -- Table structure for group_task_answer
@@ -334,11 +356,13 @@ CREATE TABLE `group_task_answer`  (
   INDEX `user_id`(`user_id`) USING BTREE,
   CONSTRAINT `group_task_answer_ibfk_1` FOREIGN KEY (`group_task_id`) REFERENCES `group_task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_task_answer_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `group_user` (`group_user`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_task_answer
 -- ----------------------------
+INSERT INTO `group_task_answer` VALUES (8, 8, 3, '# 作业标题', 0, -1, '2025-09-13 21:43:53');
+INSERT INTO `group_task_answer` VALUES (9, 9, 3, '# 作业标题\n\n![图片1](http://192.168.227.136:8080/static/uploads/2025/09/13/f7e751f4ae4c4897b67f8fd7d366c244.jpg)\n', 1, -1, '2025-09-13 21:54:15');
 
 -- ----------------------------
 -- Table structure for group_user
@@ -355,16 +379,18 @@ CREATE TABLE `group_user`  (
   INDEX `group_user`(`group_user`) USING BTREE,
   CONSTRAINT `group_user_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `group_user_ibfk_2` FOREIGN KEY (`group_user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of group_user
 -- ----------------------------
-INSERT INTO `group_user` VALUES (6, 3, 3, 0, '2025-08-22 00:00:00');
 INSERT INTO `group_user` VALUES (10, 19, 3, 0, '2025-08-27 00:00:00');
 INSERT INTO `group_user` VALUES (11, 20, 3, 0, '2025-08-27 00:00:00');
 INSERT INTO `group_user` VALUES (12, 21, 3, 0, '2025-08-28 00:00:00');
 INSERT INTO `group_user` VALUES (14, 23, 3, 0, '2025-08-28 00:00:00');
+INSERT INTO `group_user` VALUES (15, 3, 4, 0, '2025-08-31 00:00:00');
+INSERT INTO `group_user` VALUES (16, 23, 4, 0, '2025-08-31 00:00:00');
+INSERT INTO `group_user` VALUES (17, 3, 3, 40, '2025-09-01 00:00:00');
 
 -- ----------------------------
 -- Table structure for notice
@@ -417,13 +443,16 @@ CREATE TABLE `source`  (
   `task_id` int NULL DEFAULT NULL COMMENT '任务表Id',
   `task_answer_id` int NULL DEFAULT NULL COMMENT '任务回答表Id',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of source
 -- ----------------------------
 INSERT INTO `source` VALUES (6, 'f4506b8135d94eca808a26640ed13199.png', 'http://localhost:8080/static/uploads/2025/08/24/f4506b8135d94eca808a26640ed13199.png', 'D:/studyParty/uploads/2025/08/24/f4506b8135d94eca808a26640ed13199.png', NULL, NULL, NULL, 8, NULL, NULL, NULL);
 INSERT INTO `source` VALUES (7, 'cc9de24c38004334ac7b99d4896ff453.png', 'http://localhost:8080/static/uploads/2025/08/25/cc9de24c38004334ac7b99d4896ff453.png', 'D:/studyParty/uploads/2025/08/25/cc9de24c38004334ac7b99d4896ff453.png', NULL, NULL, NULL, 9, NULL, NULL, NULL);
+INSERT INTO `source` VALUES (8, '1a9760cbd8024f41ba06a40774c88d16.jpg', 'http://192.168.227.136:8080/static/uploads/2025/09/13/1a9760cbd8024f41ba06a40774c88d16.jpg', 'D:/studyParty/uploads/2025/09/13/1a9760cbd8024f41ba06a40774c88d16.jpg', NULL, NULL, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `source` VALUES (9, 'daaf5d5de2504084825cde41660e0876.jpg', 'http://192.168.227.136:8080/static/uploads/2025/09/13/daaf5d5de2504084825cde41660e0876.jpg', 'D:/studyParty/uploads/2025/09/13/daaf5d5de2504084825cde41660e0876.jpg', NULL, NULL, 2, NULL, NULL, NULL, NULL);
+INSERT INTO `source` VALUES (10, '08e97716198a414cab177894ec840dae.jpg', 'http://192.168.227.136:8080/static/uploads/2025/09/13/08e97716198a414cab177894ec840dae.jpg', 'D:/studyParty/uploads/2025/09/13/08e97716198a414cab177894ec840dae.jpg', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for tags
@@ -489,6 +518,44 @@ CREATE TABLE `task_answer`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for user_article
+-- ----------------------------
+DROP TABLE IF EXISTS `user_article`;
+CREATE TABLE `user_article`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NULL DEFAULT NULL,
+  `article_id` int UNSIGNED NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `user_id`(`user_id`) USING BTREE,
+  INDEX `article_id`(`article_id`) USING BTREE,
+  CONSTRAINT `user_article_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_article_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of user_article
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for user_create_task
+-- ----------------------------
+DROP TABLE IF EXISTS `user_create_task`;
+CREATE TABLE `user_create_task`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `article_id` int UNSIGNED NULL DEFAULT NULL,
+  `user_id` int UNSIGNED NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `user_id`(`user_id`) USING BTREE,
+  INDEX `user_create_task_ibfk_1`(`article_id`) USING BTREE,
+  CONSTRAINT `user_create_task_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_create_task_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of user_create_task
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for user_plan
 -- ----------------------------
 DROP TABLE IF EXISTS `user_plan`;
@@ -538,11 +605,29 @@ CREATE TABLE `user_task`  (
   `task_id` int UNSIGNED NULL DEFAULT NULL,
   `task_type` tinyint NULL DEFAULT NULL COMMENT '1.任务所 2.小组任务',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user_task
 -- ----------------------------
+INSERT INTO `user_task` VALUES (1, 3, 9, 2);
+INSERT INTO `user_task` VALUES (2, 3, 9, 2);
+INSERT INTO `user_task` VALUES (3, 3, 9, 2);
+INSERT INTO `user_task` VALUES (4, 3, 9, 2);
+INSERT INTO `user_task` VALUES (5, 3, 9, 2);
+INSERT INTO `user_task` VALUES (6, 3, 9, 2);
+INSERT INTO `user_task` VALUES (7, 3, 9, 2);
+INSERT INTO `user_task` VALUES (8, 3, 9, 2);
+INSERT INTO `user_task` VALUES (9, 3, 8, 2);
+INSERT INTO `user_task` VALUES (10, 3, 8, 2);
+INSERT INTO `user_task` VALUES (11, 3, 8, 2);
+INSERT INTO `user_task` VALUES (12, 3, 8, 2);
+INSERT INTO `user_task` VALUES (13, 3, 9, 2);
+INSERT INTO `user_task` VALUES (14, 3, 8, 2);
+INSERT INTO `user_task` VALUES (15, 3, 8, 2);
+INSERT INTO `user_task` VALUES (16, 3, 9, 2);
+INSERT INTO `user_task` VALUES (17, 3, 8, 2);
+INSERT INTO `user_task` VALUES (18, 3, 9, 2);
 
 -- ----------------------------
 -- Table structure for users
@@ -574,9 +659,9 @@ CREATE TABLE `users`  (
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (3, '姚镇涛', '$2a$12$e0Bk5agXDNUsBSJAStEVe.S6S3fUDPUKyOcX83IkK.lLom2G/6DZm', 'static/head/3/userHeadPhoto.png', '男', '计算机科学与技术', '大二', 1, 100, 0, 0, '13453981285', '天津职业技术师范大学', 141, '157469291@qq.com', 0, '2025-08-31', '2025-07-14');
-INSERT INTO `users` VALUES (4, '吴智勇', '$2a$12$svql.esIY7zyoGWnO3LLCugclM5Un7c1VspIJ/x9M4Q0mAto9YKtW', 'static/head/boys.png', '男', '计算机科学与技术', '大二', 1, 100, 0, 0, '15713576510', '天津职业技术师范大学', 1, '', 0, '2025-08-31', '2025-08-03');
-INSERT INTO `users` VALUES (5, '老师A', '$2a$12$JaZq7YD9y1nRyz9Sjt9lKeIzxy.zwDnSPMiTYQEbRrNfEv8Nj1qHC', 'static/head/boys.png', '男', '计算机科学与技术', '大二', 2, 100, 0, 0, '1212121212', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-14');
+INSERT INTO `users` VALUES (3, '姚镇涛', '$2a$12$e0Bk5agXDNUsBSJAStEVe.S6S3fUDPUKyOcX83IkK.lLom2G/6DZm', 'static/head/3/userHeadPhoto.png', '男', '计算机科学与技术', '大二', 1, 100, 0, 0, '13453981285', '天津职业技术师范大学', 3, '157469291@qq.com', 0, '2025-09-22', '2025-07-14');
+INSERT INTO `users` VALUES (4, '吴智勇', '$2a$12$svql.esIY7zyoGWnO3LLCugclM5Un7c1VspIJ/x9M4Q0mAto9YKtW', 'static/head/boys.png', '男', '计算机科学与技术', '大二', 1, 100, 0, 0, '15713576510', '天津职业技术师范大学', 1, '', 0, '2025-09-03', '2025-08-03');
+INSERT INTO `users` VALUES (5, '任少鹏', '$2a$12$JaZq7YD9y1nRyz9Sjt9lKeIzxy.zwDnSPMiTYQEbRrNfEv8Nj1qHC', 'static/head/boys.png', '男', '计算机科学与技术', '大二', 2, 100, 0, 0, '18512290493', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-14');
 INSERT INTO `users` VALUES (6, '企业A', '$2a$12$3Y50P0n92gfn2Coei7GY/.58RbLHyi77/IwrASnnFsUlwZ08iswAK', 'static/head/boys.png', '男', '天津中铁三局', '人事部主任', 3, 100, 0, 0, '1313131313', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-14');
 INSERT INTO `users` VALUES (7, '学生A', '$2a$12$y4//67E9uxNjhYTkrsR42OqkBDqX7owHhzm7dCdU5fyg18VFHxfuu', 'static/head/boys.png', '男', '软件工程', '大一', 1, 100, 0, 0, '123123123', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-14');
 INSERT INTO `users` VALUES (8, '学生B', '$2a$12$WUBxREyyj8vXdm/k/dpeWOXOwEH2y5R29ToYfbPaQxKRL8Swn/gym', 'static/head/8/userHeadPhoto.png', '男', '软件工程', '大一', 1, 100, 0, 0, '12341234', '天津职业技术师范大学', 0, '', 0, NULL, '2025-08-16');

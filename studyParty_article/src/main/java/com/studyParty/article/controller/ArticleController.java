@@ -4,19 +4,24 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.studyParty.article.common.Result;
 import com.studyParty.article.mapper.ArticleMapper;
+import com.studyParty.article.mapper.ArticleUserMapper;
 import com.studyParty.article.mapper.SourceMapper;
 import com.studyParty.article.services.MarkdownService;
 import com.studyParty.article.services.SourceServer;
 import com.studyParty.dubboApi.services.BusinessServer;
 import com.studyParty.entity.Source;
 import com.studyParty.entity.article.Article;
+import com.studyParty.entity.article.ArticleUser;
 import com.studyParty.entity.article.DTO.ArticleDTO;
 import com.studyParty.entity.user.User;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,38 +32,27 @@ public class ArticleController {
     private final SourceMapper sourceMapper;
     private final MarkdownService markdownService;
     private final SourceServer sourceServer;
+    private final ArticleUserMapper articleUserMapper;
     @DubboReference
     private BusinessServer businessServer;
     @PostMapping("/myArticle")
     public Result<?> myArticle(@RequestHeader("X-User-Id") String userId) {
-        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("uploader", userId);
-        queryWrapper.select("id", "uploader",  "title", "summary", "nice", "collect", "view_cont", "comment_cont", "create_time", "is_featured", "status");
-        return Result.success(articleMapper.selectList(queryWrapper));
-    }
-    @PostMapping("/articleById")
-    public Result<?> articleById(Long articleId) {
-        Article article = articleMapper.selectById(articleId);
-        if (article == null){
-            return Result.error("文章不存在");
-        }
-        article.setViewCont(article.getViewCont() + 1);
-        articleMapper.updateById(article);
-        return Result.success(article);
+        return Result.success(articleMapper.myArticle(Long.parseLong(userId)));
     }
     @PostMapping("/searchArticle")
-    public Result<?> searchArticle(String searchContext, int currentPage) {
+    public Result<?> searchArticle(String searchContext, int currentPage, @RequestHeader("X-User-Id") String userId) {
         if (currentPage <= 0) {
             currentPage = 1;
         }
         Page<ArticleDTO> page = new Page<>(currentPage, 10);
-        return Result.success(articleMapper.selectArticleWithUser(page, searchContext));
+        return Result.success(articleMapper.selectArticle(page, searchContext, Long.parseLong(userId)));
     }
     @PostMapping("/createArticle")
     public Result<?> createArticle(String title,
                                    String summary,
                                    String markdown,
-                                   @RequestParam("file") MultipartFile[] sources,
+                                   @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
+                                   @RequestPart(value = "sources", required = false) MultipartFile[] sources,
                                    @RequestHeader("X-User-Id") String userId) {
         Article article = new Article();
         String processedMarkdown = markdown;
@@ -83,9 +77,9 @@ public class ArticleController {
         article.setUploader(Long.parseLong(userId));
         article.setNice(0L);
         article.setCollect(0L);
-        article.setViewCont(0L);
-        article.setCommentCont(0L);
-        article.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        article.setViewCount(0L);
+        article.setCommentCount(0L);
+        article.setCreateTime(new Timestamp(System.currentTimeMillis()));
         User user = businessServer.selectUserById(Long.parseLong(userId));
         article.setStatus(user.getStatus());
         articleMapper.insert(article);
@@ -110,5 +104,90 @@ public class ArticleController {
         articleMapper.deleteById(articleId);
         sourceServer.deleteSource(articleId,false);
         return Result.success();
+    }
+
+    @GetMapping("/recommend")
+    public Result<?> recommendArticles(@RequestParam(defaultValue = "1") int page, @RequestHeader("X-User-Id") String userId) {
+        Page<ArticleDTO> page1 = new Page<>(page, 10);
+        return Result.success(articleMapper.recommendArticles(page1, Long.parseLong(userId)));
+    }
+    @PostMapping("/articleById")
+    public Result<?> articleById(Long articleId,@RequestHeader("X-User-Id") String userId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null){
+            return Result.error("文章不存在");
+        }
+        User user = businessServer.selectUserById(article.getUploader());
+        QueryWrapper<ArticleUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("article_id", articleId)
+                .eq("user_id", Long.parseLong(userId));
+        ArticleUser articleUser = articleUserMapper.selectOne(queryWrapper);
+        if (articleUser == null){
+            articleUser = new ArticleUser();
+            articleUser.setArticleId(articleId);
+            articleUser.setUserId(Long.parseLong(userId));
+            articleUser.setIsNice(0);
+            articleUser.setIsCollect(0);
+            articleUser.setIsView(1);
+            articleUserMapper.insert(articleUser);
+        }else if (articleUser.getIsView() == 0){
+            articleUser.setIsView(1);
+            articleUserMapper.updateById(articleUser);
+        }
+        ArticleDTO articleRecommendArticlesDTO =
+                new ArticleDTO(article, user,articleUser);
+        article.setViewCount(article.getViewCount() + 1);
+        articleMapper.updateById(article);
+        return Result.success(articleRecommendArticlesDTO);
+    }
+    @PostMapping("/niceArticle")
+    public Result<?> niceArticle(Long articleId, @RequestHeader("X-User-Id") String userId) {
+        QueryWrapper<ArticleUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("article_id", articleId)
+                .eq("user_id", Long.parseLong(userId));
+        ArticleUser articleUser = articleUserMapper.selectOne(queryWrapper);
+        if (articleUser == null){
+            articleUser = new ArticleUser();
+            articleUser.setArticleId(articleId);
+            articleUser.setUserId(Long.parseLong(userId));
+            articleUser.setIsNice(1);
+            articleUser.setIsCollect(0);
+            articleUser.setIsView(0);
+            articleUserMapper.insert(articleUser);
+        }else {
+            if (articleUser.getIsNice() == 1){
+                articleUser.setIsNice(0);
+                articleUserMapper.updateById(articleUser);
+            }else if (articleUser.getIsNice() == 0){
+                articleUser.setIsNice(1);
+                articleUserMapper.updateById(articleUser);
+            }
+        }
+        return Result.success();
+    }
+    @PostMapping("/collectArticle")
+    public Result<?> collectArticle(Long articleId, @RequestHeader("X-User-Id") String userId) {
+         QueryWrapper<ArticleUser> queryWrapper = new QueryWrapper<>();
+         queryWrapper.eq("article_id", articleId)
+                 .eq("user_id", Long.parseLong(userId));
+         ArticleUser articleUser = articleUserMapper.selectOne(queryWrapper);
+         if (articleUser == null){
+             articleUser = new ArticleUser();
+             articleUser.setArticleId(articleId);
+             articleUser.setUserId(Long.parseLong(userId));
+             articleUser.setIsNice(0);
+             articleUser.setIsCollect(1);
+             articleUser.setIsView(0);
+             articleUserMapper.insert(articleUser);
+         } else {
+             if (articleUser.getIsCollect() == 1){
+                 articleUser.setIsCollect(0);
+                 articleUserMapper.updateById(articleUser);
+             }else if (articleUser.getIsCollect() == 0){
+                 articleUser.setIsCollect(1);
+                 articleUserMapper.updateById(articleUser);
+             }
+         }
+         return Result.success();
     }
 }

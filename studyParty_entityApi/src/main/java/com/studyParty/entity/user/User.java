@@ -29,9 +29,9 @@ public class User implements Serializable {
     private String major;
     private String grade;
     private int status;
-    private int starCoin;
-    private int groupCoin;
-    private int starPrestige;
+    private Long starCoin;
+    private Long groupCoin;
+    private Long starPrestige;
     private String phone;
     private String school;
     private int clockIn;
@@ -55,9 +55,9 @@ public class User implements Serializable {
         this.phone = phone;
         this.school = school;
         this.email = email;
-        this.starCoin  = 100;
-        this.groupCoin = 0;
-        this.starPrestige = 0;
+        this.starCoin  = 100L;
+        this.groupCoin = 0L;
+        this.starPrestige = 0L;
         this.clockIn = 1;
         this.lastLogin = Date.valueOf(LocalDate.now());
         this.finishTask = 0L;

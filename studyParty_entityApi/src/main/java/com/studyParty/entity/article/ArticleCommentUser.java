@@ -7,24 +7,18 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.sql.Timestamp;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Data
-@TableName("`article_comment`")
-public class ArticleComment implements Serializable {
+@TableName("`article_comment_user`")
+public class ArticleCommentUser implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
     private Long id;
-    private Long articleId;
+    private Long articleCommentId;
     private Long userId;
-    private String content;
-    private Long nice;
-    private Timestamp createTime;
-    private int status;
-
+    private int isNice;
 }

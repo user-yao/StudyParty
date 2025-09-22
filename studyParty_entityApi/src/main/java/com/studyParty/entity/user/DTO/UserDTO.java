@@ -24,7 +24,7 @@ public class UserDTO implements Serializable {
     private String grade;
     private String remark;
     private int status;
-    private int starPrestige;
+    private Long starPrestige;
     private String phone;
     private String school;
     private int clockIn;

@@ -17,11 +17,10 @@ import com.studyParty.entity.task.DTO.TaskAnswerDTO;
 import com.studyParty.entity.task.Task;
 import com.studyParty.entity.task.TaskAnswer;
 import com.studyParty.entity.user.User;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
@@ -45,9 +44,9 @@ public class TaskAnswerController {
 
     @PostMapping("/addTaskAnswer")
     public Result<?> addTask(Long taskId,
-                             String title,
                              String markdown,
-                             @RequestParam("file") MultipartFile[] sources,
+                             @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
+                             @RequestPart(value = "sources", required = false) MultipartFile[] sources,
                              @RequestHeader("X-User-Id") String userId){
         TaskAnswer taskAnswer = new TaskAnswer();
         String processedMarkdown = markdown;
@@ -55,6 +54,7 @@ public class TaskAnswerController {
             return Result.error("上传文件错误");
         }
         Map<String, Source> sourceMap = new HashMap<>();
+
         // 只有当sources不为null且不为空数组时才处理资源文件
         if (sources != null && sources.length > 0) {
             for (MultipartFile source : sources) {
