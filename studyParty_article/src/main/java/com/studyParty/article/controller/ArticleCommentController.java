@@ -25,10 +25,12 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController("/articleComment")
+@RestController
+@RequestMapping("/articleComment")
 @RequiredArgsConstructor
 public class ArticleCommentController {
     private final SourceMapper sourceMapper;
+    private final ArticleMapper articleMapper;
     private final BusinessServer businessServer;
     private final SourceServer sourceServer;
     private final ArticleCommentMapper articleCommentMapper;
@@ -41,6 +43,7 @@ public class ArticleCommentController {
                                        @RequestPart(value = "sources", required = false) MultipartFile[] sources,
                                        @RequestHeader("X-User-Id") String userId){
         ArticleComment articleComment = new ArticleComment();
+        Article article = articleMapper.selectById(articleId);
         Map<String, Source> sourceMap = new HashMap<>();
         if (sources != null && sources.length > 0) {
             for (MultipartFile source : sources) {
@@ -55,14 +58,39 @@ public class ArticleCommentController {
         articleComment.setCreateTime(new Timestamp(System.currentTimeMillis()));
         User user = businessServer.selectUserById(Long.parseLong(userId));
         articleComment.setStatus(user.getStatus());
-        articleCommentMapper.insert(articleComment);
+        article.setCommentCount(article.getCommentCount() + 1);
+        articleMapper.updateById(article);
+        
+        // 检查是否在1秒内发布了相同内容的评论（防止重复提交）
+        QueryWrapper<ArticleComment> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("article_id", articleId);
+        queryWrapper.eq("user_id", Long.parseLong(userId));
+        queryWrapper.eq("content", articleComment.getContent());
+        // 检查1秒内是否有相同内容的评论
+        Timestamp oneSecondAgo = new Timestamp(System.currentTimeMillis() - 1000);
+        queryWrapper.ge("create_time", oneSecondAgo);
+        
+        ArticleComment recentSameComment = articleCommentMapper.selectOne(queryWrapper);
+        Long targetCommentId; // 用于存储目标评论的ID
+        
+        if (recentSameComment == null){
+            // 如果没有近期的相同评论，则插入新评论
+            articleCommentMapper.insert(articleComment);
+            targetCommentId = articleComment.getId();
+        }else {
+            // 如果1秒内有相同内容的评论，使用已存在的评论ID
+            targetCommentId = recentSameComment.getId();
+        }
+        
+        // 统一处理资源文件的关联
         if (!sourceMap.isEmpty()){
             for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
                 Source source = entry.getValue();
-                source.setArticleCommentId(articleComment.getId());
+                source.setArticleCommentId(targetCommentId);
                 sourceMapper.insert(source);
             }
         }
+        
         return Result.success();
     }
     @PostMapping("/deleteArticleComment")
@@ -89,25 +117,31 @@ public class ArticleCommentController {
         queryWrapper.eq("article_comment_id", articleCommentId)
                 .eq("user_id", Long.parseLong(userId));
         ArticleCommentUser articleCommentUser = articleCommentUserMapper.selectOne(queryWrapper);
+        ArticleComment articleComment = articleCommentMapper.selectById(articleCommentId);
         if (articleCommentUser == null){
              articleCommentUser = new ArticleCommentUser();
              articleCommentUser.setArticleCommentId(articleCommentId);
              articleCommentUser.setUserId(Long.parseLong(userId));
              articleCommentUser.setIsNice(1);
+             articleComment.setNice(articleComment.getNice() + 1);
              articleCommentUserMapper.insert(articleCommentUser);
-            return Result.success("点赞");
+             articleCommentMapper.updateById(articleComment);
+            return Result.success("点赞成功");
         }else{
             if (articleCommentUser.getIsNice() == 1){
                 articleCommentUser.setIsNice(0);
+                articleComment.setNice(articleComment.getNice() - 1);
                 articleCommentUserMapper.updateById(articleCommentUser);
-                return Result.success("取消");
+                articleCommentMapper.updateById(articleComment);
+                return Result.success("取消点赞");
             }else if (articleCommentUser.getIsNice() == 0){
                 articleCommentUser.setIsNice(1);
+                articleComment.setNice(articleComment.getNice() + 1);
                 articleCommentUserMapper.updateById(articleCommentUser);
-                return Result.success("点赞");
-            }else{
-                return Result.error("操作失败");
+                articleCommentMapper.updateById(articleComment);
+                return Result.success("点赞成功");
             }
         }
+        return Result.error("操作失败");
     }
 }

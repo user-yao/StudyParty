@@ -146,6 +146,7 @@ public class ArticleController {
         queryWrapper.eq("article_id", articleId)
                 .eq("user_id", Long.parseLong(userId));
         ArticleUser articleUser = articleUserMapper.selectOne(queryWrapper);
+        Article article = articleMapper.selectById(articleId);
         if (articleUser == null){
             articleUser = new ArticleUser();
             articleUser.setArticleId(articleId);
@@ -153,17 +154,26 @@ public class ArticleController {
             articleUser.setIsNice(1);
             articleUser.setIsCollect(0);
             articleUser.setIsView(0);
+            article.setNice(article.getNice() + 1);
             articleUserMapper.insert(articleUser);
+            articleMapper.updateById(article);
+            return Result.success("点赞成功");
         }else {
             if (articleUser.getIsNice() == 1){
                 articleUser.setIsNice(0);
+                article.setNice(article.getNice() - 1);
                 articleUserMapper.updateById(articleUser);
+                articleMapper.updateById(article);
+                return Result.success("取消点赞");
             }else if (articleUser.getIsNice() == 0){
                 articleUser.setIsNice(1);
+                article.setNice(article.getNice() + 1);
                 articleUserMapper.updateById(articleUser);
+                articleMapper.updateById(article);
+                return Result.success("点赞成功");
             }
         }
-        return Result.success();
+        return Result.error("操作失败");
     }
     @PostMapping("/collectArticle")
     public Result<?> collectArticle(Long articleId, @RequestHeader("X-User-Id") String userId) {
@@ -171,6 +181,7 @@ public class ArticleController {
          queryWrapper.eq("article_id", articleId)
                  .eq("user_id", Long.parseLong(userId));
          ArticleUser articleUser = articleUserMapper.selectOne(queryWrapper);
+         Article article = articleMapper.selectById(articleId);
          if (articleUser == null){
              articleUser = new ArticleUser();
              articleUser.setArticleId(articleId);
@@ -178,16 +189,25 @@ public class ArticleController {
              articleUser.setIsNice(0);
              articleUser.setIsCollect(1);
              articleUser.setIsView(0);
+             article.setCollect(article.getCollect() + 1);
              articleUserMapper.insert(articleUser);
+             articleMapper.updateById(article);
+             return Result.success("收藏成功");
          } else {
              if (articleUser.getIsCollect() == 1){
                  articleUser.setIsCollect(0);
+                 article.setCollect(article.getCollect() - 1);
                  articleUserMapper.updateById(articleUser);
+                 articleMapper.updateById(article);
+                 return Result.success("取消收藏");
              }else if (articleUser.getIsCollect() == 0){
                  articleUser.setIsCollect(1);
+                 article.setCollect(article.getCollect() + 1);
                  articleUserMapper.updateById(articleUser);
+                 articleMapper.updateById(article);
+                 return Result.success("收藏成功");
              }
          }
-         return Result.success();
+         return Result.error("操作失败");
     }
 }

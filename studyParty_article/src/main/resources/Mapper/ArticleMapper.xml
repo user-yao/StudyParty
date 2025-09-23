@@ -58,7 +58,7 @@
         ORDER BY
             CASE WHEN au.is_view = 1 THEN 1 ELSE 0 END ASC,
             a.view_count DESC,
-            a.create_time DESC;
+            a.create_time DESC
     </select>
     <select id="myArticle" resultType="com.studyParty.entity.article.DTO.ArticleDTO">
         select article.id,
