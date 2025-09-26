@@ -54,7 +54,6 @@ public class ArticleController {
                                    @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
                                    @RequestPart(value = "sources", required = false) MultipartFile[] sources,
                                    @RequestHeader("X-User-Id") String userId) {
-        Article article = new Article();
         String processedMarkdown = markdown;
         if(processedMarkdown == null){
             return Result.error("上传文件错误");
@@ -71,18 +70,11 @@ public class ArticleController {
         }
         // 替换 Markdown 中的文件引用
         processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
-        article.setTitle(title);
-        article.setSummary(summary);
-        article.setContent(processedMarkdown);
-        article.setUploader(Long.parseLong(userId));
-        article.setNice(0L);
-        article.setCollect(0L);
-        article.setViewCount(0L);
-        article.setCommentCount(0L);
-        article.setCreateTime(new Timestamp(System.currentTimeMillis()));
         User user = businessServer.selectUserById(Long.parseLong(userId));
-        article.setStatus(user.getStatus());
+        Article article = new Article(title,summary,processedMarkdown,Long.parseLong(userId),user.getStatus());
         articleMapper.insert(article);
+        ArticleUser articleUser = new ArticleUser(article.getId(), Long.parseLong(userId));
+        articleUserMapper.insert(articleUser);
         if (!sourceMap.isEmpty()) {
             for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
                 Source source = entry.getValue();
@@ -102,6 +94,7 @@ public class ArticleController {
             return Result.error("没有权限");
         }
         articleMapper.deleteById(articleId);
+        articleUserMapper.delete(new QueryWrapper<ArticleUser>().eq("article_id",articleId));
         sourceServer.deleteSource(articleId,false);
         return Result.success();
     }

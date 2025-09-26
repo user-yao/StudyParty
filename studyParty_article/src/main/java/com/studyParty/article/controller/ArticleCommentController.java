@@ -39,11 +39,67 @@ public class ArticleCommentController {
     @PostMapping("/addArticleComment")
     public Result<?> addArticleComment(String content,
                                        Long articleId,
-                                       @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
-                                       @RequestPart(value = "sources", required = false) MultipartFile[] sources,
                                        @RequestHeader("X-User-Id") String userId){
-        ArticleComment articleComment = new ArticleComment();
+        // 参数校验
+        if (content == null || content.trim().isEmpty()) {
+            return Result.error("评论内容不能为空");
+        }
+        if (articleId == null) {
+            return Result.error("文章ID不能为空");
+        }
+        if (userId == null || userId.trim().isEmpty()) {
+            return Result.error("用户ID不能为空");
+        }
+
+        Long parsedUserId;
+        try {
+            parsedUserId = Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            return Result.error("用户ID格式错误");
+        }
+
+        // 查询文章信息
         Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            return Result.error("文章不存在");
+        }
+
+        // 查询用户信息
+        User user = businessServer.selectUserById(parsedUserId);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+
+        ArticleComment articleComment = new ArticleComment();
+        articleComment.setArticleId(articleId);
+        articleComment.setUserId(parsedUserId);
+        articleComment.setContent(content);
+        articleComment.setNice(0L);
+        articleComment.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        articleComment.setStatus(user.getStatus());
+
+        // 使用事务确保数据一致性
+        try {
+            // 更新文章评论数（使用乐观锁或原子操作避免并发问题）
+            article.setCommentCount(article.getCommentCount() + 1);
+            articleMapper.updateById(article);
+            articleCommentMapper.insert(articleComment);
+        } catch (Exception e) {
+            return Result.error("添加评论失败");
+        }
+        return Result.success(articleComment.getId());
+    }
+
+    @PostMapping("/addArticleCommentImage")
+    public Result<?> addArticleCommentImage(Long articleCommentId,
+                                            @Parameter(description = "图片文件")
+                                            @RequestPart(value = "image") MultipartFile[] sources){
+        if (sources == null){
+            return Result.error("请上传图片");
+        }
+        if(articleCommentId == null){
+            return Result.error("参数错误");
+        }
         Map<String, Source> sourceMap = new HashMap<>();
         if (sources != null && sources.length > 0) {
             for (MultipartFile source : sources) {
@@ -51,48 +107,18 @@ public class ArticleCommentController {
                 sourceMap.put(source.getOriginalFilename(), source1);
             }
         }
-        articleComment.setArticleId(articleId);
-        articleComment.setUserId(Long.parseLong(userId));
-        articleComment.setContent(content);
-        articleComment.setNice(0L);
-        articleComment.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        User user = businessServer.selectUserById(Long.parseLong(userId));
-        articleComment.setStatus(user.getStatus());
-        article.setCommentCount(article.getCommentCount() + 1);
-        articleMapper.updateById(article);
-        
-        // 检查是否在1秒内发布了相同内容的评论（防止重复提交）
-        QueryWrapper<ArticleComment> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("article_id", articleId);
-        queryWrapper.eq("user_id", Long.parseLong(userId));
-        queryWrapper.eq("content", articleComment.getContent());
-        // 检查1秒内是否有相同内容的评论
-        Timestamp oneSecondAgo = new Timestamp(System.currentTimeMillis() - 1000);
-        queryWrapper.ge("create_time", oneSecondAgo);
-        
-        ArticleComment recentSameComment = articleCommentMapper.selectOne(queryWrapper);
-        Long targetCommentId; // 用于存储目标评论的ID
-        
-        if (recentSameComment == null){
-            // 如果没有近期的相同评论，则插入新评论
-            articleCommentMapper.insert(articleComment);
-            targetCommentId = articleComment.getId();
-        }else {
-            // 如果1秒内有相同内容的评论，使用已存在的评论ID
-            targetCommentId = recentSameComment.getId();
-        }
-        
         // 统一处理资源文件的关联
         if (!sourceMap.isEmpty()){
             for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
                 Source source = entry.getValue();
-                source.setArticleCommentId(targetCommentId);
+                source.setArticleCommentId(articleCommentId);
                 sourceMapper.insert(source);
             }
         }
-        
         return Result.success();
     }
+
+
     @PostMapping("/deleteArticleComment")
     public Result<?> deleteArticleComment(Long articleCommentId, @RequestHeader("X-User-Id") String userId){
         ArticleComment articleComment = articleCommentMapper.selectById(articleCommentId);

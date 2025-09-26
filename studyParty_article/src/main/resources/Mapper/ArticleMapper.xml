@@ -22,7 +22,8 @@
             users.star_prestige as user_star_prestige,
             au.is_nice,
             au.is_collect,
-            au.is_view
+            au.is_view,
+            au.is_uploader
         FROM article
                  LEFT JOIN users ON article.uploader = users.id
                  LEFT JOIN article_user au ON article.id = au.article_id AND au.user_id = ${userId}
@@ -50,7 +51,8 @@
             u.star_prestige,
             au.is_nice,
             au.is_collect,
-            au.is_view
+            au.is_view,
+            au.is_uploader
         FROM
             article a
                 LEFT JOIN users u ON a.uploader = u.id
@@ -78,7 +80,8 @@
                users.star_prestige,
                au.is_nice,
                au.is_collect,
-               au.is_view
+               au.is_view,
+               au.is_uploader
         from article
                  left join users on article.uploader = users.id
                  LEFT JOIN article_user au ON article.id = au.article_id AND au.user_id = ${userId}

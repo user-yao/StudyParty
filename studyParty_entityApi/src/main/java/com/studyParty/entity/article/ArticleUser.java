@@ -23,4 +23,14 @@ public class ArticleUser implements Serializable {
     private int isNice;
     private int isCollect;
     private int isView;
+    private int isUploader;
+
+    public ArticleUser(Long articleId, Long userId) {
+        this.articleId = articleId;
+        this.userId = userId;
+        this.isNice = 0;
+        this.isCollect = 0;
+        this.isView = 0;
+        this.isUploader = 1;
+    }
 }

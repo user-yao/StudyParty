@@ -31,4 +31,18 @@ public class Article implements Serializable {
     private Timestamp createTime;
     private int isFeatured;
     private int status;
+
+    public Article(String title, String summary, String content,Long uploader,int status) {
+        this.uploader = uploader;
+        this.title = title;
+        this.summary = summary;
+        this.content = content;
+        this.nice = 0L;
+        this.collect = 0L;
+        this.viewCount = 0L;
+        this.commentCount = 0L;
+        this.createTime = new Timestamp(System.currentTimeMillis());
+        this.isFeatured = 0;
+        this.status = status;
+    }
 }
