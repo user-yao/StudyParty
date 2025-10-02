@@ -59,6 +59,12 @@ public class BusinessServerImpl implements BusinessServer {
     @Override
     @DubboService
     public void addUserTask(Long userId, int taskType, Long taskId) {
+        QueryWrapper<UserTask> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("task_id", taskId);
+        if (userTaskMapper.selectCount(queryWrapper) > 0) {
+            return;
+        }
         UserTask userTask = new UserTask();
         userTask.setUserId(userId);
         userTask.setTaskId(taskId);

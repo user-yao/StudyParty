@@ -48,7 +48,6 @@ public class GroupTaskAnswerController {
     @PostMapping("/submit")
     public Result<?> submit(Long groupTaskId,
                             String markdown,
-                            @RequestParam(value = "file", required = false) MultipartFile[] sources,
                             @RequestHeader("X-User-Id") String userId){
         GroupTask groupTask = groupTaskMapper.selectById(groupTaskId);
         if (groupTask == null) {
@@ -60,49 +59,64 @@ public class GroupTaskAnswerController {
         GroupTaskAnswer isSubmitted = groupTaskAnswerMapper.selectOne(queryWrapper);
 
         GroupTaskAnswer groupTaskAnswer = new GroupTaskAnswer();
-
-        // 1. 检查文件类型
-        String processedMarkdown = markdown;
-        if (processedMarkdown == null) {
+        if (markdown == null) {
             return Result.error("上传文件类型错误");
         }
-        Map<String, Source> sourceMap = new HashMap<>();
-        if(sources == null){
-            groupTaskAnswer.setHaveSource(0);
-            groupTaskAnswer.setContext(processedMarkdown);
-        }else{
-            groupTaskAnswer.setHaveSource(1);
-            for (MultipartFile source : sources) {
-                Source source1 = sourceServer.getSourceUrl(source);
-                sourceMap.put(source.getOriginalFilename(), source1);
-            }
-            processedMarkdown = markdownService.updateMarkdown( sourceMap, processedMarkdown);
-            groupTaskAnswer.setContext(processedMarkdown);
-        }
         if (isSubmitted != null) {
-            isSubmitted.setContext(processedMarkdown);
+            isSubmitted.setContext(markdown);
             isSubmitted.setTime(new Timestamp(System.currentTimeMillis()));
             groupTaskAnswerMapper.updateById(isSubmitted);
+            return Result.success(isSubmitted.getId());
         }else{
             groupTaskAnswer.setGroupTaskId(groupTaskId);
             groupTaskAnswer.setUserId(Long.valueOf(userId));
             groupTaskAnswer.setTime(new Timestamp(System.currentTimeMillis()));
+            groupTaskAnswer.setContext(markdown);
+            groupTaskAnswer.setHaveSource(0);
             groupTaskAnswer.setScore(-1);
             groupTaskAnswerMapper.insert(groupTaskAnswer);
             groupServerImpl.contributionGroup(groupTask.getGroupId(), userId);
             groupTask.setGroupTaskFinish(groupTask.getGroupTaskFinish() + 1);
             groupTaskMapper.updateById(groupTask);
+            businessServer.addUserTask(Long.valueOf(userId), 2, groupTaskId);
+            return Result.success(groupTaskAnswer.getId());
         }
-        if (sources ==  null){
+    }
+
+    @PostMapping("/submitFile")
+    public Result<?> submitFile(Long groupTaskAnswerId,
+                                @RequestParam(value = "source") MultipartFile[] sources,
+                                @RequestHeader("X-User-Id") String userId){
+        Map<String, Source> sourceMap = new HashMap<>();
+        GroupTaskAnswer groupTaskAnswer = groupTaskAnswerMapper.selectById(groupTaskAnswerId);
+
+        if (groupTaskAnswer == null) {
+            return Result.error("作业不存在");
+        }
+
+        // 处理资源文件
+        if (sources != null && sources.length > 0) {
+            for (MultipartFile source : sources) {
+                Source source1 = sourceServer.getSourceUrl(source);
+                sourceMap.put(source.getOriginalFilename(), source1);
+            }
+
+            // 更新作业标记为有附件
+            groupTaskAnswer.setHaveSource(1);
+            String processedMarkdown = markdownService.updateMarkdown(sourceMap, groupTaskAnswer.getContext());
+            groupTaskAnswer.setContext(processedMarkdown);
+            groupTaskAnswerMapper.updateById(groupTaskAnswer);
+
+            // 插入资源记录
             for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
                 Source source = entry.getValue();
-                source.setGroupTaskAnswerId(groupTaskAnswer.getId());
+                source.setGroupTaskAnswerId(groupTaskAnswerId);
                 sourceMapper.insert(source);
             }
         }
-        businessServer.addUserTask(Long.valueOf(userId), 2, groupTaskId);
         return Result.success();
     }
+
     @PostMapping("/score")
     public Result<?> score(Long groupTaskAnswerId, int score, @RequestHeader("X-User-Id") String userId){
         GroupTaskAnswer groupTaskAnswer = groupTaskAnswerMapper.selectById(groupTaskAnswerId);

@@ -16,6 +16,7 @@
         <result property="head" column="user_head"/>
         <result property="school" column="user_school"/>
         <result property="star_prestige" column="star_prestige"/>
+        <result property="isNice" column="is_nice"/>
         <collection property="sources" ofType="com.studyParty.entity.Source">
             <id property="id" column="source_id"/>
             <result property="name" column="source_name"/>
@@ -39,8 +40,8 @@
         FROM `article_comment`
                  LEFT JOIN `users` ON `article_comment`.user_id = `users`.id
                  LEFT JOIN `source` ON `article_comment`.id = `source`.article_comment_id
-                 LEFT JOIN `article_comment_user` ON `article_comment`.id = `article_comment_user`.article_comment_id AND `article_comment_user`.user_id = #{userId}
-        WHERE `article_comment`.article_id = #{articleId}
+                 LEFT JOIN `article_comment_user` ON `article_comment`.id = `article_comment_user`.article_comment_id AND `article_comment_user`.user_id = ${userId}
+        WHERE `article_comment`.article_id = ${articleId}
         ORDER BY `article_comment`.create_time DESC
     </select>
 </mapper>

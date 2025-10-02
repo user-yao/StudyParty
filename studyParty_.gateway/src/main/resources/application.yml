@@ -76,6 +76,13 @@ spring:
           filters:
             - StripPrefix=1
 
+        - id: AIServiceRoute
+          uri: lb://studyParty-AI
+          predicates:
+            - Path=/AI/**, /studyParty-AI/**
+          filters:
+            - StripPrefix=1
+
         - id: dubboApiRoute
           uri: lb://studyParty-dubboApi
           predicates:

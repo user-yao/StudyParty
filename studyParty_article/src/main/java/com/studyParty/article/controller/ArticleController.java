@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@RestController("article")
+@RestController
 public class ArticleController {
     private final ArticleMapper articleMapper;
     private final SourceMapper sourceMapper;
@@ -51,39 +51,61 @@ public class ArticleController {
     public Result<?> createArticle(String title,
                                    String summary,
                                    String markdown,
-                                   @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
-                                   @RequestPart(value = "sources", required = false) MultipartFile[] sources,
                                    @RequestHeader("X-User-Id") String userId) {
-        String processedMarkdown = markdown;
-        if(processedMarkdown == null){
+        if (title == null || title.trim().isEmpty()) {
+            return Result.error("标题不能为空");
+        }
+        if (markdown == null) {
             return Result.error("上传文件错误");
         }
+        // 查找是否已存在相同的文章（根据标题、概要、内容和用户ID判断）
+        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("title", title)
+                .eq("summary", summary)
+                .eq("content", markdown)
+                .eq("uploader", Long.parseLong(userId));
+        Article existingArticle = articleMapper.selectOne(queryWrapper);
+        if (existingArticle != null) {
+            // 如果文章已存在，则更新文章内容和时间
+            existingArticle.setSummary(summary);
+            existingArticle.setContent(markdown);
+            existingArticle.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            articleMapper.updateById(existingArticle);
+            return Result.success(existingArticle.getId());
+        } else {
+            // 如果文章不存在，则创建新文章
+            User user = businessServer.selectUserById(Long.parseLong(userId));
+            Article article = new Article(title, summary, markdown, Long.parseLong(userId), user.getStatus());
+            articleMapper.insert(article);
+            ArticleUser articleUser = new ArticleUser(article.getId(), Long.parseLong(userId));
+            articleUserMapper.insert(articleUser);
+            return Result.success(article.getId());
+        }
+    }
+    @PostMapping("/createArticleImage")
+    public Result<?> createArticleImage(Long articleId, @RequestPart(value = "source") MultipartFile[] sources){
         Map<String, Source> sourceMap = new HashMap<>();
-        // 只有当sources不为null且不为空数组时才处理资源文件
-        if (sources != null && sources.length > 0) {
-            for (MultipartFile source : sources) {
-                Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
-                sourceMap.put(source.getOriginalFilename(), source1);
-            }
-            // 替换 Markdown 中的文件引用
-            processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
+        // 处理资源文件
+        for (MultipartFile source : sources) {
+            Source source1 = sourceServer.getSourceUrl(source);
+            sourceMap.put(source.getOriginalFilename(), source1);
         }
+        Article article = articleMapper.selectById(articleId);
         // 替换 Markdown 中的文件引用
-        processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
-        User user = businessServer.selectUserById(Long.parseLong(userId));
-        Article article = new Article(title,summary,processedMarkdown,Long.parseLong(userId),user.getStatus());
-        articleMapper.insert(article);
-        ArticleUser articleUser = new ArticleUser(article.getId(), Long.parseLong(userId));
-        articleUserMapper.insert(articleUser);
-        if (!sourceMap.isEmpty()) {
-            for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
-                Source source = entry.getValue();
-                source.setArticleId(article.getId());
-                sourceMapper.insert(source);
-            }
+        String processedMarkdown = markdownService.updateMarkdown(sourceMap, article.getContent());
+        if (sourceMap.isEmpty()) {
+            return Result.error("静态资源为空");
         }
+        for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
+            Source source = entry.getValue();
+            source.setArticleId(article.getId());
+            sourceMapper.insert(source);
+        }
+        article.setContent(processedMarkdown);
+        articleMapper.updateById(article);
         return Result.success();
     }
+
     @PostMapping("/deleteArticle")
     public Result<?> deleteArticle(Long articleId, @RequestHeader("X-User-Id") String userId) {
         Article article = articleMapper.selectById(articleId);

@@ -3,23 +3,44 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.studyParty.article.mapper.ArticleMapper">
-    <select id="selectArticle" resultType="com.studyParty.entity.article.DTO.ArticleDTO">
+    <resultMap id="ArticleDTOResultMap" type="com.studyParty.entity.article.DTO.ArticleDTO">
+        <result property="id" column="id"/>
+        <result property="uploader" column="uploader"/>
+        <result property="title" column="title"/>
+        <result property="summary" column="summary"/>
+        <result property="nice" column="nice"/>
+        <result property="collect" column="collect"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="createTime" column="create_time"/>
+        <result property="isFeatured" column="is_featured"/>
+        <result property="status" column="status"/>
+        <result property="name" column="name"/>
+        <result property="head" column="head"/>
+        <result property="school" column="school"/>
+        <result property="starPrestige" column="star_prestige"/>
+        <result property="isNice" column="is_nice"/>
+        <result property="isCollect" column="is_collect"/>
+        <result property="isView" column="is_view"/>
+        <result property="isUploader" column="is_uploader"/>
+    </resultMap>
+    <select id="selectArticle" resultMap="ArticleDTOResultMap">
         SELECT
-            article.id as article_id,
-            article.uploader as article_uploader,
-            article.title as article_title,
-            article.summary as article_summary,
-            article.nice as article_nice,
-            article.collect as article_collect,
-            article.view_count as article_view_cont,
-            article.comment_count as article_comment_cont,
-            article.create_time as article_create_time,
-            article.is_featured as article_is_featured,
-            article.status as article_status,
-            users.name as user_name,
-            users.head as user_head,
-            users.school as user_school,
-            users.star_prestige as user_star_prestige,
+            article.id,
+            article.uploader,
+            article.title,
+            article.summary,
+            article.nice,
+            article.collect,
+            article.view_count,
+            article.comment_count,
+            article.create_time,
+            article.is_featured,
+            article.status,
+            users.name,
+            users.head,
+            users.school,
+            users.star_prestige,
             au.is_nice,
             au.is_collect,
             au.is_view,

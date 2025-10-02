@@ -35,6 +35,7 @@ public class ArticleDTO implements Serializable {
     private int isNice;
     private int isCollect;
     private int isView;
+    private int isUploader;
 
     public ArticleDTO(Article article, User user, ArticleUser articleUser) {
         this.id = article.getId();
