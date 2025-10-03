@@ -122,7 +122,10 @@ public class GroupTaskAnswerController {
         GroupTaskAnswer groupTaskAnswer = groupTaskAnswerMapper.selectById(groupTaskAnswerId);
         GroupTask groupTask = groupTaskMapper.selectById(groupTaskAnswer.getGroupTaskId());
         Group group = groupMapper.selectById(groupTask.getGroupId());
-        if(!Objects.equals(group.getLeader(), Long.valueOf(userId)) || !Objects.equals(group.getDeputy(), Long.valueOf(userId))){
+        if(!group.getLeader().equals(Long.valueOf(userId))
+                && !group.getDeputy().equals(Long.valueOf(userId))
+                && !group.getTeacher().equals(Long.valueOf(userId))
+                && !group.getEnterprise().equals(Long.valueOf(userId))){
             return Result.error("权限错误");
         }
         groupTaskAnswer.setScore(score);
@@ -133,11 +136,11 @@ public class GroupTaskAnswerController {
     public Result<?> getGroupTaskAnswers(Long groupTaskId, @RequestHeader("X-User-Id") String userId){
         GroupTask groupTask = groupTaskMapper.selectById(groupTaskId);
         Group group = groupMapper.selectById(groupTask.getGroupId());
-        if(!Objects.equals(group.getLeader(), Long.valueOf(userId))
-                || !Objects.equals(group.getDeputy(), Long.valueOf(userId))
-                || !Objects.equals(group.getTeacher(), Long.valueOf(userId))
-                || !Objects.equals(group.getEnterprise(), Long.valueOf(userId))){
-            return Result.error("权限错误");
+        if(!group.getLeader().equals(Long.valueOf(userId))
+                && !group.getDeputy().equals(Long.valueOf(userId))
+                && !group.getTeacher().equals(Long.valueOf(userId))
+                && !group.getEnterprise().equals(Long.valueOf(userId))){
+            return Result.success("权限错误");
         }
         QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_task_id", groupTaskId);

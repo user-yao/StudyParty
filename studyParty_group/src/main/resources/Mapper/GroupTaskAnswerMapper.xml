@@ -6,11 +6,11 @@
 <mapper namespace="com.studyParty.group.mapper.GroupTaskAnswerMapper">
     <select id="selectGroupTaskAnswerWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskAnswerDTO">
         SELECT `group_task_answer`.*,
-               users.id     as user_id,
-               users.name   as user_name,
-               users.head   as user_head,
-               users.status as user_status,
-               users.school as user_school
+               users.id     as userId,
+               users.name   as username,
+               users.head   as head,
+               users.status as status,
+               users.school as school
         FROM group_task_answer
                  LEFT JOIN users ON group_task_answer.user_id = users.id
         WHERE group_task_answer.group_task_id = #{groupTaskId}
@@ -19,11 +19,11 @@
     <select id="selectMyGroupTaskAnswerWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskAnswerDTO">
         SELECT
             `group_task_answer`.*,
-            users.id as user_id,
-            users.name as user_name,
-            users.head as user_head,
-            users.status as user_status,
-            users.school as user_school
+            users.id as userId,
+            users.name as username,
+            users.head as head,
+            users.status as status,
+            users.school as school
         FROM group_task_answer
                  LEFT JOIN users ON group_task_answer.user_id = users.id
         WHERE group_task_answer.group_task_id = #{groupTaskId}
