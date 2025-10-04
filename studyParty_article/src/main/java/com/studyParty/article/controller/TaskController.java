@@ -13,18 +13,15 @@ import com.studyParty.entity.task.DTO.TaskDTO;
 import com.studyParty.entity.task.Task;
 import com.studyParty.entity.user.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-@RestController("/task")
+@RestController
+@RequestMapping("/task")
 @RequiredArgsConstructor
 public class TaskController {
     private final TaskMapper taskMapper;
@@ -32,18 +29,60 @@ public class TaskController {
     private final BusinessServer businessServer;
     private final MarkdownService markdownService;
     private final SourceServer sourceServer;
-
-
-    @PostMapping("/addTask")
-    public Result<?> addTask(String title,
-                             String markdown,
-                             @RequestParam("file") MultipartFile[] sources,
-                             @RequestHeader("X-User-Id") String userId){
-        Task task = new Task();
-        String processedMarkdown = markdown;
-        if(processedMarkdown == null){
+    
+    @PostMapping("/createTask")
+    public Result<?> createTask(String title,
+                                String markdown,
+                                @RequestHeader("X-User-Id") String userId){
+        if (title == null || title.trim().isEmpty()) {
+            return Result.error("标题不能为空");
+        }
+        if (markdown == null) {
             return Result.error("上传文件错误");
         }
+        // 查找是否已存在相同的任务（根据标题、内容和用户ID判断）
+        QueryWrapper<Task> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("title", title)
+                .eq("context", markdown)
+                .eq("uploader", Long.parseLong(userId));
+        Task existingTask = taskMapper.selectOne(queryWrapper);
+        if (existingTask != null) {
+            // 如果任务已存在，则更新任务内容和时间
+            existingTask.setContext(markdown);
+            existingTask.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            taskMapper.updateById(existingTask);
+            return Result.success(existingTask.getId());
+        } else {
+            // 如果任务不存在，则创建新任务
+            User user = businessServer.selectUserById(Long.parseLong(userId));
+            Task task = new Task(Long.parseLong(userId), title, markdown,user.getStatus());
+            taskMapper.insert(task);
+            return Result.success(task.getId());
+        }
+    }
+    @GetMapping("/getTaskById")
+    public Result<?> getTaskById(Long taskId){
+        Task task = taskMapper.selectById(taskId);
+        if(task == null){
+            return Result.error("任务不存在");
+        }
+        User user = businessServer.selectUserById(task.getUploader());
+        TaskDTO taskDTO = new TaskDTO(task,user);
+        return Result.success(taskDTO);
+    }
+    
+    @PostMapping("/createTaskImage")
+    public Result<?> createTaskImage(Long taskId, 
+                                     @RequestParam("file") MultipartFile[] sources,
+                                     @RequestHeader("X-User-Id") String userId){
+        Task task = taskMapper.selectById(taskId);
+        if (task == null) {
+            return Result.error("任务不存在");
+        }
+        if (!task.getUploader().equals(Long.parseLong(userId))) {
+            return Result.error("没有权限");
+        }
+        
         Map<String, Source> sourceMap = new HashMap<>();
         // 只有当sources不为null且不为空数组时才处理资源文件
         if (sources != null && sources.length > 0) {
@@ -51,19 +90,14 @@ public class TaskController {
                 Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
                 sourceMap.put(source.getOriginalFilename(), source1);
             }
-            // 替换 Markdown 中的文件引用
-            processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
         }
+        System.out.println(task.getContext());
         // 替换 Markdown 中的文件引用
-        processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
-        task.setTitle(title);
+        String processedMarkdown = markdownService.updateMarkdown(sourceMap, task.getContext());
         task.setContext(processedMarkdown);
-        task.setUploader(Long.parseLong(userId));
-        task.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        task.setStarPrestige(10L);
-        User user = businessServer.selectUserById(Long.parseLong(userId));
-        task.setStatus(user.getStatus());
-        taskMapper.insert(task);
+        System.out.println(task.getContext());
+        taskMapper.updateById(task);
+        
         if (!sourceMap.isEmpty()) {
             for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
                 Source source = entry.getValue();
@@ -73,6 +107,7 @@ public class TaskController {
         }
         return Result.success();
     }
+    
     @PostMapping("/deleteTask")
     public Result<?> deleteTask(Long taskId, @RequestHeader("X-User-Id") String userId){
         Task task = taskMapper.selectById(taskId);
@@ -95,5 +130,11 @@ public class TaskController {
         // 创建分页对象
         Page<TaskDTO> page = new Page<>(currentPage, 10);
         return Result.success(taskMapper.selectTaskWithUser(page, searchContent));
+    }
+    @GetMapping("/recommend")
+    public Result<?> recommend(@RequestParam(defaultValue = "1") int currentPage, @RequestHeader("X-User-Id") String userId){
+        // 创建分页对象
+        Page<TaskDTO> page = new Page<>(currentPage, 10);
+        return Result.success(taskMapper.recommendTask(page, Long.parseLong(userId)));
     }
 }

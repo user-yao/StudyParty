@@ -29,4 +29,16 @@ public class Task implements Serializable {
     private Long starPrestige;
     private Timestamp createTime;
     private Integer status;
+
+    public Task(Long uploader, String title, String context, Integer status) {
+        this.uploader = uploader;
+        this.title = title;
+        this.context = context;
+        this.isOver = 0;
+        this.isTrueId = -1L;
+        this.starCoin = 0L;
+        this.starPrestige = 1L;
+        this.createTime = new Timestamp(System.currentTimeMillis());
+        this.status = status;
+    }
 }

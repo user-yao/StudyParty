@@ -28,7 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController("/taskAnswer")
+@RequestMapping("/taskAnswer")
+@RestController
 @RequiredArgsConstructor
 public class TaskAnswerController {
     private final TaskMapper taskMapper;
@@ -42,38 +43,69 @@ public class TaskAnswerController {
     private final TaskAnswerServer taskAnswerServer;
 
 
-    @PostMapping("/addTaskAnswer")
-    public Result<?> addTask(Long taskId,
-                             String markdown,
-                             @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
-                             @RequestPart(value = "sources", required = false) MultipartFile[] sources,
-                             @RequestHeader("X-User-Id") String userId){
-        TaskAnswer taskAnswer = new TaskAnswer();
-        String processedMarkdown = markdown;
-        if(processedMarkdown == null){
-            return Result.error("上传文件错误");
+    @PostMapping("/createTaskAnswer")
+    public Result<?> createTaskAnswer(Long taskId,
+                                      String markdown,
+                                      @RequestHeader("X-User-Id") String userId){
+        if (markdown == null) {
+            return Result.error("内容不能为空");
         }
+        
+        // 查找是否已存在相同的答案（根据任务ID、内容和用户ID判断）
+        QueryWrapper<TaskAnswer> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("task_id", taskId)
+                .eq("context", markdown)
+                .eq("answerer", Long.parseLong(userId));
+        TaskAnswer existingTaskAnswer = taskAnswerMapper.selectOne(queryWrapper);
+        
+        if (existingTaskAnswer != null) {
+            // 如果答案已存在，则更新答案内容和时间
+            existingTaskAnswer.setContext(markdown);
+            existingTaskAnswer.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            taskAnswerMapper.updateById(existingTaskAnswer);
+            return Result.success(existingTaskAnswer.getId());
+        } else {
+            // 如果答案不存在，则创建新答案
+            TaskAnswer taskAnswer = new TaskAnswer();
+            User user = businessServer.selectUserById(Long.parseLong(userId));
+            taskAnswer.setTaskId(taskId);
+            taskAnswer.setAnswerer(Long.parseLong(userId));
+            taskAnswer.setContext(markdown);
+            taskAnswer.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            taskAnswer.setNice(0L);
+            taskAnswer.setStatus(user.getStatus());
+            taskAnswerMapper.insert(taskAnswer);
+            return Result.success(taskAnswer.getId());
+        }
+    }
+    
+    @PostMapping("/createTaskAnswerImage")
+    public Result<?> createTaskAnswerImage(Long taskAnswerId,
+                                           @Parameter(description = "资源文件数组", schema = @Schema(type = "array", implementation = MultipartFile.class))
+                                           @RequestPart(value = "sources", required = false) MultipartFile[] sources,
+                                           @RequestHeader("X-User-Id") String userId){
+        TaskAnswer taskAnswer = taskAnswerMapper.selectById(taskAnswerId);
+        if (taskAnswer == null) {
+            return Result.error("答案不存在");
+        }
+        if (!taskAnswer.getAnswerer().equals(Long.parseLong(userId))) {
+            return Result.error("没有权限");
+        }
+        
         Map<String, Source> sourceMap = new HashMap<>();
-
         // 只有当sources不为null且不为空数组时才处理资源文件
         if (sources != null && sources.length > 0) {
             for (MultipartFile source : sources) {
                 Source source1 = sourceServer.getSourceUrl(source); // 返回如: /uploads/2025/03/15/cat.jpg
                 sourceMap.put(source.getOriginalFilename(), source1);
             }
-            // 替换 Markdown 中的文件引用
-            processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
         }
+        
         // 替换 Markdown 中的文件引用
-        processedMarkdown = markdownService.updateMarkdown(sourceMap, processedMarkdown);
-        taskAnswer.setTaskId(taskId);
-        taskAnswer.setAnswerer(Long.parseLong(userId));
+        String processedMarkdown = markdownService.updateMarkdown(sourceMap, taskAnswer.getContext());
         taskAnswer.setContext(processedMarkdown);
-        taskAnswer.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        taskAnswer.setNice(0L);
-        User user = businessServer.selectUserById(Long.parseLong(userId));
-        taskAnswer.setStatus(user.getStatus());
-        taskAnswerMapper.insert(taskAnswer);
+        taskAnswerMapper.updateById(taskAnswer);
+        
         if (!sourceMap.isEmpty()) {
             for (Map.Entry<String, Source> entry : sourceMap.entrySet()) {
                 Source source = entry.getValue();
@@ -81,9 +113,10 @@ public class TaskAnswerController {
                 sourceMapper.insert(source);
             }
         }
-
+        
         return Result.success();
     }
+    
     @PostMapping("/deleteTaskAnswer")
     public Result<?> deleteTaskAnswer(Long taskAnswerId, @RequestHeader("X-User-Id") String userId){
         TaskAnswer taskAnswer = taskAnswerMapper.selectById(taskAnswerId);

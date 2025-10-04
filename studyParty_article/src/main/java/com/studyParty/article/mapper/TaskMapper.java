@@ -9,4 +9,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface TaskMapper extends BaseMapper<Task> {
     IPage<TaskDTO> selectTaskWithUser(IPage<TaskDTO> page, String searchContext);
+    IPage<TaskDTO> recommendTask(IPage<TaskDTO> page, Long userId);
 }

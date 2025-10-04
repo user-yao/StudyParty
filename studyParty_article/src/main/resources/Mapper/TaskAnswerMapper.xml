@@ -3,12 +3,12 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.studyParty.article.mapper.TaskAnswerMapper">
-    <select id="selectTaskAnswerWithUser" resultType="com.studyParty.entity.task.DTO.TaskDTO">
+    <select id="selectTaskAnswerWithUser" resultType="com.studyParty.entity.task.DTO.TaskAnswerDTO">
         SELECT
             `task_answer`.*,
-            `users`.name as user_name,
-            `users`.head as user_head,
-            `users`.school as user_school
+            `users`.name as name,
+            `users`.head as head,
+            `users`.school as school
         FROM `task_answer`
                  LEFT JOIN `users` ON `task_answer`.answerer = `users`.id
         WHERE `task_answer`.task_id = #{taskId}

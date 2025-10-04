@@ -15,4 +15,13 @@
             OR task.context LIKE CONCAT('%', #{searchContext}, '%'))
         ORDER BY task.create_time DESC
     </select>
+    <select id="recommendTask" resultType="com.studyParty.entity.task.DTO.TaskDTO">
+        SELECT `task`.*,
+               users.name   as name,
+               users.head   as head,
+               users.school as school
+        FROM task
+                 LEFT JOIN users ON task.uploader = users.id
+        ORDER BY task.is_over, task.create_time DESC, task.star_prestige DESC
+    </select>
 </mapper>
