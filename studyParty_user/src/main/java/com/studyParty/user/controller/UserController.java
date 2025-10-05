@@ -2,9 +2,11 @@ package com.studyParty.user.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.studyParty.user.mapper.UserArticleMapper;
 import com.studyParty.entity.user.DTO.UserDTO;
 import com.studyParty.entity.user.DTO.UserToken;
 import com.studyParty.entity.user.User;
+import com.studyParty.entity.user.UserArticle;
 import com.studyParty.entity.user.UserTask;
 import com.studyParty.user.Utils.MyFileUtil;
 import com.studyParty.user.Utils.PasswordEncoder;
@@ -50,6 +52,7 @@ public class UserController {
     private final UserServer userServer;
     private final FriendMapper friendMapper;
     private final UserTaskMapper userTaskMapper;
+    private final UserArticleMapper userArticleMapper;
     @Value("${head}")
     private String head;
     @Value("${saveHead}")
@@ -89,6 +92,7 @@ public class UserController {
         try {
             User user = userMapper.selectById(userId);
             user.setFinishTask(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id",userId)));
+            user.setArticleNum(userArticleMapper.selectCount(new QueryWrapper<UserArticle>().eq("user_id",userId)));
             return Result.success(user);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -229,95 +233,59 @@ public class UserController {
     }
 
     @PostMapping("/selectUser")
-    public Result<?> selectUser( @RequestParam(required = false) Long id,
-                                 @RequestParam(required = false) String name,
-                                 @RequestParam(required = false) String phone, @RequestHeader("X-User-Id") String userId ){
-        // 如果提供了phone参数，则进行精确查询
-        if (phone != null && !phone.isEmpty()) {
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("phone", phone);
-            User user = userMapper.selectOne(queryWrapper);
-            if (user == null) {
-                return Result.error("用户不存在");
-            }
-            UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
-            boolean isFriend = friendMapper.isFriend(Long.valueOf(userId), (long)user.getId());
-            if (friend == null) {
-                friend = new UserDTO(null, user);
-            }
-            friend.setFriend(isFriend);
-            return Result.success(friend);
+    public Result<?> selectUser(@RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) Long id,
+                                @RequestHeader("X-User-Id") String userId) {
+        // 验证userId
+        if (userId == null || userId.isEmpty()) {
+            return Result.error("用户未登录");
         }
+
+        Long currentUserId;
+        try {
+            currentUserId = Long.valueOf(userId);
+        } catch (NumberFormatException e) {
+            return Result.error("用户ID格式错误");
+        }
+
+        // 如果提供了id参数，则进行精确查询
         if (id != null) {
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("id", id);
-            User user = userMapper.selectOne(queryWrapper);
+            User user = userMapper.selectById(id);
             if (user == null) {
                 return Result.error("用户不存在");
             }
-            UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
-            boolean isFriend = friendMapper.isFriend(Long.valueOf(userId), (long)user.getId());
-            if (friend == null) {
-                friend = new UserDTO(null, user);
-            }
-            friend.setFriend(isFriend);
+            UserDTO friend = buildUserDTO(user, currentUserId);
             return Result.success(friend);
         }
-        // 如果提供了id或name参数，则进行查询
+
+        // 如果没有提供查询参数，则返回错误
+        if (keyword == null || keyword.isEmpty()) {
+            return Result.error("请提供查询参数");
+        }
+
+        // 构造查询条件，模糊匹配name字段，精确匹配phone字段
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if (name != null && !name.isEmpty()) {
-            // name使用模糊查询
-            queryWrapper.like("name", name);
+        queryWrapper.like("name", keyword).or()
+                .eq("phone", keyword);
+
+        List<User> users = userMapper.selectList(queryWrapper);
+        List<UserDTO> userDTOs = new ArrayList<>();
+        for (User user : users) {
+            UserDTO friend = buildUserDTO(user, currentUserId);
+            userDTOs.add(friend);
         }
-        if ( name != null && !name.isEmpty()) {
-            List<User> users = userMapper.selectList(queryWrapper);
-            List<UserDTO> userDTOs = new ArrayList<>();
-            for (User user : users) {
-                UserDTO friend = friendMapper.selectUserAndRemarkById((long)user.getId(), Long.valueOf(userId));
-                boolean isFriend = friendMapper.isFriend(Long.valueOf(userId), (long)user.getId());
-                if (friend == null) {
-                    friend = new UserDTO(null, user);
-                }
-                friend.setFriend(isFriend);
-                userDTOs.add(friend);
-            }
-            return Result.success(userDTOs);
-        }
-        // 如果没有提供任何参数，则返回错误
-        return Result.error("请提供查询参数");
+        return Result.success(userDTOs);
     }
 
-
-   /* @PostMapping("/updateHead")
-    public Result<?> updateHead(@RequestParam("photo")MultipartFile photo,@RequestParam("id") int id,@RequestParam("oldPhoto") String oldPhoto){
-        String photoName = photo.getOriginalFilename();
-        String newName = null;
-        if (photoName != null && photoName.contains(".")) {
-            String[] parts = photoName.split("\\.");
-            newName = "." + parts[parts.length - 1]; // 获取最后一个部分作为扩展名
+    private UserDTO buildUserDTO(User user, Long currentUserId) {
+        UserDTO friend = friendMapper.selectUserAndRemarkById(user.getId().longValue(), currentUserId);
+        boolean isFriend = friendMapper.isFriend(currentUserId, user.getId().longValue());
+        if (friend == null) {
+            friend = new UserDTO(null, user);
         }
-        String uuid =  id + "_" + UUID.randomUUID().toString().replace("-","");
-        String phName = uuid + newName;
-        String pre = saveHead + id;
-        String path = pre + "/" + phName;
-        File file = new File(pre);
-        try {
-            if(!file.exists() && !file.isDirectory()){
-                Files.createDirectories(Path.of(path));
-                photo.transferTo(new File(path));
-            }else {
-                new File(oldPhoto).delete();
-                Files.createDirectories(Path.of(path));
-                photo.transferTo(new File(path));
-            }
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        userMapper.update(null,new LambdaUpdateWrapper<User>()
-                .eq(User::getId,id)
-                .set(User::getHead, head + id +"/" +phName)
-        );
-        return Result.success(head + id +"/" +phName);
-    }*/
+        friend.setFinishTask(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id", user.getId())));
+        friend.setArticleNum(userArticleMapper.selectCount(new QueryWrapper<UserArticle>().eq("user_id", user.getId())));
+        friend.setFriend(isFriend);
+        return friend;
+    }
 }

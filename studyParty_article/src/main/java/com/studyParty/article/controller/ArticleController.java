@@ -14,8 +14,6 @@ import com.studyParty.entity.article.Article;
 import com.studyParty.entity.article.ArticleUser;
 import com.studyParty.entity.article.DTO.ArticleDTO;
 import com.studyParty.entity.user.User;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.*;
@@ -71,6 +69,7 @@ public class ArticleController {
             existingArticle.setContent(markdown);
             existingArticle.setCreateTime(new Timestamp(System.currentTimeMillis()));
             articleMapper.updateById(existingArticle);
+            businessServer.addUserArticle(Long.parseLong(userId), existingArticle.getId());
             return Result.success(existingArticle.getId());
         } else {
             // 如果文章不存在，则创建新文章
@@ -79,6 +78,7 @@ public class ArticleController {
             articleMapper.insert(article);
             ArticleUser articleUser = new ArticleUser(article.getId(), Long.parseLong(userId));
             articleUserMapper.insert(articleUser);
+            businessServer.addUserArticle(Long.parseLong(userId), article.getId());
             return Result.success(article.getId());
         }
     }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyParty.article.mapper.ArticleUserMapper">
+    <select id="myCollectArticle" resultType="com.studyParty.entity.article.DTO.ArticleDTO">
+        select article.id,
+               article.uploader,
+               article.title,
+               article.summary,
+               article.nice,
+               article.collect,
+               article.view_count,
+               article.comment_count,
+               article.create_time,
+               article.is_featured,
+               article.status,
+               users.name,
+               users.head,
+               users.school,
+               users.star_prestige,
+               au.is_nice,
+               au.is_collect,
+               au.is_view,
+               au.is_uploader
+        from article
+                 left join users on article.uploader = users.id
+                 LEFT JOIN article_user au ON article.id = au.article_id AND au.user_id = ${userId}
+        where au.user_id = #{userId} AND au.is_collect = 1
+        order by article.view_count desc, article.create_time desc
+    </select>
+</mapper>

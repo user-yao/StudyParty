@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.studyParty.dubboApi.Mapper.*;
+import com.studyParty.entity.article.DTO.ArticleDTO;
 import com.studyParty.entity.group.DTO.GroupUserDTO;
 import com.studyParty.entity.group.GroupTask;
 import com.studyParty.entity.group.GroupTaskAnswer;
@@ -15,6 +16,7 @@ import com.studyParty.entity.user.DTO.UserTaskGroup;
 import com.studyParty.entity.user.DTO.UserTaskTask;
 import com.studyParty.entity.user.User;
 import com.studyParty.dubboApi.services.BusinessServer;
+import com.studyParty.entity.user.UserArticle;
 import com.studyParty.entity.user.UserTask;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -34,6 +36,8 @@ public class BusinessServerImpl implements BusinessServer {
     private final GroupTaskAnswerMapper groupTaskAnswerMapper;
     private final GroupTaskMapper groupTaskMapper;
     private final GroupUserMapper groupUserMapper;
+    private final UserArticleMapper userArticleMapper;
+    private final ArticleMapper articleMapper;
 
     @Override
     @DubboService
@@ -73,6 +77,27 @@ public class BusinessServerImpl implements BusinessServer {
     }
 
     @Override
+    @DubboService
+    public void addUserArticle(Long userId, Long articleId) {
+        QueryWrapper<UserArticle> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("article_id", articleId);
+        if (userArticleMapper.selectCount(queryWrapper) > 0) {
+            return;
+        }
+        UserArticle userArticle = new UserArticle();
+        userArticle.setUserId(userId);
+        userArticle.setArticleId(articleId);
+        userArticleMapper.insert(userArticle);
+    }
+
+    @Override
+    public List<ArticleDTO> selectUserArticle(Long userId) {
+        List<ArticleDTO> userArticles = articleMapper.selectUserArticle(userId);
+        return userArticles;
+    }
+
+    @Override
     public List<UserTaskTask> selectUserTaskTask(Long userId) {
         List<UserTaskTask> userTaskTasks = new ArrayList<>();
         List<TaskAnswer> taskAnswers = taskAnswerMapper.selectTrueTaskAnswer(userId);
@@ -107,5 +132,6 @@ public class BusinessServerImpl implements BusinessServer {
         wrapper.eq("group_id", groupId);
         return groupUserMapper.selectObjs( wrapper);
     }
+
 
 }

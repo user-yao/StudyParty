@@ -32,6 +32,7 @@ public class UserDTO implements Serializable {
     private Date lastLogin;
     private Date createDate;
     private Long finishTask;
+    private Long articleNum;
     private boolean friend;
 
     public UserDTO(String remark, User  user) {
@@ -51,6 +52,7 @@ public class UserDTO implements Serializable {
         this.lastLogin = user.getLastLogin();
         this.createDate = user.getCreateDate();
         this.finishTask = user.getFinishTask();
+        this.articleNum = user.getArticleNum();
         this.friend = false;//默认不是好友
     }
 }

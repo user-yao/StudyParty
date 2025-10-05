@@ -7,10 +7,7 @@ import com.studyParty.user.mapper.UserTaskMapper;
 import com.studyParty.user.common.Result;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +19,7 @@ public class UserTaskController {
     private final UserTaskMapper userTaskMapper;
     @DubboReference
     private BusinessServer businessServer;
-    @PostMapping("/selectMyUserTasks")
+    @GetMapping("/selectMyUserTasks")
     public Result<?> selectMyUserTasks(@RequestHeader("X-User-Id") String userId){
         List<UserTaskTask> userTaskTasks = businessServer.selectUserTaskTask(Long.parseLong(userId));
         List<UserTaskGroup> userTaskGroups = businessServer.selectUserTaskGroup(Long.parseLong(userId));
