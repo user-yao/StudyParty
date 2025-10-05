@@ -84,6 +84,17 @@ public class UserController {
         }
         return Result.error("用户名或密码错误");
     }
+    @GetMapping("/userInfo")
+    public Result<?> userInfo(@RequestHeader("X-User-Id") String userId){
+        try {
+            User user = userMapper.selectById(userId);
+            user.setFinishTask(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id",userId)));
+            return Result.success(user);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return Result.error();
+        }
+    }
     @PostMapping("/register")
     public Result<?> register(@RequestBody User user){
         try {
@@ -141,14 +152,13 @@ public class UserController {
         }
     }
     @PostMapping("/updatePassword")
-    public Result<?> updatePassword(@RequestBody User user){
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("id",user.getId());
-        String oldEncodedPassword = userMapper.selectOne(queryWrapper).getPassword();
-        if(oldEncodedPassword.equals(PasswordEncoder.encode(user.getPassword()))){
+    public Result<?> updatePassword(String password,@RequestHeader("X-User-Id") String userId){
+        User user = userMapper.selectById(userId);
+        String oldEncodedPassword = user.getPassword();
+        if(oldEncodedPassword.equals(PasswordEncoder.encode(password))){
             return Result.error("新密码与旧密码一致");
         }
-        user.setPassword(PasswordEncoder.encode(user.getPassword()));
+        user.setPassword(PasswordEncoder.encode(password));
         userMapper.update(null, new LambdaUpdateWrapper<User>()
                 .eq(User::getId,user.getId())
                 .set(User::getPassword,user.getPassword())
@@ -158,33 +168,36 @@ public class UserController {
 
 
     @PostMapping("/updateUser")
-    public Result<?> updateUser(@RequestBody User user){
-        if (user.getPhone() == null){
+    public Result<?> updateUser(String name, String sex, String major, String grade, String phone, String school, String email,@RequestHeader("X-User-Id") String userId){
+        if (phone == null){
             return Result.error("请输入手机号");
         }
-        if (user.getPhone().length() != 11){
+        if (phone.length() != 11){
             return Result.error("手机号长度有误");
         }
-        if (!user.getPhone().matches("^1[3-9]\\d{8}$")){
-            return Result.error("手机号格式有误");
-        }
+        User user = userMapper.selectById(userId);
         userMapper.update(null,new LambdaUpdateWrapper<User>()
                 .eq(User::getId,user.getId())
-                .set(User::getPhone,user.getPhone())
-                .set(User::getName,user.getName())
-                .set(User::getSex,user.getSex())
-                .set(User::getMajor,user.getMajor())
-                .set(User::getGrade,user.getGrade())
-                .set(User::getEmail,user.getEmail())
-                .set(User::getSchool,user.getSchool())
+                .set(User::getName,name)
+                .set(User::getSex,sex)
+                .set(User::getMajor,major)
+                .set(User::getGrade,grade)
+                .set(User::getPhone,phone)
+                .set(User::getSchool,school)
+                .set(User::getEmail,email)
         );
         return Result.success();
     }
     @PostMapping("/updateHead")
-    public Result<?> updateHead(@RequestParam("photo") MultipartFile photo, @RequestHeader("X-User-Id") String userId) {
+    public Result<?> updateHead(@RequestParam(value = "photo", required = false) MultipartFile photo, @RequestHeader("X-User-Id") String userId) {
         // 防止非法字符导致路径穿越
         if (userId.contains("..") || userId.contains(File.separator)) {
             return Result.error("非法用户ID");
+        }
+        
+        // 检查是否有上传文件
+        if (photo == null || photo.isEmpty()) {
+            return Result.error("未提供有效的头像文件");
         }
 
         // 使用 Paths 构建安全路径
@@ -198,13 +211,14 @@ public class UserController {
                 Files.createDirectories(dirPath);
             }
 
+            // 保存上传的文件
+            photo.transferTo(targetFile);
+            
             // 更新用户头像路径
             userMapper.update(null, new LambdaUpdateWrapper<User>()
                     .eq(User::getId, userId)
                     .set(User::getHead, head + userId + "/userHeadPhoto.png"));
 
-            // 保存上传的文件
-            photo.transferTo(targetFile);
             return Result.success(head + userId + "/userHeadPhoto.png");
 
         } catch (IOException e) {
@@ -213,6 +227,7 @@ public class UserController {
             return Result.error("系统错误: " + e.getMessage());
         }
     }
+
     @PostMapping("/selectUser")
     public Result<?> selectUser( @RequestParam(required = false) Long id,
                                  @RequestParam(required = false) String name,

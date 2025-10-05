@@ -63,8 +63,7 @@ public class User implements Serializable {
         this.finishTask = 0L;
     }
     /// 修改个人信息专用
-    public User(Long id, String name, String sex, String major, String grade, String phone, String school, String email) {
-        this.id = id;
+    public User(String name, String sex, String major, String grade, String phone, String school, String email) {
         this.name = name;
         this.sex = sex;
         this.major = major;
