@@ -48,6 +48,32 @@ public class StudentAIController {
                         result.getOutput().getText());
                 return Result.success(JSON.parse(result.getOutput().getText()));
     }
+    @PostMapping("/taskAnalyst")
+    public Result<?> taskAnalyst(@RequestBody String prompt) throws NoApiKeyException, InputRequiredException {
+        ApplicationParam param = ApplicationParam.builder()
+                .apiKey(System.getenv(apikey))
+                .appId("0e0d0a99d6324d5d90fdaee23586ec10")
+                .prompt(prompt)
+                .build();
+        Application application = new Application();
+        ApplicationResult result = application.call(param);
+        System.out.printf("text: %s\n",
+                result.getOutput().getText());
+        return Result.success(JSON.parse(result.getOutput().getText()));
+    }
+    @PostMapping("/articleAnalyst")
+    public Result<?> articleAnalyst(@RequestBody String prompt) throws NoApiKeyException, InputRequiredException {
+        ApplicationParam param = ApplicationParam.builder()
+                .apiKey(System.getenv(apikey))
+                .appId("6103a07ff32a4d0ca3063e1dc07ce7ac")
+                .prompt(prompt)
+                .build();
+        Application application = new Application();
+        ApplicationResult result = application.call(param);
+        System.out.printf("text: %s\n",
+                result.getOutput().getText());
+        return Result.success(JSON.parse(result.getOutput().getText()));
+    }
     @PostMapping("/AI")
     public SseEmitter AI(String prompt) throws NoApiKeyException, InputRequiredException {
         // 创建 SSE 发射器，设置超时时间
