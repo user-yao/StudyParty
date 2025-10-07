@@ -120,5 +120,5 @@ logging:
     com.alibaba.nacos: DEBUG
 gateway:
   static-resource:
-    local-dir: D://studyParty/
+    local-dir: /root/studyParty/
     image-path: /images

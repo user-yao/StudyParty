@@ -27,6 +27,7 @@
         <module>studyParty_AI</module>
         <module>studyParty_admin</module>
         <module>studyParty_dubboApi</module>
+        <module>studyParty_entityApi</module>
     </modules>
 
     <licenses>
@@ -57,11 +58,7 @@
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
             <version>4.2.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.studyParty</groupId>
-            <artifactId>studyParty_dubboApi</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+
         <!--    nacos节点服务    -->
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
@@ -126,11 +123,7 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.studyParty</groupId>
-            <artifactId>studyParty_entityApi</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>

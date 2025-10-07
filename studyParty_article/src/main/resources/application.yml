@@ -34,7 +34,7 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 mybatis-plus:
   type-aliases-package: com.studyParty.entity.article;
-  mapper-locations: classpath:mapper/**/*.xml
+  mapper-locations: classpath:Mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
 springdoc:
@@ -68,15 +68,15 @@ knife4j:
   setting:
     language: zh_cn
 head: static/head/
-saveHead: D:/studyParty/head/
+saveHead: /root/studyParty/head/
 # 自定义配置
 app:
   # 文件上传路径配置
   upload:
     # 本地存储路径
-    base-path: D:/studyParty/uploads/
+    base-path: /root/studyParty/uploads/
     # 访问URL前缀
-    base-url: http://192.168.233.136:8080/static/uploads/
+    base-url: http://121.199.174.172:8080/static/uploads/
     # 允许的文件类型：图片、音频、视频
     allowed-types: >
       image/jpeg,

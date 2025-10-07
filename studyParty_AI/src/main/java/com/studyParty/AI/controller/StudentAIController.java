@@ -18,13 +18,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 public class StudentAIController {
-    @Value("${apikey}")
-    private String apikey;
+    private final String apikey = "sk-e1075cda4ca34c5d989977a2628bfe34";
     @PostMapping("/getSkillTree")
     public Result<?> getSkillTree(@RequestBody String  prompt) throws NoApiKeyException, InputRequiredException {
         ApplicationParam param = ApplicationParam.builder()
-                // 若没有配置环境变量，可用百炼API Key将下行替换为：.apiKey("sk-xxx")。但不建议在生产环境中直接将API Key硬编码到代码中，以减少API Key泄露风险。
-                .apiKey(System.getenv(apikey))
+                .apiKey(apikey)
                 .appId("f7179ca9fc8b42f1a275d00d28deff4e")
                 .prompt(prompt)
                 .build();
@@ -38,7 +36,7 @@ public class StudentAIController {
     @PostMapping("/teachingPlan")
     public Result<?> teachingPlan(@RequestBody String prompt) throws NoApiKeyException, InputRequiredException {
         ApplicationParam param = ApplicationParam.builder()
-                .apiKey(System.getenv(apikey))
+                .apiKey(apikey)
                 .appId("f88ca1f92ab4456d877c3430666b1e8d")
                 .prompt(prompt)
                 .build();
@@ -51,7 +49,7 @@ public class StudentAIController {
     @PostMapping("/taskAnalyst")
     public Result<?> taskAnalyst(@RequestBody String prompt) throws NoApiKeyException, InputRequiredException {
         ApplicationParam param = ApplicationParam.builder()
-                .apiKey(System.getenv(apikey))
+                .apiKey(apikey)
                 .appId("0e0d0a99d6324d5d90fdaee23586ec10")
                 .prompt(prompt)
                 .build();
@@ -64,7 +62,7 @@ public class StudentAIController {
     @PostMapping("/articleAnalyst")
     public Result<?> articleAnalyst(@RequestBody String prompt) throws NoApiKeyException, InputRequiredException {
         ApplicationParam param = ApplicationParam.builder()
-                .apiKey(System.getenv(apikey))
+                .apiKey(apikey)
                 .appId("6103a07ff32a4d0ca3063e1dc07ce7ac")
                 .prompt(prompt)
                 .build();
@@ -75,12 +73,12 @@ public class StudentAIController {
         return Result.success(JSON.parse(result.getOutput().getText()));
     }
     @PostMapping("/AI")
-    public SseEmitter AI(String prompt) throws NoApiKeyException, InputRequiredException {
+    public SseEmitter AI(@RequestBody String prompt) throws NoApiKeyException, InputRequiredException {
         // 创建 SSE 发射器，设置超时时间
         SseEmitter emitter = new SseEmitter(0L);
 
         ApplicationParam param = ApplicationParam.builder()
-                .apiKey(System.getenv(apikey))
+                .apiKey(apikey)
                 .appId("a9aeb75b22d844ac87985dae43a5f4e1")
                 .prompt(prompt)
                 .incrementalOutput(true)

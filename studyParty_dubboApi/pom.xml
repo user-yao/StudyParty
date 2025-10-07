@@ -13,6 +13,7 @@
     <name>studyParty_dubboApi</name>
     <description>studyParty_dubboApi</description>
     <url/>
+    <packaging>jar</packaging>
     <licenses>
         <license/>
     </licenses>
@@ -47,6 +48,11 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>com.studyParty</groupId>
+            <artifactId>studyParty_entityApi</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
@@ -71,10 +77,24 @@
     </dependencies>
 
     <build>
+        <finalName>studyParty_dubboApi</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <!-- 修复：添加 classifier 用于区分普通 jar 和可执行 jar -->
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
