@@ -26,7 +26,7 @@ public class WebFluxConfig implements WebFluxConfigurer {
     @Override
     public void addResourceHandlers(org.springframework.web.reactive.config.ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/**")
-                .addResourceLocations("file:/root/studyParty/")
+                .addResourceLocations("file:D:/studyParty/")
                 .resourceChain(true);
         /** 配置knife4j 显示文档 */
         registry.addResourceHandler("doc.html")

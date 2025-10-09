@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # 网关服务 - 需要首先启动
+  gateway:
+    build: ./studyParty_.gateway
+    container_name: study-party-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  # Dubbo API服务 - 需要首先启动
+  dubbo-api:
+    build: ./studyParty_dubboApi
+    container_name: study-party-dubbo-api
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  # 其他服务 - 在网关和dubbo-api之后启动
+  user-service:
+    build: ./studyParty_user
+    container_name: study-party-user
+    ports:
+      - "8082:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  group-service:
+    build: ./studyParty_group
+    container_name: study-party-group
+    ports:
+      - "8083:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  article-service:
+    build: ./studyParty_article
+    container_name: study-party-article
+    ports:
+      - "8084:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  websocket-service:
+    build: ./studyParty_websocket
+    container_name: study-party-websocket
+    ports:
+      - "8085:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  ai-service:
+    build: ./studyParty_AI
+    container_name: study-party-ai
+    ports:
+      - "8086:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  admin-service:
+    build: ./studyParty_admin
+    container_name: study-party-admin
+    ports:
+      - "8087:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+  enterprise-service:
+    build: ./studyParty_enterprise
+    container_name: study-party-enterprise
+    ports:
+      - "8088:8080"
+    depends_on:
+      dubbo-api:
+        condition: service_healthy
+    networks:
+      - studyparty-network
+    command: [
+      "--spring.profiles.active=dev"
+    ]
+
+networks:
+  studyparty-network:
+    driver: bridge
