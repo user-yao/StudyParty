@@ -54,6 +54,9 @@ public class FileUploadUtil {
                     ", 允许的类型: " + uploadProperties.getAllowedTypes());
         }
 
+        // 记录配置信息用于调试
+        log.info("当前文件上传配置 - basePath: {}, baseUrl: {}", 
+                uploadProperties.getBasePath(), uploadProperties.getBaseUrl());
 
         // 获取对应类型的最大大小（单位：MB）
         long maxSizeInMB = getMaxSizeByType(contentType);
@@ -79,13 +82,19 @@ public class FileUploadUtil {
             String basePath = uploadProperties.getBasePath();
             String filePath = basePath + dateDir + fileName;
 
+            // 记录文件路径信息用于调试
+            log.info("准备保存文件到路径: {}", filePath);
+
             // 创建目录(如果不存在)
             File saveFile = new File(filePath);
             if (!saveFile.getParentFile().exists()) {
-                boolean mkdir = saveFile.getParentFile().mkdirs();
-                if (!mkdir) {
+                // 使用.mkdirs()确保创建所有必要的父目录
+                boolean mkdirsSuccess = saveFile.getParentFile().mkdirs();
+                if (!mkdirsSuccess && !saveFile.getParentFile().exists()) {
+                    // 检查mkdirs是否真的失败，有时候即使返回false，目录也可能已经存在
                     throw new BusinessException("创建目录失败: " + saveFile.getParentFile().getPath());
                 }
+                log.info("已创建目录: {}", saveFile.getParentFile().getPath());
             }
 
             // 保存文件到磁盘

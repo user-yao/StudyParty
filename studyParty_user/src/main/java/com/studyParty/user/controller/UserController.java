@@ -83,7 +83,7 @@ public class UserController {
             }
         } catch (Exception e) {
             Logger.getGlobal().log(Level.WARNING,e.getMessage());
-            return Result.error();
+            return Result.error("用户名或密码错误");
         }
         return Result.error("用户名或密码错误");
     }
@@ -93,6 +93,7 @@ public class UserController {
             User user = userMapper.selectById(userId);
             user.setFinishTask(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id",userId)));
             user.setArticleNum(userArticleMapper.selectCount(new QueryWrapper<UserArticle>().eq("user_id",userId)));
+            user.setTaskNum(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id",userId)));
             return Result.success(user);
         } catch (Exception e) {
             System.err.println(e.getMessage());

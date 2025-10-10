@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: studyParty-article
+  profiles:
+    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
@@ -20,7 +22,7 @@ spring:
   data:
     redis:
       port: 6379
-      timeout: 6000 # ??????????
+      timeout: 6000 # 可选，默认单位为毫秒
       host: localhost
   kafka:
     bootstrap-servers: localhost:9092 # Kafka服务器地址
@@ -39,11 +41,11 @@ mybatis-plus:
     map-underscore-to-camel-case: true
 springdoc:
   api-docs:
-    path: /v3/api-docs  # ??????????????
+    path: /v3/api-docs  # 关键！网关依赖此路径拉取文档
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: com.studyParty.article.controller  # ??????Controller?
+      packages-to-scan: com.studyParty.article.controller  # 扫描本模块的Controller包
   swagger-ui:
     path: /swagger-ui.html
     config-url: /v3/api-docs/swagger-config
@@ -64,19 +66,19 @@ dubbo.provider:
 dubbo.consumer:
   timeout: 2000 # 服务消费方超时时间
 knife4j:
-  enable: true  # ??Knife4j??UI
+  enable: true  # 启用Knife4j增强UI
   setting:
     language: zh_cn
 head: static/head/
-saveHead: /root/studyParty/head/
+saveHead: D:/studyParty/head/
 # 自定义配置
 app:
   # 文件上传路径配置
   upload:
     # 本地存储路径
-    base-path: /root/studyParty/uploads/
+    base-path: D:/studyParty/uploads/
     # 访问URL前缀
-    base-url: http://121.199.174.172:8080/static/uploads/
+    base-url: http://192.168.46.136:8080/static/uploads/
     # 允许的文件类型：图片、音频、视频
     allowed-types: >
       image/jpeg,

@@ -145,8 +145,9 @@ public class TaskAnswerController {
         if(!taskAnswerServer.trueTask(taskAnswer)){
             return Result.error("任务不存在");
         }
-        businessServer.addStarPrestige(task.getUploader(),task.getStarPrestige());
-        businessServer.addUserTask(task.getUploader(),1,taskAnswerId);
+        TaskAnswer taskAnswer1 = taskAnswerMapper.selectById(taskAnswerId);
+        businessServer.addStarPrestige(taskAnswer1.getAnswerer(),task.getStarPrestige());
+        businessServer.addUserTask(taskAnswer1.getAnswerer(),1,taskAnswerId);
         return Result.success();
     }
     @PostMapping("/TaskAnswerList")

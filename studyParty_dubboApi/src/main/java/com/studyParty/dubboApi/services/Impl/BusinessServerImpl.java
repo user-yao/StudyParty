@@ -74,6 +74,9 @@ public class BusinessServerImpl implements BusinessServer {
         userTask.setTaskId(taskId);
         userTask.setTaskType(taskType);
         userTaskMapper.insert(userTask);
+        User user = userMapper.selectById(userId);
+        user.setFinishTask(user.getFinishTask()+1);
+        userMapper.updateById(user);
     }
 
     @Override

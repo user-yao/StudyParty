@@ -27,17 +27,27 @@ public class UserFriendController {
 
     @PostMapping("/request")
     public Result<?> request(Long friendId, String context, @RequestHeader("X-User-Id") String userId) {
+        // 校验参数
         if (friendId == null){
             return Result.error("请选择好友");
         }
-        if (friendId.equals(Long.valueOf(userId))){
+        
+        // 校验 userId 是否为有效的 Long 类型
+        Long parsedUserId;
+        try {
+            parsedUserId = Long.valueOf(userId);
+        } catch (NumberFormatException e) {
+            return Result.error("用户ID格式错误");
+        }
+        
+        if (friendId.equals(parsedUserId)){
             return Result.error("不能添加自己为好友");
         }
-        if (friendServer.isFriend(Long.valueOf(userId), friendId)){
+        if (friendServer.isFriend(parsedUserId, friendId)){
             return Result.error("已经是好友");
         }
         QueryWrapper< FriendRequest> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", Long.valueOf(userId));
+        queryWrapper.eq("user_id", parsedUserId);
         queryWrapper.eq("friend_id", friendId);
         FriendRequest friendRequest = friendRequestMapper.selectOne(queryWrapper);
         if (friendRequest != null){
@@ -46,7 +56,7 @@ public class UserFriendController {
             friendRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
             friendRequestMapper.updateById(friendRequest);
         }else{
-            friendRequestServer.save(new FriendRequest(Long.valueOf(userId), friendId, context));
+            friendRequestServer.save(new FriendRequest(parsedUserId, friendId, context));
         }
         return Result.success();
     }

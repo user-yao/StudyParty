@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -19,7 +20,7 @@ import java.util.List;
 public class UserPlanController {
     private final UserPlanMapper userPlanMapper;
     @PostMapping("/addUserPlan")
-    public Result<?> addUserPlan(String planContext, Long startTime,  @RequestHeader("X-User-Id") String userId) {
+    public Result<?> addUserPlan(String planContext, Long startTime, @RequestHeader("X-User-Id") String userId) {
         if (planContext == null || planContext.trim().isEmpty()) {
             return Result.error("计划内容不能为空");
         }
@@ -28,7 +29,7 @@ public class UserPlanController {
         }
 
         // 将毫秒时间戳转换为 Timestamp
-        Timestamp startTimestamp = new Timestamp(startTime * 1000L);
+        Timestamp startTimestamp = new Timestamp(startTime);
         if(startTimestamp.before(new Timestamp(System.currentTimeMillis()))){
             return Result.error("计划开始时间不能早于当前时间");
         }
@@ -62,6 +63,7 @@ public class UserPlanController {
         if (userPlan.getIsStart() == 1){
             return Result.error("计划已开始");
         }
+        userPlan.setStartTime(new Timestamp(System.currentTimeMillis()));
         userPlan.setIsStart(1);
         userPlanMapper.updateById(userPlan);
         return Result.success();
@@ -80,6 +82,7 @@ public class UserPlanController {
         }
         userPlan.setIsStart(0);
         userPlan.setIsEnd(1);
+        userPlan.setEndTime(new Timestamp(System.currentTimeMillis()));
         userPlanMapper.updateById(userPlan);
         return Result.success();
     }
