@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("`group_task`")
+@TableName(" group_task ")
 public class GroupTask implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

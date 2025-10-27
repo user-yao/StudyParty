@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Data
 @Getter
 @Setter
-@TableName("`user_task`")
+@TableName(" user_task ")
 public class UserTask implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

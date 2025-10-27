@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="studyParty" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="studyParty">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_enterprise" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_websocket" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_.gateway" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_group" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_entityApi" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_AI" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_dubboApi" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_article" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_admin" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/studyParty_user" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

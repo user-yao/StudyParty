@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @Data
 @Getter
 @Setter
-@TableName("`user_plan`")
+@TableName(" user_plan ")
 public class UserPlan implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -4,26 +4,28 @@ spring:
   application:
     name: studyParty-AI
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: 9345245374
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://studyparty.pg.polardb.rds.aliyuncs.com:5432/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&currentSchema=public
+    username: root_yzt
+    password: Yzt9345245374
+
   cloud:
     nacos:
       username: nacos
       password: nacos
       config:
-        server-addr: localhost:8848
+        server-addr: nacos:8848
       discovery:
+        enabled: true
         namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
-        server-addr: localhost:8848
+        server-addr: nacos:8848
   data:
     redis:
       port: 6379
       timeout: 6000 # ??????????
-      host: localhost
+      host: redis
   kafka:
-    bootstrap-servers: localhost:9092 # Kafka服务器地址
+    bootstrap-servers: kafka:9092 # Kafka服务器地址
     consumer:
       group-id: studyParty # 消费组ID
       auto-offset-reset: earliest # 当没有初始偏移量时该做何处理（earliest, latest）
@@ -51,7 +53,9 @@ dubbo:
   application:
     name: studyParty-AI # 应用名称
   registry:
-    address: nacos://localhost:8848?username=nacos&password=nacos&namespace=086bcf84-a9bb-4265-aa7c-98fcad205276 # 注册中心地址
+    address: nacos://nacos:8848?username=nacos&password=nacos&namespace=086bcf84-a9bb-4265-aa7c-98fcad205276 # 注册中心地址
+  config-center:
+    address: nacos://nacos:8848?username=nacos&password=nacos&namespace=086bcf84-a9bb-4265-aa7c-98fcad205276 # 配置中心地址
   protocol:
     name: dubbo
     port: 20880 # 服务暴露端口

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="bf28e76e-006a-434b-b969-cbc56541c558" name="studyParty">
+        <fileTransfer rootFolder="/root/nacos/code" accessType="SFTP" host="121.199.174.172" port="22" sshConfigId="1ef1ceb9-b882-4811-a736-21de99a8cf6f" sshConfig="root@121.199.174.172:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" isUseSudo="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

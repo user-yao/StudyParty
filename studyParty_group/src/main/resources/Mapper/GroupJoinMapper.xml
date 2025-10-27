@@ -19,7 +19,7 @@
             gj.is_pass as isPass,
             gj.join_time as joinTime
         FROM group_join gj
-        LEFT JOIN `group` g ON gj.group_id = g.id
+        LEFT JOIN  "group " g ON gj.group_id = g.id
         LEFT JOIN users ul ON gj.group_leader = ul.id
         LEFT JOIN users uu ON gj.user_id = uu.id
         WHERE 
@@ -42,7 +42,7 @@
             gj.is_pass as isPass,
             gj.join_time as joinTime
         FROM group_join gj
-        LEFT JOIN `group` g ON gj.group_id = g.id
+        LEFT JOIN  "group " g ON gj.group_id = g.id
         LEFT JOIN users ul ON gj.group_leader = ul.id
         LEFT JOIN users uu ON gj.user_id = uu.id
         WHERE 

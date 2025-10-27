@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @Data
-@TableName("`task_answer`")
+@TableName(" task_answer ")
 public class TaskAnswer implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

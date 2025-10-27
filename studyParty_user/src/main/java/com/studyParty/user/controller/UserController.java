@@ -82,6 +82,7 @@ public class UserController {
                 return Result.success(userToken);
             }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             Logger.getGlobal().log(Level.WARNING,e.getMessage());
             return Result.error("用户名或密码错误");
         }

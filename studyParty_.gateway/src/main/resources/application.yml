@@ -1,24 +1,20 @@
 server:
   port: 8080
 spring:
-  servlet:
-    multipart:
-      max-file-size: 10MB      # 单个文件最大大小
-      max-request-size: 10MB   # 整个请求最大大小
-  codec:
-    max-in-memory-size: 10MB
   application:
     name: studyParty-gateway
+
   cloud:
     nacos:
+      username: nacos
+      password: nacos
       config:
-        namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
+        server-addr: nacos:8848
       discovery:
-        username: nacos
-        password: nacos
-        server-addr: localhost:8848
-        namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
         enabled: true
+        namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
+        server-addr: nacos:8848
+
     gateway:
       globalcors:
         add-to-simple-url-handler-mapping: true  # 解决 OPTIONS 请求被拦截
@@ -48,7 +44,7 @@ spring:
         - id: openapi-route   # 确保存在此路由
           uri: no://op
           predicates:
-           - Path=/v3/api-docs/**  # 关键路径匹配
+            - Path=/v3/api-docs/**  # 关键路径匹配
 
         - id: userServiceRoute
           uri: lb://studyParty-user
@@ -66,9 +62,9 @@ spring:
         -  id: groupServiceRoute
            uri: lb://studyParty-group
            predicates:
-            - Path=/group/**, /studyParty-group/**
+             - Path=/group/**, /studyParty-group/**
            filters:
-            -  StripPrefix=1
+             -  StripPrefix=1
         - id: articleServiceRoute
           uri: lb://studyParty-article
           predicates:
@@ -107,7 +103,7 @@ spring:
     redis:
       port: 6379
       timeout: 6000 # 可选，默认单位为毫秒
-      host: localhost
+      host: redis
 knife4j:
   gateway:
     enabled: true

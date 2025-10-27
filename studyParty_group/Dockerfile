@@ -8,7 +8,11 @@ WORKDIR /app
 COPY target/studyParty_group.jar studyParty_group.jar
 
 # 暴露端口
-EXPOSE 8080
+EXPOSE 8084
+
+# 设置环境变量
+ENV SPRING_APPLICATION_NAME=studyParty-group \
+    NACOS_SERVERS=nacos:8848
 
 # 运行应用
 ENTRYPOINT ["java", "-jar", "studyParty_group.jar"]

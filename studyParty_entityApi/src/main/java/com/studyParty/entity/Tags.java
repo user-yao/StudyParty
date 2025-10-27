@@ -12,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName("`tags`")
+@TableName(" tags ")
 @Data
 public class Tags implements Serializable {
     @Serial

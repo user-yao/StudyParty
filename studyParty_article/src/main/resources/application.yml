@@ -3,29 +3,28 @@ server:
 spring:
   application:
     name: studyParty-article
-  profiles:
-    active: dev
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: 9345245374
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://studyparty.pg.polardb.rds.aliyuncs.com:5432/studyparty?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&currentSchema=public
+    username: root_yzt
+    password: Yzt9345245374
   cloud:
     nacos:
       username: nacos
       password: nacos
       config:
-        server-addr: localhost:8848
+        server-addr: nacos:8848
       discovery:
+        enabled: true
         namespace: 086bcf84-a9bb-4265-aa7c-98fcad205276
-        server-addr: localhost:8848
+        server-addr: nacos:8848
   data:
     redis:
       port: 6379
       timeout: 6000 # 可选，默认单位为毫秒
-      host: localhost
+      host: redis
   kafka:
-    bootstrap-servers: localhost:9092 # Kafka服务器地址
+    bootstrap-servers: kafka:9092 # Kafka服务器地址
     consumer:
       group-id: studyParty # 消费组ID
       auto-offset-reset: earliest # 当没有初始偏移量时该做何处理（earliest, latest）
@@ -53,7 +52,9 @@ dubbo:
   application:
     name: studyParty-article # 应用名称
   registry:
-    address: nacos://localhost:8848?username=nacos&password=nacos&namespace=086bcf84-a9bb-4265-aa7c-98fcad205276 # 注册中心地址
+    address: nacos://nacos:8848?username=nacos&password=nacos&namespace=086bcf84-a9bb-4265-aa7c-98fcad205276 # 注册中心地址
+  config-center:
+    address: nacos://nacos:8848?username=nacos&password=nacos&namespace=086bcf84-a9bb-4265-aa7c-98fcad205276 # 配置中心地址
   protocol:
     name: dubbo
     port: 20880 # 服务暴露端口
@@ -70,15 +71,15 @@ knife4j:
   setting:
     language: zh_cn
 head: static/head/
-saveHead: D:/studyParty/head/
+saveHead: /root/studyParty/head/
 # 自定义配置
 app:
   # 文件上传路径配置
   upload:
     # 本地存储路径
-    base-path: D:/studyParty/uploads/
+    base-path: /root/studyParty/uploads/
     # 访问URL前缀
-    base-url: http://192.168.46.136:8080/static/uploads/
+    base-url: http://121.199.174.172:8080/static/uploads/
     # 允许的文件类型：图片、音频、视频
     allowed-types: >
       image/jpeg,

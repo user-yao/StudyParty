@@ -1,137 +1,152 @@
 version: '3.8'
 
 services:
-  # 网关服务 - 需要首先启动
+  # 网关服务 - 首先启动
   gateway:
-    build: ./studyParty_.gateway
+    build: 
+      context: ./studyParty_.gateway
     container_name: study-party-gateway
     ports:
       - "8080:8080"
-    depends_on:
-      dubbo-api:
-        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - NACOS_SERVER_ADDR=nacos:8848
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
+    depends_on:
+      - nacos
 
-  # Dubbo API服务 - 需要首先启动
+  # Dubbo服务 - 第二个启动
   dubbo-api:
-    build: ./studyParty_dubboApi
+    build:
+      context: ./studyParty_dubboApi
     container_name: study-party-dubbo-api
     ports:
-      - "8081:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - "8090:8090"
+      - "20880:20880"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - NACOS_SERVER_ADDR=nacos:8848
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
+    depends_on:
+      - nacos
 
-  # 其他服务 - 在网关和dubbo-api之后启动
+  # 用户服务
   user-service:
-    build: ./studyParty_user
+    build:
+      context: ./studyParty_user
     container_name: study-party-user
     ports:
-      - "8082:8080"
-    depends_on:
-      dubbo-api:
-        condition: service_healthy
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - NACOS_SERVER_ADDR=nacos:8848
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
-
-  group-service:
-    build: ./studyParty_group
-    container_name: study-party-group
-    ports:
-      - "8083:8080"
     depends_on:
-      dubbo-api:
-        condition: service_healthy
-    networks:
-      - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
+      - gateway
+      - dubbo-api
+      - nacos
 
+  # 文章服务
   article-service:
-    build: ./studyParty_article
+    build:
+      context: ./studyParty_article
     container_name: study-party-article
     ports:
-      - "8084:8080"
-    depends_on:
-      dubbo-api:
-        condition: service_healthy
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - NACOS_SERVER_ADDR=nacos:8848
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
+    depends_on:
+      - gateway
+      - dubbo-api
+      - nacos
 
+  # 群组服务
+  group-service:
+    build:
+      context: ./studyParty_group
+    container_name: study-party-group
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - NACOS_SERVER_ADDR=nacos:8848
+    networks:
+      - studyparty-network
+    depends_on:
+      - gateway
+      - dubbo-api
+      - nacos
+
+  # websocket服务
   websocket-service:
-    build: ./studyParty_websocket
+    build:
+      context: ./studyParty_websocket
     container_name: study-party-websocket
     ports:
-      - "8085:8080"
-    depends_on:
-      dubbo-api:
-        condition: service_healthy
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - NACOS_SERVER_ADDR=nacos:8848
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
+    depends_on:
+      - gateway
+      - dubbo-api
+      - nacos
 
+  # AI服务
   ai-service:
-    build: ./studyParty_AI
+    build:
+      context: ./studyParty_AI
     container_name: study-party-ai
     ports:
-      - "8086:8080"
-    depends_on:
-      dubbo-api:
-        condition: service_healthy
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - NACOS_SERVER_ADDR=nacos:8848
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
+    depends_on:
+      - gateway
+      - dubbo-api
+      - nacos
 
-  admin-service:
-    build: ./studyParty_admin
-    container_name: study-party-admin
-    ports:
-      - "8087:8080"
-    depends_on:
-      dubbo-api:
-        condition: service_healthy
+  # Nacos 服务（从docker-compose-env.yml中引入）
+  nacos:
+    extends:
+      file: docker-compose-env.yml
+      service: nacos
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
 
-  enterprise-service:
-    build: ./studyParty_enterprise
-    container_name: study-party-enterprise
-    ports:
-      - "8088:8080"
-    depends_on:
-      dubbo-api:
-        condition: service_healthy
+  # Redis 服务（从docker-compose-env.yml中引入）
+  redis:
+    extends:
+      file: docker-compose-env.yml
+      service: redis
     networks:
       - studyparty-network
-    command: [
-      "--spring.profiles.active=dev"
-    ]
+
+  # Kafka 服务（从docker-compose-env.yml中引入）
+  zookeeper:
+    extends:
+      file: docker-compose-env.yml
+      service: zookeeper
+    networks:
+      - studyparty-network
+
+  kafka:
+    extends:
+      file: docker-compose-env.yml
+      service: kafka
+    networks:
+      - studyparty-network
 
 networks:
   studyparty-network:

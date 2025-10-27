@@ -6,33 +6,33 @@
     <!-- ArticleCommentMapper.xml -->
     <select id="friendList" resultType="com.studyParty.entity.friend.DTO.FriendDTO">
         SELECT
-            `friend`.*,
-            `users`.`phone`,
-            `users`.`name`,
-            `users`.`head`,
-            `users`.`status`,
-            `users`.`school`
-        FROM `friend`
-                 LEFT JOIN `users` ON `friend`.friend_id = `users`.id
-        WHERE `friend`.user_id = #{userId}
-        ORDER BY `users`.`name`
+            "friend".*,
+            "users"."phone",
+            "users"."name",
+            "users"."head",
+            "users"."status",
+            "users"."school"
+        FROM "friend"
+                 LEFT JOIN "users" ON "friend".friend_id = "users".id
+        WHERE "friend".user_id = #{userId}
+        ORDER BY "users"."name"
     </select>
     <select id="selectUserAndRemarkById" resultType="com.studyParty.entity.user.DTO.UserDTO">
         SELECT
-            `users`.*,
-            `friend`.`remark`
-        FROM `users`
-                 LEFT JOIN `friend` ON `friend`.friend_id = `users`.id
-        WHERE `friend`.user_id = #{userId}
-              AND `friend`.friend_id = #{id}
+            "users".*,
+            "friend"."remark"
+        FROM "users"
+                 LEFT JOIN "friend" ON "friend".friend_id = "users".id
+        WHERE "friend".user_id = #{userId}
+              AND "friend".friend_id = #{id}
     </select>
     
     <select id="isFriend" resultType="boolean">
         SELECT EXISTS(
             SELECT 1
-            FROM `friend`
-            WHERE `friend`.user_id = #{userId}
-              AND `friend`.friend_id = #{friendId}
+            FROM "friend"
+            WHERE "friend".user_id = #{userId}
+              AND "friend".friend_id = #{friendId}
         )
     </select>
 </mapper>

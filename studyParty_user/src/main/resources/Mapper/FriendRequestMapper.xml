@@ -6,28 +6,28 @@
     <!-- ArticleCommentMapper.xml -->
     <select id="friendRequestList" resultType="com.studyParty.entity.friend.DTO.FriendRequestDTO">
         SELECT
-            `friend_request`.*,
-            `users`.id,
-            `users`.name,
-            `users`.head,
-            `users`.status,
-            `users`.school
-        FROM `friend_request`
-                 LEFT JOIN `users` ON `friend_request`.user_id = `users`.id
-        WHERE `friend_request`.friend_id = #{userId}
-        ORDER BY `friend_request`.create_time DESC
+            "friend_request".*,
+            "users".id,
+            "users".name,
+            "users".head,
+            "users".status,
+            "users".school
+        FROM "friend_request"
+                 LEFT JOIN "users" ON "friend_request".user_id = "users".id
+        WHERE "friend_request".friend_id = #{userId}
+        ORDER BY "friend_request".create_time DESC
     </select>
     <select id="myFriendRequestList" resultType="com.studyParty.entity.friend.DTO.FriendRequestDTO">
         SELECT
-            `friend_request`.*,
-            `users`.id,
-            `users`.name,
-            `users`.head,
-            `users`.status,
-            `users`.school
-        FROM `friend_request`
-                 LEFT JOIN `users` ON `friend_request`.friend_id = `users`.id
-        WHERE `friend_request`.user_id = #{userId}
-        ORDER BY `friend_request`.create_time DESC
+            "friend_request".*,
+            "users".id,
+            "users".name,
+            "users".head,
+            "users".status,
+            "users".school
+        FROM "friend_request"
+                 LEFT JOIN "users" ON "friend_request".friend_id = "users".id
+        WHERE "friend_request".user_id = #{userId}
+        ORDER BY "friend_request".create_time DESC
     </select>
 </mapper>
