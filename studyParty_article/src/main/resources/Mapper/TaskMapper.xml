@@ -5,7 +5,7 @@
 <mapper namespace="com.studyParty.article.mapper.TaskMapper">
     <select id="selectTaskWithUser" resultType="com.studyParty.entity.task.DTO.TaskDTO">
         SELECT
-            `task`.*,
+            "task".*,
             users.name as name,
             users.head as head,
             users.school as school
@@ -16,7 +16,7 @@
         ORDER BY task.create_time DESC
     </select>
     <select id="recommendTask" resultType="com.studyParty.entity.task.DTO.TaskDTO">
-        SELECT `task`.*,
+        SELECT "task".*,
                users.name   as name,
                users.head   as head,
                users.school as school

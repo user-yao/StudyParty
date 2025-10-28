@@ -56,8 +56,9 @@ public class GroupTaskController {
 
     @PostMapping("/deleteGroupTask")
     public Result<?> deleteGroupTask(Long groupTaskId, @RequestHeader("X-User-Id") String userId) {
-        if (groupMapper.selectById(userId).getLeader() != Integer.parseInt(userId) ||
-                groupMapper.selectById(userId).getDeputy() != Integer.parseInt(userId)) {
+        Long userIdLong = Long.valueOf(userId);
+        if (groupMapper.selectById(userId).getLeader() != userIdLong ||
+                groupMapper.selectById(userId).getDeputy() != userIdLong) {
             return Result.error("权限错误");
         }
         QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();

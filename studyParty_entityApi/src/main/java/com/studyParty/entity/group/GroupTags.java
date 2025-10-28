@@ -13,7 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName(" group_tags ")
+@TableName("group_tags")
 public class GroupTags implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

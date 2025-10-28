@@ -5,25 +5,25 @@
 <mapper namespace="com.studyParty.article.mapper.TaskAnswerMapper">
     <select id="selectTaskAnswerWithUser" resultType="com.studyParty.entity.task.DTO.TaskAnswerDTO">
         SELECT
-            `task_answer`.*,
-            `users`.name as name,
-            `users`.head as head,
-            `users`.school as school
-        FROM `task_answer`
-                 LEFT JOIN `users` ON `task_answer`.answerer = `users`.id
-        WHERE `task_answer`.task_id = #{taskId}
-        ORDER BY `task_answer`.nice DESC, `task_answer`.create_time DESC
+            "task_answer".*,
+            "users".name as name,
+            "users".head as head,
+            "users".school as school
+        FROM "task_answer"
+                 LEFT JOIN "users" ON "task_answer".answerer = "users".id
+        WHERE "task_answer".task_id = #{taskId}
+        ORDER BY "task_answer".nice DESC, "task_answer".create_time DESC
     </select>
     <select id="selectTaskTrueAnswer" resultType="com.studyParty.entity.task.DTO.TaskDTO">
         SELECT
-            `task_answer`.*,
-            `users`.id as user_id,
-            `users`.name as user_name,
-            `users`.head as user_head,
-            `users`.status as user_status,
-            `users`.school as user_school
-        FROM `task_answer`
-                 LEFT JOIN `users` ON `task_answer`.answerer = `users`.id
-        WHERE `task_answer`.task_id = #{taskId}
+            "task_answer".*,
+            "users".id as user_id,
+            "users".name as user_name,
+            "users".head as user_head,
+            "users".status as user_status,
+            "users".school as user_school
+        FROM "task_answer"
+                 LEFT JOIN "users" ON "task_answer".answerer = "users".id
+        WHERE "task_answer".task_id = #{taskId}
     </select>
 </mapper>

@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @Data
-@TableName(" article_comment ")
+@TableName("article_comment")
 public class ArticleComment implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

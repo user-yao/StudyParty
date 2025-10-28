@@ -12,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName(" source ")
+@TableName("source")
 @Data
 public class Source implements Serializable {
     @Serial

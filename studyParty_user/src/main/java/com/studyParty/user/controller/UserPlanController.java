@@ -33,18 +33,20 @@ public class UserPlanController {
         if(startTimestamp.before(new Timestamp(System.currentTimeMillis()))){
             return Result.error("计划开始时间不能早于当前时间");
         }
-        Long num = userPlanMapper.selectCount(new QueryWrapper<UserPlan>().eq("user_id", userId));
+        Long userIdLong = Long.valueOf(userId);
+        Long num = userPlanMapper.selectCount(new QueryWrapper<UserPlan>().eq("user_id", userIdLong));
         if (num >= 5){
             return Result.error("计划已达到上限");
         }
-        userPlanMapper.insert(new UserPlan(planContext, startTimestamp, Long.valueOf(userId)));
+        userPlanMapper.insert(new UserPlan(planContext, startTimestamp, userIdLong));
         return Result.success();
     }
     @PostMapping("/deleteUserPlan")
     public Result<?> deleteUserPlan(Long planId, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         QueryWrapper<UserPlan> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", planId);
-        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("user_id", userIdLong);
         if (userPlanMapper.selectOne(queryWrapper) == null){
             return Result.error("计划不存在");
         }
@@ -53,9 +55,10 @@ public class UserPlanController {
     }
     @PostMapping("/startUserPlan")
     public Result<?> startUserPlan(Long planId, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         QueryWrapper<UserPlan> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", planId);
-        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("user_id", userIdLong);
         if (userPlanMapper.selectOne(queryWrapper) == null){
             return Result.error("计划不存在");
         }
@@ -70,9 +73,10 @@ public class UserPlanController {
     }
     @PostMapping("/endUserPlan")
     public Result<?> endUserPlan(Long planId, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         QueryWrapper<UserPlan> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", planId);
-        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("user_id", userIdLong);
         if (userPlanMapper.selectOne(queryWrapper) == null){
             return Result.error("计划不存在");
         }
@@ -88,13 +92,14 @@ public class UserPlanController {
     }
     @PostMapping("/getUserPlans")
     public Result<?> getUserPlans(@RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         QueryWrapper<UserPlan> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("user_id", userIdLong);
         queryWrapper.orderByAsc("start_time");
         queryWrapper.eq("is_end", 0);
         List<UserPlan> userPlans = userPlanMapper.selectList(queryWrapper);
         queryWrapper.clear();
-        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("user_id", userIdLong);
         queryWrapper.orderByDesc("start_time");
         queryWrapper.eq("is_end", 1);
         List<UserPlan> userPlans1 = userPlanMapper.selectList(queryWrapper);

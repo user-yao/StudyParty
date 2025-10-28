@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Data
-@TableName(" article_comment_user ")
+@TableName("article_comment_user")
 public class ArticleCommentUser implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

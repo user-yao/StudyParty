@@ -53,6 +53,6 @@ public class UserDTO implements Serializable {
         this.createDate = user.getCreateDate();
         this.finishTask = user.getFinishTask();
         this.articleNum = user.getArticleNum();
-        this.friend = false;//默认不是好友
+        this.friend = false;
     }
 }

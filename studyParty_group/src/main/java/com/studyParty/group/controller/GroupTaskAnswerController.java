@@ -53,9 +53,10 @@ public class GroupTaskAnswerController {
         if (groupTask == null) {
             return Result.error("任务不存在");
         }
+        Long userIdLong = Long.valueOf(userId);
         QueryWrapper<GroupTaskAnswer> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_task_id", groupTaskId);
-        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("user_id", userIdLong);
         GroupTaskAnswer isSubmitted = groupTaskAnswerMapper.selectOne(queryWrapper);
 
         GroupTaskAnswer groupTaskAnswer = new GroupTaskAnswer();
@@ -69,7 +70,7 @@ public class GroupTaskAnswerController {
             return Result.success(isSubmitted.getId());
         }else{
             groupTaskAnswer.setGroupTaskId(groupTaskId);
-            groupTaskAnswer.setUserId(Long.valueOf(userId));
+            groupTaskAnswer.setUserId(userIdLong);
             groupTaskAnswer.setTime(new Timestamp(System.currentTimeMillis()));
             groupTaskAnswer.setContext(markdown);
             groupTaskAnswer.setHaveSource(0);
@@ -78,7 +79,7 @@ public class GroupTaskAnswerController {
             groupServerImpl.contributionGroup(groupTask.getGroupId(), userId);
             groupTask.setGroupTaskFinish(groupTask.getGroupTaskFinish() + 1);
             groupTaskMapper.updateById(groupTask);
-            businessServer.addUserTask(Long.valueOf(userId), 2, groupTaskId);
+            businessServer.addUserTask(userIdLong, 2, groupTaskId);
             return Result.success(groupTaskAnswer.getId());
         }
     }

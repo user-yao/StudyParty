@@ -11,7 +11,7 @@ COPY target/studyParty_AI.jar studyParty_AI.jar
 EXPOSE 8086
 
 # 设置环境变量
-ENV SPRING_APPLICATION_NAME=studyParty-ai \
+ENV SPRING_APPLICATION_NAME=studyParty-AI \
     NACOS_SERVERS=nacos:8848
 
 # 运行应用

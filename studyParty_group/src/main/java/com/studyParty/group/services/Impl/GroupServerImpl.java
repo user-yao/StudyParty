@@ -29,9 +29,10 @@ public class GroupServerImpl extends ServiceImpl<GroupMapper, Group> implements 
         return groupMapper.findMyGroups(id);
     }
     public Result<?> contributionGroup(Long groupId, String userId) {
+        Long userIdLong = Long.valueOf(userId);
         QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("group_id", groupId);
-        queryWrapper.eq("group_user", userId);
+        queryWrapper.eq("group_user", userIdLong);
         GroupUser groupUser = groupUserMapper.selectOne(queryWrapper);
         if (groupUser == null) {
             return Result.error("未找到对应的群组成员");

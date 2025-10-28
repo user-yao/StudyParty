@@ -37,7 +37,12 @@ mybatis-plus:
   type-aliases-package: com.studyParty.entity.article;
   mapper-locations: classpath:Mapper/**/*.xml
   configuration:
+    # 关闭自动转义关键字（防止生成反引号）
+    auto-mapping-behavior: FULL
     map-underscore-to-camel-case: true
+    # ️ 关键：禁止 MyBatis 自动加反引号
+    # PostgreSQL 不支持反引号，必须关闭标识符自动转义
+    safe-row-bounds-enabled: true
 springdoc:
   api-docs:
     path: /v3/api-docs  # 关键！网关依赖此路径拉取文档

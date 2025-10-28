@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-@TableName(" group_join ")
+@TableName("group_join")
 public class GroupJoin implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -133,14 +133,6 @@ services:
     networks:
       - studyparty-network
 
-  # Kafka 服务（从docker-compose-env.yml中引入）
-  zookeeper:
-    extends:
-      file: docker-compose-env.yml
-      service: zookeeper
-    networks:
-      - studyparty-network
-
   kafka:
     extends:
       file: docker-compose-env.yml

@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Data
-@TableName(" user_tags ")
+@TableName("user_tags")
 public class UserTags implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

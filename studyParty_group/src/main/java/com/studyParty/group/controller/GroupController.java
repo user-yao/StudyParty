@@ -271,7 +271,8 @@ public class GroupController {
 
         @PostMapping("/changeDeputy")
     public Result<?> changeDeputy(Long groupId, Integer deputy, @RequestHeader("X-User-Id") String userId) {
-        if (groupMapper.selectById(groupId).getLeader() != Integer.parseInt(userId)) {
+        Long userIdLong = Long.valueOf(userId);
+        if (groupMapper.selectById(groupId).getLeader() != userIdLong) {
             return Result.error("权限错误");
         }
         QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
@@ -291,7 +292,8 @@ public class GroupController {
 
     @PostMapping("/changeCanJoin")
     public Result<?> changeCanJoin(Long groupId, Integer canJoin, @RequestHeader("X-User-Id") String userId) {
-        if (groupMapper.selectById(groupId).getLeader() != Integer.parseInt(userId)) {
+        Long userIdLong = Long.valueOf(userId);
+        if (groupMapper.selectById(groupId).getLeader() != userIdLong) {
             return Result.error("权限错误");
         }
         UpdateWrapper<Group> queryWrapper = new UpdateWrapper<>();
@@ -307,8 +309,9 @@ public class GroupController {
 
     @PostMapping("/invitePredecessor")
     public Result<?> inviteTeacher(Long groupId, Long predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         Group group = groupMapper.selectById(groupId);
-        if (group.getLeader() != Integer.parseInt(userId)) {
+        if (group.getLeader() != userIdLong) {
             return Result.error("权限错误");
         }
         if (status == 1) {
@@ -333,8 +336,9 @@ public class GroupController {
 
     @PostMapping("/clearPredecessor")
     public Result<?> clearPredecessor(Long groupId, Long predecessorId, int status, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         Group group = groupMapper.selectById(groupId);
-        if (group.getLeader() != Integer.parseInt(userId)) {
+        if (group.getLeader() != userIdLong) {
             return Result.error("权限错误");
         }
         if (status == 1) {
@@ -361,6 +365,7 @@ public class GroupController {
     
     @PostMapping("/inviteUserToGroup")
     public Result<?> inviteUserToGroup(Long groupId, Long invitedUserId, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         // 检查发起邀请的用户是否是小组的创建者或管理员
         Group group = groupMapper.selectById(groupId);
         if (group == null) {
@@ -370,7 +375,7 @@ public class GroupController {
         Long leaderId = group.getLeader();
         Long deputyId = group.getDeputy();
         
-        if (!leaderId.toString().equals(userId) && !deputyId.toString().equals(userId)) {
+        if (!leaderId.equals(userIdLong) && !deputyId.equals(userIdLong)) {
             return Result.error("权限错误，只有群主或副群主可以邀请用户");
         }
         
@@ -444,27 +449,28 @@ public class GroupController {
     }
     @PostMapping("/outGroup")
     public Result<?> outGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         Group group = groupMapper.selectById(groupId);
         if (group == null) {
             return Result.error("未找到对应的群组");
         }
-        if (group.getLeader().toString().equals(userId)) {
+        if (group.getLeader().equals(userIdLong)) {
             return Result.error("群主不能退出群组");
         }
         
         // 如果退出的人是代理组长(deputy)，就设置代理组长为组长
-        if (group.getDeputy() != null && group.getDeputy().toString().equals(userId)) {
+        if (group.getDeputy() != null && group.getDeputy().equals(userIdLong)) {
             // 将代理组长设置为组长
             group.setDeputy(group.getLeader());
             group.setPeopleNum(group.getPeopleNum() - 1);
             groupMapper.updateById(group);
         }
         // 如果退出的人是老师或者企业，就将对应的teacher或者enterprise设置为空
-        else if (group.getTeacher() != null && group.getTeacher().toString().equals(userId)) {
+        else if (group.getTeacher() != null && group.getTeacher().equals(userIdLong)) {
             group.setTeacher(null);
             groupMapper.updateById(group);
         } 
-        else if (group.getEnterprise() != null && group.getEnterprise().toString().equals(userId)) {
+        else if (group.getEnterprise() != null && group.getEnterprise().equals(userIdLong)) {
             group.setEnterprise(null);
             groupMapper.updateById(group);
         }

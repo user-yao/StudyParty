@@ -15,7 +15,7 @@ import java.util.Locale;
 @Getter
 @Setter
 @Data
-@TableName(" friend_request ")
+@TableName("friend_request")
 public class FriendRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -86,6 +86,7 @@ public class GroupJoinController {
 
     @PostMapping("/agreeJoin")
     public Result<?> agreeJoin(Long groupJoinId, Boolean agree, @RequestHeader("X-User-Id") String userId) {
+        Long userIdLong = Long.valueOf(userId);
         // 检查申请记录是否存在
         GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
         if (groupJoin == null) {
@@ -103,7 +104,7 @@ public class GroupJoinController {
         if (isInvite) {
             // 处理邀请我加入别人的小组
             // 检查是否是被邀请用户本人操作
-            if (!groupJoin.getUserId().toString().equals(userId)) {
+            if (!groupJoin.getUserId().equals(userIdLong)) {
                 return Result.error("权限错误");
             }
 
@@ -123,7 +124,7 @@ public class GroupJoinController {
                 // 检查用户是否已经加入了群组（通过其他方式）
                 QueryWrapper<GroupUser> userCheckWrapper = new QueryWrapper<>();
                 userCheckWrapper.eq("group_id", groupJoin.getGroupId());
-                userCheckWrapper.eq("group_user", Long.valueOf(userId));
+                userCheckWrapper.eq("group_user", userIdLong);
                 if (groupUserMapper.selectCount(userCheckWrapper) > 0) {
                     // 更新邀请状态为已通过
                     groupJoin.setIsPass(1);
@@ -174,7 +175,6 @@ public class GroupJoinController {
                 groupJoinMapper.updateById(groupJoin);
 
                 // 如果是老师或企业，需要清除相关设置
-                Long userIdLong = Long.valueOf(userId);
                 if (group.getTeacher() != null && group.getTeacher().equals(userIdLong)) {
                     group.setTeacher(0L);
                     groupMapper.updateById(group);
@@ -189,7 +189,7 @@ public class GroupJoinController {
             }
         } else {
             // 处理别人申请加入我的小组
-            if (!groupJoin.getGroupLeader().toString().equals(userId)) {
+            if (!groupJoin.getGroupLeader().equals(userIdLong)) {
                 return Result.error("用户权限不足");
             }
 
@@ -208,11 +208,12 @@ public class GroupJoinController {
     
     @PostMapping("/cancelJoin")
     public Result<?> cancelJoin(Long groupJoinId,@RequestHeader("X-User-Id") String userId){
+        Long userIdLong = Long.valueOf(userId);
         GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
         if (groupJoin.getIsPass() != 0){
             return Result.error("申请已处理");
         }
-        if (groupJoin.getUserId() != Integer.parseInt(userId)){
+        if (!groupJoin.getUserId().equals(userIdLong)){
             return Result.error("用户权限不足");
         }
         groupJoinMapper.deleteById(groupJoinId);
