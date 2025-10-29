@@ -35,7 +35,7 @@ public class UserFriendController {
         // 校验 userId 是否为有效的 Long 类型
         Long parsedUserId;
         try {
-            parsedUserId = Long.valueOf(userId);
+            parsedUserId = Long.parseLong(userId);
         } catch (NumberFormatException e) {
             return Result.error("用户ID格式错误");
         }
@@ -64,7 +64,7 @@ public class UserFriendController {
     public Result<?> accept(Long applicant, Integer isConsent, @RequestHeader("X-User-Id") String userId) {
         QueryWrapper<FriendRequest> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", applicant);
-        queryWrapper.eq("friend_id", Long.valueOf(userId));
+        queryWrapper.eq("friend_id", Long.parseLong(userId));
         queryWrapper.eq("is_consent", 0);
         FriendRequest friendRequest = friendRequestMapper.selectOne(queryWrapper);
         if (friendRequest == null){
@@ -75,8 +75,8 @@ public class UserFriendController {
         }
         if (isConsent == 1){
             friendRequest.setIsConsent(1);
-            friendServer.save(new Friend(Long.valueOf(userId), applicant));
-            friendServer.save(new Friend(applicant, Long.valueOf(userId)));
+            friendServer.save(new Friend(Long.parseLong(userId), applicant));
+            friendServer.save(new Friend(applicant, Long.parseLong(userId)));
         }else if (isConsent == 2){
             friendRequest.setIsConsent(2);
         }
@@ -86,7 +86,7 @@ public class UserFriendController {
     @PostMapping("/remark")
     public Result<?> remark(Long friendId, String remark, @RequestHeader("X-User-Id") String userId) {
         QueryWrapper<Friend> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", Long.valueOf(userId));
+        queryWrapper.eq("user_id", Long.parseLong(userId));
         queryWrapper.eq("friend_id", friendId);
         Friend friend = friendMapper.selectOne(queryWrapper);
         if (friend == null){
@@ -100,25 +100,25 @@ public class UserFriendController {
     @PostMapping("/delete")
     public Result<?> delete(Long friendId, @RequestHeader("X-User-Id") String userId) {
         QueryWrapper<Friend> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", Long.valueOf(userId));
+        queryWrapper.eq("user_id", Long.parseLong(userId));
         queryWrapper.eq("friend_id", friendId);
         friendMapper.delete(queryWrapper);
         queryWrapper.clear();
         queryWrapper.eq("user_id", friendId);
-        queryWrapper.eq("friend_id", Long.valueOf(userId));
+        queryWrapper.eq("friend_id", Long.parseLong(userId));
         friendMapper.delete(queryWrapper);
         return Result.success();
     }
     @PostMapping("/friendList")
     public Result<?> list(@RequestHeader("X-User-Id") String userId) {
-        return Result.success(friendMapper.friendList(Long.valueOf(userId)));
+        return Result.success(friendMapper.friendList(Long.parseLong(userId)));
     }
     @PostMapping("/friendRequestList")
     public Result<?> friendRequestList(@RequestHeader("X-User-Id") String userId) {
-        return Result.success(friendRequestMapper.friendRequestList(Long.valueOf(userId)));
+        return Result.success(friendRequestMapper.friendRequestList(Long.parseLong(userId)));
     }
     @PostMapping("/myFriendRequestList")
     public Result<?> myFriendRequestList(@RequestHeader("X-User-Id") String userId) {
-        return Result.success(friendRequestMapper.myFriendRequestList(Long.valueOf(userId)));
+        return Result.success(friendRequestMapper.myFriendRequestList(Long.parseLong(userId)));
     }
 }

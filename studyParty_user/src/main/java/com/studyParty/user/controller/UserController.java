@@ -91,7 +91,7 @@ public class UserController {
     @GetMapping("/userInfo")
     public Result<?> userInfo(@RequestHeader("X-User-Id") String userId){
         try {
-            User user = userMapper.selectById(userId);
+            User user = userMapper.selectById(Long.parseLong(userId));
             user.setFinishTask(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id",userId)));
             user.setArticleNum(userArticleMapper.selectCount(new QueryWrapper<UserArticle>().eq("user_id",userId)));
             user.setTaskNum(userTaskMapper.selectCount(new QueryWrapper<UserTask>().eq("user_id",userId)));
@@ -159,14 +159,14 @@ public class UserController {
     }
     @PostMapping("/updatePassword")
     public Result<?> updatePassword(String password,@RequestHeader("X-User-Id") String userId){
-        User user = userMapper.selectById(userId);
+        User user = userMapper.selectById(Long.parseLong(userId));
         String oldEncodedPassword = user.getPassword();
         if(oldEncodedPassword.equals(PasswordEncoder.encode(password))){
             return Result.error("新密码与旧密码一致");
         }
         user.setPassword(PasswordEncoder.encode(password));
         userMapper.update(null, new LambdaUpdateWrapper<User>()
-                .eq(User::getId,user.getId())
+                .eq(User::getId,Long.parseLong(userId))
                 .set(User::getPassword,user.getPassword())
         );
         return Result.success("密码修改成功");
@@ -181,9 +181,9 @@ public class UserController {
         if (phone.length() != 11){
             return Result.error("手机号长度有误");
         }
-        User user = userMapper.selectById(userId);
+        User user = userMapper.selectById(Long.parseLong(userId));
         userMapper.update(null,new LambdaUpdateWrapper<User>()
-                .eq(User::getId,user.getId())
+                .eq(User::getId,Long.parseLong(userId))
                 .set(User::getName,name)
                 .set(User::getSex,sex)
                 .set(User::getMajor,major)
@@ -222,7 +222,7 @@ public class UserController {
             
             // 更新用户头像路径
             userMapper.update(null, new LambdaUpdateWrapper<User>()
-                    .eq(User::getId, userId)
+                    .eq(User::getId, Long.parseLong(userId))
                     .set(User::getHead, head + userId + "/userHeadPhoto.png"));
 
             return Result.success(head + userId + "/userHeadPhoto.png");

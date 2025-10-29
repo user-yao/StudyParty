@@ -5,7 +5,7 @@
 
 <mapper namespace="com.studyParty.group.mapper.GroupTaskAnswerMapper">
     <select id="selectGroupTaskAnswerWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskAnswerDTO">
-        SELECT  "group_task_answer ".*,
+        SELECT  "group_task_answer".*,
                users.id     as userId,
                users.name   as username,
                users.head   as head,
@@ -18,7 +18,7 @@
     </select>
     <select id="selectMyGroupTaskAnswerWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskAnswerDTO">
         SELECT
-             "group_task_answer ".*,
+             "group_task_answer".*,
             users.id as userId,
             users.name as username,
             users.head as head,

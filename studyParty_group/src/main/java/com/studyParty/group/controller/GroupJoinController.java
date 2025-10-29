@@ -44,8 +44,8 @@ public class GroupJoinController {
     private BusinessServer businessServer;
     @PostMapping("/joinGroup")
     public Result<?> joinGroup(Long groupId, String context, @RequestHeader("X-User-Id") String userId){
-        GroupJoin groupJoin = new GroupJoin(groupId,Long.valueOf(userId),context);
-        if(groupJoin.getUserId() != Integer.parseInt(userId)){
+        GroupJoin groupJoin = new GroupJoin(groupId,Long.parseLong(userId),context);
+        if(groupJoin.getUserId() != Long.parseLong(userId)){
             return Result.error("用户身份错误");
         }
         Group group = groupMapper.selectById(groupJoin.getGroupId());
@@ -80,13 +80,13 @@ public class GroupJoinController {
     @GetMapping("/getGroupJoin")
     @PostMapping("/getGroupJoin")
     public Result<?> getGroupJoin(@RequestHeader("X-User-Id") String userId){
-        List<List<GroupJoinDTO>> result = groupJoinServer.findMyGroups(Long.valueOf(userId));
+        List<List<GroupJoinDTO>> result = groupJoinServer.findMyGroups(Long.parseLong(userId));
         return Result.success(result);
     }
 
     @PostMapping("/agreeJoin")
     public Result<?> agreeJoin(Long groupJoinId, Boolean agree, @RequestHeader("X-User-Id") String userId) {
-        Long userIdLong = Long.valueOf(userId);
+        Long userIdLong = Long.parseLong(userId);
         // 检查申请记录是否存在
         GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
         if (groupJoin == null) {
@@ -208,7 +208,7 @@ public class GroupJoinController {
     
     @PostMapping("/cancelJoin")
     public Result<?> cancelJoin(Long groupJoinId,@RequestHeader("X-User-Id") String userId){
-        Long userIdLong = Long.valueOf(userId);
+        Long userIdLong = Long.parseLong(userId);
         GroupJoin groupJoin = groupJoinMapper.selectById(groupJoinId);
         if (groupJoin.getIsPass() != 0){
             return Result.error("申请已处理");

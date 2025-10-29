@@ -11,8 +11,8 @@
             users.school as school
         FROM task
                  LEFT JOIN users ON task.uploader = users.id
-        WHERE (task.title LIKE CONCAT('%', #{searchContext}, '%')
-            OR task.context LIKE CONCAT('%', #{searchContext}, '%'))
+        WHERE (task.title LIKE '%' || #{searchContext} || '%'
+            OR task.context LIKE '%' || #{searchContext} || '%')
         ORDER BY task.create_time DESC
     </select>
     <select id="recommendTask" resultType="com.studyParty.entity.task.DTO.TaskDTO">

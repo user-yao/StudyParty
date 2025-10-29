@@ -6,7 +6,7 @@
 <mapper namespace="com.studyParty.group.mapper.GroupTaskMapper">
     <select id="selectGroupTaskWithUser" resultType="com.studyParty.entity.group.DTO.GroupTaskDTO">
         SELECT
-             "group_task ".*,
+             "group_task".*,
             users.id as user_id,
             users.name as user_name,
             users.head as user_head,

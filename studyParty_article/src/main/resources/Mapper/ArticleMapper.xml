@@ -48,8 +48,8 @@
         FROM article
                  LEFT JOIN users ON article.uploader = users.id
                  LEFT JOIN article_user au ON article.id = au.article_id AND au.user_id = ${userId}
-        WHERE (article.title LIKE CONCAT('%', #{searchContext}, '%')
-            OR article.summary LIKE CONCAT('%', #{searchContext}, '%'))
+        WHERE (article.title LIKE '%' || #{searchContext} || '%'
+            OR article.summary LIKE '%' || #{searchContext} || '%')
         ORDER BY article.create_time DESC
 
     </select>

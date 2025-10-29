@@ -6,8 +6,8 @@
 <mapper namespace="com.studyParty.group.mapper.GroupMapper">
 
     <select id="findMyGroups" resultType="com.studyParty.entity.group.Group">
-        SELECT group_user.group_user, "group ".*
-        FROM  "group " join group_user on  "group ".id = group_user.group_id
+        SELECT group_user.group_user, "group".*
+        FROM "group" join group_user on "group".id = group_user.group_id
         where group_user.group_user = #{id}
     </select>
 </mapper>

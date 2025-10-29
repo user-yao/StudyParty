@@ -85,6 +85,7 @@ public class ArticleCommentController {
             articleMapper.updateById(article);
             articleCommentMapper.insert(articleComment);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return Result.error("添加评论失败");
         }
         return Result.success(articleComment.getId());

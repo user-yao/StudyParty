@@ -87,10 +87,22 @@ public class GroupController {
         return Result.success(groupMapper.selectPage(page, queryWrapper));
     }
 
+    @PostMapping("/searchMyGroup")
+    public Result<?> searchMyGroup(String searchContext, @RequestHeader("X-User-Id") String userId) {
+        QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("\"group\".leader", Long.parseLong(userId));
+        queryWrapper.and(wrapper -> wrapper
+                .like("group_name", searchContext.trim())
+                .or()
+                .like("slogan", searchContext.trim()));
+        List<Group> leaderGroups = groupMapper.selectList(queryWrapper);
+        return Result.success(leaderGroups);
+    }
+
     @PostMapping("/getMyGroup")
     public Result<?> getMyGroup(@RequestHeader("X-User-Id") String userId) {
         QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("leader", userId);
+        queryWrapper.eq("\"group\".leader", Long.parseLong(userId));
         List<Group> leaderGroups = groupMapper.selectList(queryWrapper);
         List<Group> memberGroups = groupMapper.findMyGroups(Long.valueOf(userId));
 
@@ -179,9 +191,9 @@ public class GroupController {
                 Files.createDirectories(Path.of(path));
             }
             photo.transferTo(new File(path + "/groupHeadPhoto.png"));
-            groupMapper.update(null, new LambdaUpdateWrapper<Group>()
-                    .eq(Group::getLeader, Integer.parseInt(userId))
-                    .set(Group::getHead, head + userId + "/groupHeadPhoto.png")
+            groupMapper.update(null, new UpdateWrapper<Group>()
+                    .eq("\"group\".leader", Long.parseLong(userId))
+                    .set("head", head + userId + "/groupHeadPhoto.png")
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -199,9 +211,9 @@ public class GroupController {
             @RequestHeader("X-User-Id") String userId) {
 
         // 验证用户是否是群组的创建者
-        LambdaQueryWrapper<Group> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Group::getId, groupId);
-        queryWrapper.eq(Group::getLeader, Integer.parseInt(userId));
+        QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("\"group\".id", groupId);
+        queryWrapper.eq("\"group\".leader", Long.parseLong(userId));
         Group existingGroup = groupMapper.selectOne(queryWrapper);
 
         if (existingGroup == null) {
@@ -209,17 +221,17 @@ public class GroupController {
         }
 
         // 更新小组信息
-        LambdaUpdateWrapper<Group> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Group::getId, groupId);
+        UpdateWrapper<Group> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("\"group\".id", groupId);
 
         if (groupName != null && !groupName.trim().isEmpty()) {
-            updateWrapper.set(Group::getGroupName, groupName);
+            updateWrapper.set("group_name", groupName);
         }
         if (slogan != null && !slogan.trim().isEmpty()) {
-            updateWrapper.set(Group::getSlogan, slogan);
+            updateWrapper.set("slogan", slogan);
         }
         if (rule != null && !rule.trim().isEmpty()) {
-            updateWrapper.set(Group::getRule, rule);
+            updateWrapper.set("rule", rule);
         }
         groupMapper.update(null, updateWrapper);
 
@@ -232,9 +244,9 @@ public class GroupController {
                     Files.createDirectories(Path.of(path));
                 }
                 photo.transferTo(new File(path + "/groupHeadPhoto.png"));
-                groupMapper.update(null, new LambdaUpdateWrapper<Group>()
-                        .eq(Group::getId, groupId)
-                        .set(Group::getHead, head + groupId + "/groupHeadPhoto.png"));
+                groupMapper.update(null, new UpdateWrapper<Group>()
+                        .eq("\"group\".id", groupId)
+                        .set("head", head + groupId + "/groupHeadPhoto.png"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -245,9 +257,9 @@ public class GroupController {
 
     @PostMapping("/deleteGroup")
     public Result<?> deleteGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
-        LambdaQueryWrapper<Group> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Group::getId, groupId);
-        queryWrapper.eq(Group::getLeader, Integer.parseInt(userId));
+        QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("\"group\".id", groupId);
+        queryWrapper.eq("\"group\".leader", Long.parseLong(userId));
         if (groupMapper.delete(queryWrapper) == 0) {
             groupUserMapper.delete(new UpdateWrapper<GroupUser>().eq("groupId", groupId));
             return Result.error("未找到对应的群组，可能已被删除");
@@ -257,13 +269,16 @@ public class GroupController {
 
     @PostMapping("/transferGroup")
     public Result<?> transferGroup(Long groupId, Long newLeader, @RequestHeader("X-User-Id") String userId) {
-        if (groupMapper.selectById(groupId).getLeader() != Integer.parseInt(userId)) {
+        QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("\"group\".id", groupId);
+        queryWrapper.eq("\"group\".leader", Long.parseLong(userId));
+        if (groupMapper.selectOne(queryWrapper) == null) {
             return Result.error("权限错误");
         }
-        UpdateWrapper<Group> queryWrapper = new UpdateWrapper<>();
-        queryWrapper.eq("id", groupId);
-        queryWrapper.set("leader", newLeader);
-        if (groupMapper.update(null, queryWrapper) == 0) {
+        UpdateWrapper<Group> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("\"group\".id", groupId);
+        updateWrapper.set("leader", newLeader);
+        if (groupMapper.update(null, updateWrapper) == 0) {
             return Result.error("未找到对应的群组，可能已被删除");
         }
         return Result.success();
@@ -272,19 +287,22 @@ public class GroupController {
         @PostMapping("/changeDeputy")
     public Result<?> changeDeputy(Long groupId, Integer deputy, @RequestHeader("X-User-Id") String userId) {
         Long userIdLong = Long.valueOf(userId);
-        if (groupMapper.selectById(groupId).getLeader() != userIdLong) {
+        QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("\"group\".id", groupId);
+        queryWrapper.eq("\"group\".leader", Long.parseLong(userId));
+        if (groupMapper.selectOne(queryWrapper) == null) {
             return Result.error("权限错误");
         }
-        QueryWrapper<GroupUser> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("group_id", groupId);
-        queryWrapper.eq("group_user", deputy);
-        if (groupUserMapper.selectOne(queryWrapper) == null) {
+        QueryWrapper<GroupUser> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper1.eq("group_id", groupId);
+        queryWrapper1.eq("group_user", deputy);
+        if (groupUserMapper.selectOne(queryWrapper1) == null) {
             return Result.error("未找到对应的群组成员");
         }
-        UpdateWrapper<Group> queryWrapper1 = new UpdateWrapper<>();
-        queryWrapper1.eq("id", groupId);
-        queryWrapper1.set("deputy", deputy);
-        if (groupMapper.update(null, queryWrapper1) == 0) {
+        UpdateWrapper<Group> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("\"group\".id", groupId);
+        updateWrapper.set("deputy", deputy);
+        if (groupMapper.update(null, updateWrapper) == 0) {
             return Result.error("未找到对应的群组，可能已被删除");
         }
         return Result.success();
@@ -293,13 +311,16 @@ public class GroupController {
     @PostMapping("/changeCanJoin")
     public Result<?> changeCanJoin(Long groupId, Integer canJoin, @RequestHeader("X-User-Id") String userId) {
         Long userIdLong = Long.valueOf(userId);
-        if (groupMapper.selectById(groupId).getLeader() != userIdLong) {
+        QueryWrapper<Group> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("\"group\".id", groupId);
+        queryWrapper.eq("\"group\".leader", Long.parseLong(userId));
+        if (groupMapper.selectOne(queryWrapper) == null) {
             return Result.error("权限错误");
         }
-        UpdateWrapper<Group> queryWrapper = new UpdateWrapper<>();
-        queryWrapper.eq("id", groupId);
-        queryWrapper.set("canJoin", canJoin);
-        if (groupMapper.update(null, queryWrapper) == 0) {
+        UpdateWrapper<Group> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("\"group\".id", groupId);
+        updateWrapper.set("can_join", canJoin);
+        if (groupMapper.update(null, updateWrapper) == 0) {
             return Result.error("未找到对应的群组，可能已被删除");
         }
         return Result.success();
@@ -449,7 +470,7 @@ public class GroupController {
     }
     @PostMapping("/outGroup")
     public Result<?> outGroup(Long groupId, @RequestHeader("X-User-Id") String userId) {
-        Long userIdLong = Long.valueOf(userId);
+        Long userIdLong = Long.parseLong(userId);
         Group group = groupMapper.selectById(groupId);
         if (group == null) {
             return Result.error("未找到对应的群组");
